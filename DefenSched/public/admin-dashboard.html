@@ -1573,17 +1573,16 @@
     <td style="font-family:var(--mono);font-size:12px">${fmtDate(a.date)} · ${a.time_slot || '—'}</td>
     <td>${a.venue_name || '—'}</td>
     <td>${fmtStatus(a.status)}</td>
-    <td>
+    <td style="display:flex;gap:6px">
       <select class="form-select" style="padding:5px 9px;font-size:12px;width:130px" onchange="inlineUpdateApptStatus(${a.id},this.value)">
         ${['pending', 'confirmed', 'rescheduled', 'completed', 'cancelled'].map(s => `<option value="${s}"${a.status === s ? ' selected' : ''}>${s}</option>`).join('')}
       </select>
-    </td>
-  </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No appointments</td></tr>';
+      <button class="btn btn-danger btn-sm" onclick="deleteAppointment(${a.id}, '${a.group_name.replace(/'/g, "\\'")}')">
         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6" stroke-width="2"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2" stroke-width="2" stroke-linecap="round"/></svg>
         Delete
       </button>
     </td>
-  </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:30px">No appointments</td></tr>';
+  </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No appointments</td></tr>';
     }
 
     async function inlineUpdateApptStatus(id, status) {
