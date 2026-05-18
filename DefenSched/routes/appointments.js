@@ -98,7 +98,7 @@ router.get('/check-conflict', requireAuth, (req, res) => {
     : { ok: true,  message: 'Adviser is available.' };
 
   const pIds = panelist_ids ? panelist_ids.split(',').map(Number).filter(Boolean) : [];
-  let panelists = { ok: false, message: 'No panelists selected.', details: [] };
+  let panelists = { ok: true, message: 'No panelists selected.', details: [] };
   if (pIds.length) {
     let allOk = true;
     const details = pIds.map(pid => {
@@ -136,7 +136,7 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 router.post('/', requireAuth, (req, res) => {
   const { userId } = req.session;
   const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes } = req.body;
-  if (!group_name || !adviser_id || !date || !time_slot || !venue_id || !panelist_ids?.length)
+  if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
     return res.status(400).json({ error: 'All fields are required.' });
 
   if (db.prepare(`SELECT id FROM appointments WHERE adviser_id=? AND date=? AND time_slot=? AND status!='cancelled'`).get(adviser_id, date, time_slot))
@@ -150,12 +150,13 @@ router.post('/', requireAuth, (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
   `).run(group_name, userId, adviser_id, date, time_slot, venue_id, notes || null);
 
+  const pIds = Array.isArray(panelist_ids) ? panelist_ids.filter(Boolean) : [];
   const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
-  for (const pid of panelist_ids) insPan.run(apptId, pid);
+  for (const pid of pIds) insPan.run(apptId, pid);
 
   // Notify adviser, panelists, and submitting student
   notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
-  for (const pid of safePanelistIds) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
+  for (const pid of pIds) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
   notify(userId, 'Appointment submitted. Upload your manuscript to confirm.', 'success');
 
   // Notify all admin users about the new booking
