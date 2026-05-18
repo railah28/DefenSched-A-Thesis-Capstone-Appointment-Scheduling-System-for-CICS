@@ -516,8 +516,10 @@
     }
 
     .avail-advisory {
-      background: var(--teal-bg);
-      color: var(--teal);
+      background: linear-gradient(135deg, #0d9488, #0ea5e9);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(13, 148, 136, 0.2);
     }
 
     .manuscript-item {
@@ -1006,7 +1008,7 @@
           <span
             style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--success-bg);color:var(--success);">●
             Available</span>
-          <span style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--teal-bg);color:var(--teal);">●
+          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:linear-gradient(135deg, #0d9488, #0ea5e9);color:#ffffff;font-weight:600;box-shadow:0 2px 6px rgba(13,148,136,0.15)">●
             Your slot</span>
           <span
             style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--danger-bg);color:var(--danger);">●
@@ -1314,11 +1316,16 @@
 
     document.getElementById('avail-mode')?.addEventListener('change', () => loadAvailability());
 
+    let _savingAvail = false;
     async function toggleAvailSlot(date, time_slot, type, el) {
+      if (_savingAvail) return;
       if (!date) { showToast('Cannot modify past dates', 'warning'); return; }
+      
+      _savingAvail = true;
+      el.style.pointerEvents = 'none';
       const isSet = el.classList.contains('avail-advisory');
       const saveEl = document.getElementById('avail-saving');
-      saveEl.style.display = 'inline';
+      if (saveEl) saveEl.style.display = 'inline';
 
       try {
         if (isSet) {
@@ -1352,7 +1359,9 @@
       } catch (e) {
         showToast('Server error', 'error');
       } finally {
-        saveEl.style.display = 'none';
+        _savingAvail = false;
+        el.style.pointerEvents = 'auto';
+        if (saveEl) saveEl.style.display = 'none';
       }
     }
 
