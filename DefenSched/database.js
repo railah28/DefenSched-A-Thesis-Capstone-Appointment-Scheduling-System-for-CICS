@@ -107,6 +107,33 @@ db.exec(`
 try { db.exec(`ALTER TABLE users ADD COLUMN members TEXT`); } catch (_) { /* column already exists */ }
 try { db.exec(`ALTER TABLE users ADD COLUMN is_group INTEGER NOT NULL DEFAULT 0`); } catch (_) { /* column already exists */ }
 
+// Ensure group accounts are set up correctly with high-fidelity members data
+try {
+  const updateAlpha = db.prepare(`
+    UPDATE users 
+    SET is_group = 1, 
+        members = ? 
+    WHERE email = 'group.alpha@cics.edu.ph'
+  `);
+  updateAlpha.run(JSON.stringify({
+    leader: 'Juan Dela Cruz',
+    members: ['Juan Dela Cruz', 'Maria Santos', 'Pedro Penduko']
+  }));
+
+  const updateBeta = db.prepare(`
+    UPDATE users 
+    SET is_group = 1, 
+        members = ? 
+    WHERE email = 'group.beta@cics.edu.ph'
+  `);
+  updateBeta.run(JSON.stringify({
+    leader: 'Group Beta Leader',
+    members: ['Group Beta Leader', 'Member One', 'Member Two']
+  }));
+} catch (e) {
+  console.error('Failed to update group student records:', e);
+}
+
 // ── Seed ────────────────────────────────────────────────────────
 function seed() {
   const count = db.prepare('SELECT COUNT(*) as c FROM users').get().c;

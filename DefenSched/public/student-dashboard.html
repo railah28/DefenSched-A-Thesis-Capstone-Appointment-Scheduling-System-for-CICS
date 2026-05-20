@@ -298,37 +298,47 @@
 
     <!-- Defense details + checklist -->
     <div class="grid-2" style="margin-bottom:14px;">
-      <div class="card" id="defense-detail-card">
-        <div class="card-header"><span class="card-title">My defense details</span><span class="tag tag-pending" id="defense-tag">—</span></div>
-        <div class="defense-detail" style="margin-bottom:14px;">
-          <div class="detail-item">
-            <div class="detail-label">Date</div>
-            <div class="detail-value" id="d-date">—</div>
-            <div class="detail-sub" id="d-day">—</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card" id="defense-detail-card">
+          <div class="card-header"><span class="card-title">My defense details</span><span class="tag tag-pending" id="defense-tag">—</span></div>
+          <div class="defense-detail" style="margin-bottom:14px;">
+            <div class="detail-item">
+              <div class="detail-label">Date</div>
+              <div class="detail-value" id="d-date">—</div>
+              <div class="detail-sub" id="d-day">—</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Time</div>
+              <div class="detail-value" id="d-time" style="font-family:var(--mono);">—</div>
+              <div class="detail-sub">Defense session</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Venue</div>
+              <div class="detail-value" id="d-venue">—</div>
+              <div class="detail-sub">CICS Building</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Stage</div>
+              <div class="detail-value"><span class="tag tag-final" style="font-size:12px;">Final defense</span></div>
+            </div>
           </div>
-          <div class="detail-item">
-            <div class="detail-label">Time</div>
-            <div class="detail-value" id="d-time" style="font-family:var(--mono);">—</div>
-            <div class="detail-sub">Defense session</div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assigned adviser</div>
+          <div class="panelist-chip" style="margin-bottom:14px;">
+            <div class="panelist-dot" id="adviser-dot" style="background:linear-gradient(135deg,#0d9488,#2563eb);">—</div>
+            <div><div class="panelist-name" id="adviser-name">—</div><div class="panelist-role">Primary Adviser</div></div>
           </div>
-          <div class="detail-item">
-            <div class="detail-label">Venue</div>
-            <div class="detail-value" id="d-venue">—</div>
-            <div class="detail-sub">CICS Building</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Stage</div>
-            <div class="detail-value"><span class="tag tag-final" style="font-size:12px;">Final defense</span></div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assigned panelists</div>
+          <div class="panelist-list" id="panelist-list">
+            <div style="font-size:12px;color:var(--text3);">Panelists will be assigned by the Research Coordinator.</div>
           </div>
         </div>
-        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assigned adviser</div>
-        <div class="panelist-chip" style="margin-bottom:14px;">
-          <div class="panelist-dot" id="adviser-dot" style="background:linear-gradient(135deg,#0d9488,#2563eb);">—</div>
-          <div><div class="panelist-name" id="adviser-name">—</div><div class="panelist-role">Primary Adviser</div></div>
-        </div>
-        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assigned panelists</div>
-        <div class="panelist-list" id="panelist-list">
-          <div style="font-size:12px;color:var(--text3);">Panelists will be assigned by the Research Coordinator.</div>
+
+        <!-- Group Members Card -->
+        <div class="card" id="group-members-card" style="display:none;">
+          <div class="card-header"><span class="card-title">Group members</span></div>
+          <div class="panelist-list" id="group-members-list">
+            <!-- Rendered dynamically -->
+          </div>
         </div>
       </div>
 
@@ -604,6 +614,43 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('user-display-name').textContent = name;
   document.getElementById('page-sub').textContent = `AY 2025–2026 · Hello, ${name}!`;
 
+  // Render Group Members if present
+  const gmCard = document.getElementById('group-members-card');
+  if (_user.is_group && _user.members) {
+    try {
+      const data = typeof _user.members === 'string' ? JSON.parse(_user.members) : _user.members;
+      if (data && data.members) {
+        gmCard.style.display = 'block';
+        const gml = document.getElementById('group-members-list');
+        const colors = [
+          'linear-gradient(135deg, #7c3aed, #6d28d9)',
+          'linear-gradient(135deg, #0d9488, #2563eb)',
+          'linear-gradient(135deg, #ea580c, #d97706)',
+          'linear-gradient(135deg, #16a34a, #0d9488)'
+        ];
+        gml.innerHTML = data.members.map((m, idx) => {
+          const isLeader = m.toLowerCase().trim() === (data.leader || '').toLowerCase().trim();
+          const initials = m.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          const grad = colors[idx % colors.length];
+          return `
+            <div class="panelist-chip" style="justify-content: space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="panelist-dot" style="background:${grad};">${initials}</div>
+                <div>
+                  <div class="panelist-name">${m}</div>
+                  <div class="panelist-role">${isLeader ? 'Project Leader' : 'Team Member'}</div>
+                </div>
+              </div>
+              ${isLeader ? '<span class="tag tag-final" style="font-size:10px;padding:2px 7px;">Leader</span>' : '<span class="tag tag-confirmed" style="font-size:10px;padding:2px 7px;background:var(--accent-light);color:var(--accent);">Member</span>'}
+            </div>
+          `;
+        }).join('');
+      }
+    } catch (e) {
+      console.error('Failed to parse group members:', e);
+    }
+  }
+
   document.getElementById('logout-btn').onclick = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     window.location.replace('/');
@@ -768,9 +815,10 @@ async function loadScheduleBoard() {
     }
     const tagMap = { confirmed:'tag-final', pending:'tag-pending', completed:'tag-confirmed', cancelled:'tag-cancelled' };
     el.innerHTML = `<table class="sched-table">
-      <thead><tr><th>Time</th><th>Group</th><th>Venue</th><th>Adviser</th><th>Status</th></tr></thead>
+      <thead><tr><th>Date</th><th>Time</th><th>Group</th><th>Venue</th><th>Adviser</th><th>Status</th></tr></thead>
       <tbody>${active.map(a => `
         <tr class="${_user && a.student_id === _user.id ? 'mine-row' : ''}">
+          <td style="font-weight:600;">${a.date||'—'}</td>
           <td style="font-family:var(--mono);font-size:11px;">${a.time_slot||'—'}</td>
           <td style="font-weight:600;">${a.group_name}${_user && a.student_id===_user.id?' <span style="font-size:10px;color:var(--accent);">(You)</span>':''}</td>
           <td>${a.venue_name||'—'}</td>
