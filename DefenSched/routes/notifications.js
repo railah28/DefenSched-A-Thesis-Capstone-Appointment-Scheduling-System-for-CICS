@@ -32,4 +32,18 @@ router.put('/read-all', requireAuth, (req, res) => {
   res.json({ success: true });
 });
 
+// DELETE /api/notifications/:id — delete single notification
+router.delete('/:id', requireAuth, (req, res) => {
+  db.prepare('DELETE FROM notifications WHERE id = ? AND user_id = ?')
+    .run(req.params.id, req.session.userId);
+  res.json({ success: true });
+});
+
+// DELETE /api/notifications — delete all notifications for current user
+router.delete('/', requireAuth, (req, res) => {
+  db.prepare('DELETE FROM notifications WHERE user_id = ?')
+    .run(req.session.userId);
+  res.json({ success: true });
+});
+
 module.exports = router;
