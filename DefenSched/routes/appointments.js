@@ -113,7 +113,7 @@ router.get('/check-conflict', requireAuth, (req, res) => {
     : { ok: true,  message: 'Adviser is available.' };
 
   const pIds = panelist_ids ? panelist_ids.split(',').map(Number).filter(Boolean) : [];
-  let panelists = { ok: true, message: 'No panelists selected.', details: [] };
+  let panelists = { ok: true, message: 'Panelists will be assigned later.', details: [] };
   if (pIds.length) {
     let allOk = true;
     const details = pIds.map(pid => {
@@ -150,8 +150,8 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 // ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, (req, res) => {
   const { userId } = req.session;
-  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes, research_title, meeting_link } = req.body;
-  if (!group_name || !adviser_id || !date || !time_slot || !venue_id || !panelist_ids?.length)
+  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes } = req.body;
+  if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
     return res.status(400).json({ error: 'All fields are required.' });
 
   // Prevent student double-booking
@@ -190,9 +190,11 @@ router.post('/', requireAuth, (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
   `).run(group_name, userId, adviser_id, date, time_slot, venue_id, notes || null, research_title || null, meeting_link || null);
 
-  const pIds = Array.isArray(panelist_ids) ? panelist_ids.filter(Boolean) : [];
-  const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
-  for (const pid of pIds) insPan.run(apptId, pid);
+  const safePanelistIds = Array.isArray(panelist_ids) ? panelist_ids.map(Number).filter(Boolean) : [];
+  if (safePanelistIds.length > 0) {
+    const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
+    for (const pid of safePanelistIds) insPan.run(apptId, pid);
+  }
 
   // Notify adviser, panelists, and submitting student
   notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
