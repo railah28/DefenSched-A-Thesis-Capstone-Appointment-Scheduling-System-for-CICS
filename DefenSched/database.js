@@ -106,6 +106,8 @@ db.exec(`
 // ── Migrations (idempotent) ────────────────────────────────────
 try { db.exec(`ALTER TABLE users ADD COLUMN members TEXT`); } catch (_) { /* column already exists */ }
 try { db.exec(`ALTER TABLE users ADD COLUMN is_group INTEGER NOT NULL DEFAULT 0`); } catch (_) { /* column already exists */ }
+try { db.exec(`ALTER TABLE appointments ADD COLUMN research_title TEXT`); } catch (_) { /* column already exists */ }
+try { db.exec(`ALTER TABLE appointments ADD COLUMN meeting_link TEXT`); } catch (_) { /* column already exists */ }
 
 // ── Seed ────────────────────────────────────────────────────────
 function seed() {

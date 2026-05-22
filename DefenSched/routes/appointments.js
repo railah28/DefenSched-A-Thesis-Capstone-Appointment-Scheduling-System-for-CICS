@@ -33,7 +33,7 @@ router.get('/', requireAuth, (req, res) => {
   let rows;
   if (role === 'admin') {
     rows = db.prepare(`
-      SELECT a.*, u.name student_name, f.name adviser_name, v.name venue_name
+      SELECT a.*, u.name student_name, f.name adviser_name, v.name venue_name, v.type venue_type
       FROM appointments a
       JOIN users u ON a.student_id = u.id
       JOIN users f ON a.adviser_id = f.id
@@ -42,7 +42,7 @@ router.get('/', requireAuth, (req, res) => {
     `).all();
   } else if (role === 'faculty') {
     rows = db.prepare(`
-      SELECT DISTINCT a.*, u.name student_name, f.name adviser_name, v.name venue_name
+      SELECT DISTINCT a.*, u.name student_name, f.name adviser_name, v.name venue_name, v.type venue_type
       FROM appointments a
       JOIN users u ON a.student_id = u.id
       JOIN users f ON a.adviser_id = f.id
@@ -53,7 +53,7 @@ router.get('/', requireAuth, (req, res) => {
     `).all(userId, userId);
   } else {
     rows = db.prepare(`
-      SELECT a.*, f.name adviser_name, v.name venue_name
+      SELECT a.*, f.name adviser_name, v.name venue_name, v.type venue_type
       FROM appointments a
       JOIN users f ON a.adviser_id = f.id
       JOIN venues v ON a.venue_id  = v.id
@@ -135,7 +135,7 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 // ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, (req, res) => {
   const { userId } = req.session;
-  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes } = req.body;
+  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes, research_title, meeting_link } = req.body;
   if (!group_name || !adviser_id || !date || !time_slot || !venue_id || !panelist_ids?.length)
     return res.status(400).json({ error: 'All fields are required.' });
 
@@ -146,9 +146,9 @@ router.post('/', requireAuth, (req, res) => {
     return res.status(409).json({ error: 'Conflict: Venue is already booked.' });
 
   const { lastInsertRowid: apptId } = db.prepare(`
-    INSERT INTO appointments (group_name, student_id, adviser_id, date, time_slot, venue_id, notes, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
-  `).run(group_name, userId, adviser_id, date, time_slot, venue_id, notes || null);
+    INSERT INTO appointments (group_name, student_id, adviser_id, date, time_slot, venue_id, notes, research_title, meeting_link, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+  `).run(group_name, userId, adviser_id, date, time_slot, venue_id, notes || null, research_title || null, meeting_link || null);
 
   const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
   for (const pid of panelist_ids) insPan.run(apptId, pid);
@@ -167,6 +167,44 @@ router.post('/', requireAuth, (req, res) => {
   res.status(201).json({ success: true, appointment_id: apptId });
 });
 
+// ── GET /api/appointments/:id — single appointment detail ───────
+router.get('/:id', requireAuth, (req, res) => {
+  const { userId, role } = req.session;
+  const appt = db.prepare(`
+    SELECT a.*, u.name student_name, u.members student_members, f.name adviser_name, v.name venue_name, v.type venue_type
+    FROM appointments a
+    JOIN users u ON a.student_id = u.id
+    JOIN users f ON a.adviser_id = f.id
+    JOIN venues v ON a.venue_id  = v.id
+    WHERE a.id = ?
+  `).get(req.params.id);
+
+  if (!appt) return res.status(404).json({ error: 'Appointment not found.' });
+  if (role !== 'admin' && appt.student_id !== userId && appt.adviser_id !== userId) {
+    // Check if the user is a panelist for this appointment
+    const isPanelist = db.prepare(
+      'SELECT 1 FROM appointment_panelists WHERE appointment_id = ? AND panelist_id = ?'
+    ).get(req.params.id, userId);
+    if (!isPanelist) return res.status(403).json({ error: 'Access denied.' });
+  }
+
+  const panelists = db.prepare(`
+    SELECT u.id, u.name FROM users u
+    JOIN appointment_panelists ap ON u.id = ap.panelist_id
+    WHERE ap.appointment_id = ?
+  `).all(req.params.id);
+
+  const manuscript = db.prepare('SELECT * FROM manuscripts WHERE appointment_id = ?').get(req.params.id);
+
+  res.json({
+    appointment: {
+      ...appt,
+      panelists,
+      manuscript: manuscript || null
+    }
+  });
+});
+
 // ── PUT /api/appointments/:id ─────────────────────────────────────
 router.put('/:id', requireAuth, (req, res) => {
   const { userId, role } = req.session;
@@ -175,7 +213,7 @@ router.put('/:id', requireAuth, (req, res) => {
   if (role === 'student' && appt.student_id !== userId)
     return res.status(403).json({ error: 'Cannot modify another group\'s appointment.' });
 
-  const fields = ['status','date','time_slot','venue_id','notes'];
+  const fields = ['status','date','time_slot','venue_id','notes','research_title','meeting_link'];
   const updates = {};
   fields.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
   updates.updated_at = new Date().toISOString();
