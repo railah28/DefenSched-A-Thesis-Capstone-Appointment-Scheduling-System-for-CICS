@@ -150,8 +150,8 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 // ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, (req, res) => {
   const { userId } = req.session;
-  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes } = req.body;
-  if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
+  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes, research_title, meeting_link } = req.body;
+  if (!group_name || !adviser_id || !date || !time_slot || !venue_id || !panelist_ids?.length)
     return res.status(400).json({ error: 'All fields are required.' });
 
   // Prevent student double-booking
