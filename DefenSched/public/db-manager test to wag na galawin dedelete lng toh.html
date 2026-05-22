@@ -556,7 +556,7 @@ async function loadVenues() {
   const res = await fetch('/api/venues');
   const { venues } = await res.json();
   const tbody = document.getElementById('venue-tbody');
-  if (!venues?.length) { tbody.innerHTML = `<tr><td colspan="6" class="empty">No venues found.</td></tr>`; return; }
+  if (!venues?.length) { tbody.innerHTML = `<tr><td colspan="7" class="empty">No venues found.</td></tr>`; return; }
   tbody.innerHTML = venues.map(v => `
     <tr>
       <td style="color:var(--text3);font-family:var(--mono);font-size:12px;">#${v.id}</td>
@@ -565,12 +565,24 @@ async function loadVenues() {
       <td style="color:var(--text3);">${v.capacity}</td>
       <td><span class="badge ${v.is_active?'badge-active':'badge-inactive'}">${v.is_active?'Active':'Inactive'}</span></td>
       <td>
-        <button class="btn btn-ghost btn-sm" onclick='openEditVenueModal(${JSON.stringify(v)})'>
-          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke-width="2"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/></svg>
-          Edit
-        </button>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick='openEditVenueModal(${JSON.stringify(v)})'>
+            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke-width="2"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/></svg>
+            Edit
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="deleteVenue(${v.id},'${v.name}')">
+            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M15 9l-6 6M9 9l6 6" stroke-width="2" stroke-linecap="round"/></svg>
+            Delete
+          </button>
+        </div>
       </td>
     </tr>`).join('');
+}
+async function deleteVenue(id, name) {
+  if (!confirm(`Delete venue "${name}"? Existing appointments using this venue will be unaffected.`)) return;
+  const res = await fetch(`/api/venues/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast(`"${name}" has been deleted.`, 'success'); loadVenues(); }
+  else { const d = await res.json(); showToast(d.error || 'Failed to delete venue.', 'error'); }
 }
 function openAddVenueModal() {
   document.getElementById('venue-modal-title').textContent = 'Add Venue';
