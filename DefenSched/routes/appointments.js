@@ -149,10 +149,21 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 
 // ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, (req, res) => {
-  const { userId } = req.session;
+  const { userId, role } = req.session;
   const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes } = req.body;
   if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
     return res.status(400).json({ error: 'All fields are required.' });
+
+  // Prevent student double-booking
+  if (role === 'student') {
+    const existing = db.prepare(`
+      SELECT id FROM appointments
+      WHERE student_id = ? AND status IN ('pending', 'confirmed', 'rescheduled')
+    `).get(userId);
+    if (existing) {
+      return res.status(400).json({ error: 'You already have an active appointment.' });
+    }
+  }
 
   // Check if booking is in the past
   const now = new Date();

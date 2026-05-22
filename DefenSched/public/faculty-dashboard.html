@@ -862,6 +862,147 @@
       color: var(--text3);
       font-size: 13px;
     }
+
+    /* ── Availability View Tabs ──────────────────────────────── */
+    .cal-view-tabs {
+      display: flex;
+      gap: 3px;
+      background: var(--surface2);
+      padding: 3px;
+      border-radius: 8px;
+    }
+
+    .cal-view-tab {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text2);
+      transition: all .15s;
+      user-select: none;
+    }
+
+    .cal-view-tab.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    }
+
+    /* ── Month Calendar ──────────────────────────────────────── */
+    .month-cal-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .month-nav-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--text2);
+      cursor: pointer;
+      padding: 5px 10px;
+      font-size: 13px;
+      font-family: var(--font);
+      transition: all .15s;
+    }
+
+    .month-nav-btn:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .month-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+      text-align: center;
+    }
+
+    .month-cal {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .month-cal th {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: 8px 4px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .month-cal td {
+      border: 1px solid var(--border);
+      padding: 0;
+      vertical-align: top;
+      width: 14.28%;
+    }
+
+    .month-day {
+      padding: 4px 6px;
+      min-height: 80px;
+    }
+
+    .month-day-num {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 3px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .month-day.is-today .month-day-num {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .month-day.other-month {
+      opacity: .4;
+      background: var(--surface2);
+    }
+
+    .month-day-events {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .month-day-event {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .month-event-avail {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .month-event-booked {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .month-event-selected {
+      background: linear-gradient(135deg, #0d9488, #0ea5e9);
+      color: #fff;
+    }
   </style>
 </head>
 
@@ -1141,19 +1282,36 @@
       <div class="card" style="max-width:900px">
         <div class="card-header">
           <span class="card-title">Your Availability</span>
-          <div style="display:flex;gap:8px;align-items:center">
-            <div style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;color:var(--text3)">Week:</span><select id="avail-week-selector" class="form-select" style="width:250px" onchange="loadAvailability()"><option>Loading weeks...</option></select></div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;color:var(--text3)">Mode:</span>
-            <select id="avail-mode" class="form-select" style="width:120px">
-              <option value="adviser">Adviser</option>
-              <option value="panelist">Panelist</option>
-            </select>
-            <span id="avail-saving" style="font-size:11px;color:var(--text3);display:none">Saving…</span>
+          <div class="cal-view-tabs">
+            <div class="cal-view-tab active" onclick="switchAvailView('week',this)">&#128203; Week View</div>
+            <div class="cal-view-tab" onclick="switchAvailView('month',this)">&#128197; Month View</div>
+          </div>
+        </div>
+        <!-- Week View Controls -->
+        <div id="avail-week-controls" style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--text3)">Week:</span>
+          <button class="btn btn-outline btn-sm" id="avail-prev-week-btn" onclick="changeWeek(-1)">◀ Prev</button>
+          <select id="avail-week-selector" class="form-select" style="width:250px" onchange="loadAvailability()"><option>Loading weeks...</option></select>
+          <button class="btn btn-outline btn-sm" id="avail-next-week-btn" onclick="changeWeek(1)">Next ▶</button>
+          <span style="font-size:12px;color:var(--text3)">Mode:</span>
+          <select id="avail-mode" class="form-select" style="width:120px">
+            <option value="adviser">Adviser</option>
+            <option value="panelist">Panelist</option>
+          </select>
+          <span id="avail-saving" style="font-size:11px;color:var(--text3);display:none">Saving…</span>
+        </div>
+        <!-- Month View Controls -->
+        <div id="avail-month-controls" style="display:none;margin-bottom:14px">
+          <div class="month-cal-nav">
+            <button class="month-nav-btn" onclick="changeAvailMonth(-1)">&#9664; Prev</button>
+            <span class="month-title" id="avail-month-label">—</span>
+            <button class="month-nav-btn" onclick="changeAvailMonth(1)">Next &#9654;</button>
           </div>
         </div>
         <div id="avail-grid-container" style="overflow-x:auto;margin-bottom:16px">
           <div class="skeleton"></div>
         </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:0">
+        <div id="avail-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:0">
           <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:var(--success-bg);color:var(--success);font-weight:500">● Available (open)</span>
           <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:linear-gradient(135deg, #0d9488, #0ea5e9);color:#ffffff;font-weight:600">● Your slot (selected)</span>
           <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:var(--danger-bg);color:var(--danger);font-weight:500">● Booked (locked)</span>
@@ -1202,6 +1360,7 @@
     'use strict';
 
     let _user = null, _appointments = [], _notifications = [], _manuscripts = [], _faculty = [], _settings = {}, _avail = [];
+    let _availView = 'week', _availMonthDate = new Date();
 
     // ── Helpers ──────────────────────────────────────────────────────────────
     function fmtStatus(s) { const m = { pending: 'tag-pending', confirmed: 'tag-confirmed', cancelled: 'tag-cancelled', completed: 'tag-completed', rescheduled: 'tag-rescheduled' }; return `<span class="tag ${m[s] || ''}">${s}</span>`; }
@@ -1402,6 +1561,29 @@
         : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No panel assignments</td></tr>';
     }
 
+    function changeWeek(delta) {
+      const select = document.getElementById('avail-week-selector');
+      if (!select) return;
+      const newIndex = select.selectedIndex + delta;
+      if (newIndex >= 0 && newIndex < select.options.length) {
+        select.selectedIndex = newIndex;
+        loadAvailability();
+      }
+    }
+
+    function updateWeekButtons() {
+      const select = document.getElementById('avail-week-selector');
+      const prevBtn = document.getElementById('avail-prev-week-btn');
+      const nextBtn = document.getElementById('avail-next-week-btn');
+      if (!select) return;
+      if (prevBtn) {
+        prevBtn.disabled = (select.selectedIndex <= 0);
+      }
+      if (nextBtn) {
+        nextBtn.disabled = (select.selectedIndex >= select.options.length - 1);
+      }
+    }
+
     // ── Load Availability ────────────────────────────────────────────────────
     async function loadAvailability() {
       const el = document.getElementById('avail-grid-container');
@@ -1420,10 +1602,14 @@
         const days = (_settings.defense_days || 'Monday,Tuesday,Wednesday,Thursday,Friday').split(',');
 
         // Initialize week selector if needed
-        if (weekSelector && weekSelector.options.length === 1 && weekSelector.options[0].text === 'Loading weeks...') {
+        if (weekSelector && (weekSelector.options.length === 1 && weekSelector.options[0].text === 'Loading weeks...' || weekSelector.options.length === 0)) {
           weekSelector.innerHTML = '';
           const now = new Date();
-          for (let w = 0; w < 12; w++) {
+          const curMonday = new Date(now);
+          curMonday.setDate(now.getDate() - now.getDay() + 1);
+          const currentWeekVal = curMonday.toISOString().split('T')[0];
+
+          for (let w = -2; w <= 12; w++) {
             const startOfWeek = new Date(now);
             startOfWeek.setDate(now.getDate() + (w * 7) - now.getDay() + 1);
             const endOfWeek = new Date(startOfWeek);
@@ -1431,6 +1617,10 @@
             const label = `Week of ${startOfWeek.toLocaleDateString('en-PH')} - ${endOfWeek.toLocaleDateString('en-PH')}`;
             const value = startOfWeek.toISOString().split('T')[0];
             weekSelector.appendChild(new Option(label, value));
+          }
+          weekSelector.value = currentWeekVal;
+          if (!weekSelector.value && weekSelector.options.length > 2) {
+            weekSelector.selectedIndex = 2;
           }
         }
 
@@ -1453,8 +1643,20 @@
         // Build calendar table
         let html = '<div class="avail-calendar"><div class="avail-calendar-row">';
         html += '<div class="avail-calendar-cell avail-time-header">Time</div>';
-        days.forEach(day => {
-          html += `<div class="avail-calendar-cell avail-day-header">${dayAbbr[day] || day.slice(0, 3)}</div>`;
+        days.forEach((day, di) => {
+          const dateStr = weekDates[di];
+          let dateLabel = '';
+          if (dateStr) {
+            try {
+              const dateObj = new Date(dateStr + 'T00:00:00');
+              const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              dateLabel = `, ${formattedDate}`;
+            } catch (err) {
+              console.error('Error formatting date for header:', err);
+            }
+          }
+          const abbr = dayAbbr[day] || day.slice(0, 3);
+          html += `<div class="avail-calendar-cell avail-day-header">${abbr}${dateLabel}</div>`;
         });
         html += '</div>';
 
@@ -1504,6 +1706,8 @@
 
         // Load summary
         loadAvailabilitySummary();
+        // Update week nav buttons
+        updateWeekButtons();
       } catch (e) {
         el.innerHTML = '<div class="db-empty">Error loading availability</div>';
       }
@@ -1541,6 +1745,107 @@
       document.getElementById('avail-mode').options.length = 2; // Prevent duplicates
       loadAvailability();
     });
+
+    // ── Availability View Toggle ──────────────────────────────────────────
+    function switchAvailView(view, el) {
+      _availView = view;
+      document.querySelectorAll('.cal-view-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      const weekCtrl = document.getElementById('avail-week-controls');
+      const monthCtrl = document.getElementById('avail-month-controls');
+      const legend = document.getElementById('avail-legend');
+      if (weekCtrl) weekCtrl.style.display = view === 'week' ? 'flex' : 'none';
+      if (monthCtrl) monthCtrl.style.display = view === 'month' ? '' : 'none';
+      if (legend) legend.style.display = view === 'week' ? 'flex' : 'none';
+      if (view === 'week') {
+        loadAvailability();
+      } else {
+        loadAvailabilityMonthView();
+      }
+    }
+
+    function changeAvailMonth(delta) {
+      _availMonthDate = new Date(_availMonthDate.getFullYear(), _availMonthDate.getMonth() + delta, 1);
+      loadAvailabilityMonthView();
+    }
+
+    function loadAvailabilityMonthView() {
+      const el = document.getElementById('avail-grid-container');
+      const label = document.getElementById('avail-month-label');
+      const year = _availMonthDate.getFullYear();
+      const month = _availMonthDate.getMonth();
+
+      if (label) {
+        label.textContent = new Date(year, month, 1).toLocaleDateString('en-PH', { month: 'long', year: 'numeric' });
+      }
+
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let startDow = firstDay.getDay() - 1; // Mon=0
+      if (startDow < 0) startDow = 6;
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      const today = todayStr();
+
+      let html = '<table class="month-cal"><thead><tr>';
+      ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => html += `<th>${d}</th>`);
+      html += '</tr></thead><tbody>';
+
+      let dayCount = 1;
+      let nextMonthDay = 1;
+      for (let row = 0; row < 6; row++) {
+        if (row > 0 && dayCount > daysInMonth) break;
+        html += '<tr>';
+        for (let col = 0; col < 7; col++) {
+          const cellIdx = row * 7 + col;
+          let dateStr, displayNum, isOther = false;
+          if (cellIdx < startDow) {
+            const d = prevMonthDays - (startDow - cellIdx - 1);
+            dateStr = new Date(year, month - 1, d).toISOString().split('T')[0];
+            displayNum = d; isOther = true;
+          } else if (dayCount > daysInMonth) {
+            dateStr = new Date(year, month + 1, nextMonthDay).toISOString().split('T')[0];
+            displayNum = nextMonthDay; isOther = true; nextMonthDay++;
+          } else {
+            dateStr = new Date(year, month, dayCount).toISOString().split('T')[0];
+            displayNum = dayCount; dayCount++;
+          }
+          html += renderMonthCell(dateStr, displayNum, isOther, today);
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    }
+
+    function renderMonthCell(dateStr, dayNum, isOtherMonth, today) {
+      const isToday = dateStr === today;
+      const dayBooked = _appointments.filter(a =>
+        a.date === dateStr && a.status !== 'cancelled' &&
+        (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id))
+      );
+      const dayAvails = _avail.filter(a => a.date === dateStr);
+
+      let cellCls = `month-day${isOtherMonth ? ' other-month' : ''}${isToday ? ' is-today' : ''}`;
+      let eventsHtml = '<div class="month-day-events">';
+
+      if (dayBooked.length > 0) {
+        dayBooked.slice(0, 2).forEach(a => {
+          eventsHtml += `<div class="month-day-event month-event-booked" title="${a.group_name} &middot; ${a.time_slot}">🔒 ${a.group_name}</div>`;
+        });
+        if (dayBooked.length > 2) {
+          eventsHtml += `<div class="month-day-event" style="color:var(--text3);font-size:9px">+${dayBooked.length - 2} more booked</div>`;
+        }
+      } else if (dayAvails.length > 0) {
+        const types = [...new Set(dayAvails.map(a => a.availability_type))];
+        types.forEach(t => {
+          const cnt = dayAvails.filter(a => a.availability_type === t).length;
+          eventsHtml += `<div class="month-day-event month-event-selected" title="${cnt} slot(s) as ${t}">✓ ${cnt} ${t}</div>`;
+        });
+      }
+      eventsHtml += '</div>';
+
+      return `<td><div class="${cellCls}"><div class="month-day-num">${dayNum}</div>${eventsHtml}</div></td>`;
+    }
 
     let _savingAvail = false;
     async function toggleAvailSlot(date, time_slot, type, el) {
