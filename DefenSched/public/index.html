@@ -1,490 +1,568 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="DefenSched – Thesis/Capstone Appointment Scheduling System">
-    <title>DefenSched | System Dashboard</title>
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="DefenSched – CICS Thesis & Capstone Appointment Scheduling System Login"/>
+  <title>DefenSched | CICS Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Admin Dashboard Color System ───────────────────── */
+    :root {
+      --bg:           #0d0f14;
+      --surface:      #13161d;
+      --surface2:     #1a1e28;
+      --border:       #252a38;
+      --border2:      #2e3447;
+      --accent:       #4f8ef7;
+      --accent2:      #3a6fd8;
+      --accent-glow:  rgba(79,142,247,.15);
+      --text:         #e8eaf0;
+      --text2:        #8b90a0;
+      --text3:        #555b70;
+      --purple:       #a78bfa;
+      --success:      #3ecf8e;
+      --danger:       #e05c5c;
+      --font:         'DM Sans', 'Montserrat', sans-serif;
+      --radius:       10px;
+      --radius-lg:    20px;
+    }
+    [data-theme="light"] {
+      --bg:           #f8fafc;
+      --surface:      #ffffff;
+      --surface2:     #f1f5f9;
+      --border:       #e2e8f0;
+      --border2:      #cbd5e1;
+      --text:         #0f172a;
+      --text2:        #475569;
+      --text3:        #94a3b8;
+      --accent-glow:  rgba(79,142,247,.08);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family:var(--font); }
+
+    body {
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+
+    /* ── Theme Toggle Button ─────────────────────────────── */
+    #theme-toggle {
+      position: fixed;
+      top: 18px; right: 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text2);
+      transition: all 0.2s;
+      z-index: 9999;
+    }
+    #theme-toggle:hover { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+
+    /* ── Toast ───────────────────────────────────────────── */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      padding: 12px 20px; border-radius: var(--radius); color: #fff;
+      font-size: 14px; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      animation: slideIn .3s ease-out; display: flex; align-items: center; gap: 10px;
+    }
+    @keyframes slideIn { from{transform:translateX(120%);opacity:0} to{transform:translateX(0);opacity:1} }
+
+    /* ── Main Card ───────────────────────────────────────── */
+    .container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.4);
+      position: relative;
+      overflow: hidden;
+      width: 768px;
+      max-width: 95vw;
+      min-height: 520px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    /* ── Form Panels ─────────────────────────────────────── */
+    .form-container {
+      position: absolute; top: 0; height: 100%;
+      transition: .6s ease-in-out;
+    }
+    .form-container form {
+      background: var(--surface);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 36px 40px; height: 100%; gap: 10px;
+      transition: background 0.3s;
+      overflow-y: auto;
+    }
+    .sign-in { width:50%; left:0; z-index:2; }
+    .sign-up { width:50%; left:0; z-index:1; opacity:0; }
+    .container.active .sign-in { transform:translateX(100%); opacity:0; }
+    .container.active .sign-up { transform:translateX(100%); opacity:1; z-index:5; animation:move .6s; }
+    @keyframes move { 0%,49.99%{opacity:0;z-index:1} 50%,100%{opacity:1;z-index:5} }
+
+    /* ── Logo ────────────────────────────────────────────── */
+    .logo-wrap { display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+    .logo-wrap img { width:38px; height:38px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); }
+    .logo-wrap span { font-weight:700; font-size:1.1rem; color:var(--accent); letter-spacing:2px; }
+
+    h1 { font-size:1.4rem; font-weight:700; color:var(--text); }
+    p.sub { font-size:11.5px; color:var(--text2); }
+
+    /* ── Social Icons ────────────────────────────────────── */
+    .social-icons { display:flex; gap:10px; margin:4px 0; }
+    .social-icons a {
+      border:1px solid var(--border2); border-radius:50%;
+      width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+      color:var(--text2); font-size:13px; text-decoration:none; transition:.2s;
+    }
+    .social-icons a:hover { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider { display:flex; align-items:center; gap:8px; width:100%; margin:2px 0; }
+    .divider-line { flex:1; height:1px; background:var(--border); }
+    .divider span { font-size:10px; color:var(--text3); white-space:nowrap; }
+
+    /* ── Inputs ──────────────────────────────────────────── */
+    input[type="text"], input[type="email"], input[type="password"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      width: 100%; font-size: 13px;
+      color: var(--text); outline: none;
+      transition: border .2s, background 0.3s;
+    }
+    input:focus { border-color: var(--accent); background: var(--surface); }
+    input::placeholder { color: var(--text3); }
+
+    select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px; width: 100%;
+      font-size: 13px; color: var(--text); outline: none; cursor: pointer;
+      transition: border .2s;
+    }
+    select:focus { border-color: var(--accent); }
+
+    .row { display:flex; align-items:center; justify-content:space-between; width:100%; font-size:11.5px; color:var(--text2); }
+    .row a { color:var(--accent); text-decoration:none; font-weight:600; }
+    .row a:hover { text-decoration:underline; }
+
+    /* ── Submit Button ───────────────────────────────────── */
+    .submit-btn {
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      color: #fff; border: none;
+      border-radius: var(--radius);
+      padding: 10px 40px;
+      font-size: 13px; font-weight:700; font-family:inherit;
+      cursor: pointer; letter-spacing:.5px;
+      transition: opacity .2s, transform .1s;
+      margin-top: 4px; width: 100%;
+    }
+    .submit-btn:hover { opacity:.88; transform:translateY(-1px); }
+    .submit-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+    /* ── Group fields ────────────────────────────────────── */
+    #reg-group-fields input { margin-bottom:6px; }
+    #register-form::-webkit-scrollbar { width:4px; }
+    #register-form::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+    /* ── Toggle Overlay ──────────────────────────────────── */
+    .toggle-container {
+      position:absolute; top:0; left:50%;
+      width:50%; height:100%; overflow:hidden;
+      border-radius:150px 0 0 100px / 100px 0 0 100px;
+      z-index:1000; transition:.6s ease-in-out;
+    }
+    .container.active .toggle-container {
+      transform:translateX(-100%);
+      border-radius:0 150px 100px 0 / 0 100px 100px 0;
+    }
+    .toggle {
+      background: linear-gradient(135deg, #1a1e28, #0d1340, #1a1e28);
+      background-image: linear-gradient(135deg, var(--accent2) 0%, #1a0d44 50%, var(--purple) 100%);
+      height:100%; width:200%;
+      position:relative; left:-100%;
+      transform:translateX(0);
+      transition:.6s ease-in-out;
+    }
+    .container.active .toggle { transform:translateX(50%); }
+
+    .toggle-panel {
+      position:absolute; top:0;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:30px 24px;
+      width:50%; height:100%; text-align:center;
+    }
+    /* right half of .toggle = visible by default */
+    .toggle-left  { right:0; left:auto; }
+    /* left half of .toggle = hidden by default */
+    .toggle-right { left:0; transform:translateX(-200%); }
+    .container.active .toggle-left  { transform:translateX(200%); }
+    .container.active .toggle-right { transform:translateX(0); }
+
+    .toggle-panel h1 { font-size:1.25rem; color:#fff; margin-bottom:8px; font-weight:700; }
+    .toggle-panel p  { font-size:12px; color:rgba(255,255,255,.8); line-height:1.6; margin-bottom:20px; }
+    .toggle-panel button {
+      background:transparent; color:#fff;
+      border:1.5px solid rgba(255,255,255,.7);
+      border-radius:var(--radius);
+      padding:9px 32px;
+      font-size:12.5px; font-weight:700; font-family:inherit;
+      cursor:pointer; letter-spacing:.5px; transition:.2s;
+    }
+    .toggle-panel button:hover { background:rgba(255,255,255,.15); border-color:#fff; }
+
+    /* ── Accent dot decoration ───────────────────────────── */
+    .toggle-dot {
+      width:60px; height:60px; border-radius:50%;
+      background:rgba(255,255,255,.1);
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:16px; font-size:24px;
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media(max-width:600px){
+      .container{width:98vw;min-height:auto;}
+      .form-container form{padding:24px 16px;}
+      .toggle-container,.toggle-panel,.sign-up,.sign-in{width:100%;left:0;position:relative;border-radius:0;}
+      .container{overflow:visible;}
+    }
+  </style>
 </head>
-<body class="pre-auth">
-    <!-- Premium Aurora Background -->
-    <div class="aurora-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
+<body>
 
-    <!-- Login / Role Selection Screen -->
-    <div id="login-screen" class="auth-container">
-        <div class="auth-card glass-card">
-            <button id="theme-toggle-login" class="theme-toggle-btn" title="Toggle Theme">
-                <i class="fas fa-moon"></i>
-            </button>
-            <div class="auth-header">
-                <div class="logo-circle">
-                    <i class="fas fa-shield-halved"></i>
-                </div>
-                <h1>DefenSched</h1>
-                <p>Thesis & Capstone Appointment System</p>
-            </div>
-            
-            <form id="login-form">
-                <div class="input-group">
-                    <label for="email">Email Address</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" placeholder="Enter your email" required>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="password">Password</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="••••••••" required>
-                    </div>
-                    <button type="button" class="pwd-toggle" data-target="password">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-                <button type="submit" class="btn-primary">SIGN IN</button>
-                <p class="auth-footer" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted);">
-                    Don't have an account? <a href="#" id="go-to-register" style="color: var(--primary); font-weight: 600;">Register here</a>
-                </p>
-            </form>
+<!-- Theme Toggle -->
+<button id="theme-toggle" title="Toggle Theme">
+  <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
 
-            <form id="register-form" class="hidden">
-                <div class="input-group">
-                    <label for="reg-name">Account / Group Name</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="reg-name" placeholder="e.g. Group Alpha" required>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="reg-email">Email Address</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="reg-email" placeholder="email@cics.edu.ph" required>
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label for="reg-password">Password</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="reg-password" placeholder="••••••••" required>
-                    </div>
-                    <button type="button" class="pwd-toggle" data-target="reg-password">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-                <div class="input-group">
-                    <label for="reg-role">I am a...</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-id-card"></i>
-                        <select id="reg-role" required style="width: 100%; padding: 1.2rem 1.2rem 1.2rem 3.5rem; background: var(--bg-input); border: 1px solid var(--border-glass); border-radius: var(--radius-md); font-size: 1rem; color: var(--text-main); outline: none;">
-                            <option value="student">Thesis Student</option>
-                            <option value="faculty">Adviser / Panelist</option>
-                        </select>
-                    </div>
-                </div>
+<div class="container" id="container">
 
-                <!-- Solo / Group Toggle — shown only for students -->
-                <div id="reg-group-section" style="display:none;">
-                    <div class="input-group" style="margin-bottom: 0.75rem;">
-                        <label>Participation Type</label>
-                        <div style="display:flex; gap:0; background: var(--bg-input); border: 1px solid var(--border-glass); border-radius: var(--radius-md); overflow:hidden; margin-top:0.4rem;">
-                            <button type="button" id="btn-solo" onclick="setGroupMode(false)"
-                                style="flex:1; padding:0.75rem; border:none; cursor:pointer; font-size:0.9rem; font-weight:600; font-family:inherit; transition:all 0.2s; background: var(--primary); color:#fff;">
-                                <i class="fas fa-user" style="margin-right:6px"></i>Solo
-                            </button>
-                            <button type="button" id="btn-group" onclick="setGroupMode(true)"
-                                style="flex:1; padding:0.75rem; border:none; cursor:pointer; font-size:0.9rem; font-weight:600; font-family:inherit; transition:all 0.2s; background: transparent; color: var(--text-muted);">
-                                <i class="fas fa-users" style="margin-right:6px"></i>Group
-                            </button>
-                        </div>
-                    </div>
+  <!-- ═══════════════════════════════════ SIGN-UP PANEL -->
+  <div class="form-container sign-up">
+    <form id="register-form" novalidate>
+      <div class="logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/en/4/47/PUP_logo.png" alt="CICS Logo" onerror="this.style.display='none'"/>
+        <span>CICS</span>
+      </div>
+      <h1>Create Account</h1>
+      <p class="sub">Join the CICS community today</p>
 
-                    <!-- Group-only fields -->
-                    <div id="reg-group-fields" style="display:none; margin-top:0.75rem;">
-                        <div class="input-group">
-                            <label for="reg-group-size">Number of Members</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-hashtag"></i>
-                                <select id="reg-group-size" onchange="buildMemberFields()" style="width:100%; padding:1.2rem 1.2rem 1.2rem 3.5rem; background:var(--bg-input); border:1px solid var(--border-glass); border-radius:var(--radius-md); font-size:1rem; color:var(--text-main); outline:none;">
-                                    <option value="2">2 members</option>
-                                    <option value="3">3 members</option>
-                                    <option value="4">4 members</option>
-                                    <option value="5">5 members</option>
-                                    <option value="6">6 members</option>
-                                </select>
-                            </div>
-                        </div>
+      <div class="social-icons">
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" aria-label="Google"><i class="fa-brands fa-google"></i></a>
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      </div>
+      <div class="divider"><div class="divider-line"></div><span>or use your email</span><div class="divider-line"></div></div>
 
-                        <div class="input-group">
-                            <label for="reg-leader">Team Leader Name</label>
-                            <div class="input-wrapper">
-                                <i class="fas fa-star"></i>
-                                <input type="text" id="reg-leader" placeholder="Full name of team leader">
-                            </div>
-                        </div>
+      <!-- Role selector -->
+      <select id="reg-role" onchange="regRoleChange()">
+        <option value="student">&#127891; Thesis Student</option>
+        <option value="faculty">&#128218; Faculty (Adviser / Panelist)</option>
+      </select>
 
-                        <div id="reg-members-container">
-                            <!-- Member fields injected by JS -->
-                        </div>
-                    </div>
-                </div>
+      <input type="text"  id="reg-name"     placeholder="Full Name / Group Name" required/>
+      <input type="email" id="reg-email"    placeholder="Email Address" required/>
+      <input type="password" id="reg-password" placeholder="Password" required/>
 
-                <button type="submit" class="btn-primary">CREATE ACCOUNT</button>
-                <p class="auth-footer" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted);">
-                    Already have an account? <a href="#" id="go-to-login" style="color: var(--primary); font-weight: 600;">Sign In</a>
-                </p>
-            </form>
+      <!-- Solo / Group — students only -->
+      <div id="reg-group-section" style="width:100%;">
+        <p style="font-size:11px;color:#888;margin:2px 0 6px;">Participation Type</p>
+        <div style="display:flex;background:#f3f4f8;border:0.5px solid #ddd;border-radius:8px;overflow:hidden;margin-bottom:10px;">
+          <button type="button" id="btn-solo" onclick="setGroupMode(false)"
+            style="flex:1;padding:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;background:#2b1369;color:#fff;transition:all 0.2s;">
+            Solo
+          </button>
+          <button type="button" id="btn-grp" onclick="setGroupMode(true)"
+            style="flex:1;padding:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;background:transparent;color:#999;transition:all 0.2s;">
+            Group
+          </button>
         </div>
+        <div id="reg-group-fields" style="display:none;width:100%;">
+          <select id="reg-group-size" onchange="buildMemberFields()" style="margin-bottom:10px;">
+            <option value="2">2 members</option>
+            <option value="3">3 members</option>
+            <option value="4">4 members</option>
+            <option value="5">5 members</option>
+            <option value="6">6 members</option>
+          </select>
+          <input type="text" id="reg-leader" placeholder="Team Leader Full Name" style="margin-bottom:6px;"/>
+          <div id="reg-members-container" style="width:100%;"></div>
+        </div>
+      </div>
+
+      <button class="submit-btn" type="button" id="reg-submit-btn" onclick="handleRegister()">Sign Up</button>
+    </form>
+  </div>
+
+  <!-- ═══════════════════════════════════ SIGN-IN PANEL -->
+  <div class="form-container sign-in">
+    <form id="login-form" novalidate>
+      <div class="logo-wrap">
+        <img src="https://upload.wikimedia.org/wikipedia/en/4/47/PUP_logo.png" alt="CICS Logo" onerror="this.style.display='none'"/>
+        <span>CICS</span>
+      </div>
+      <h1>Sign In</h1>
+      <p class="sub">Welcome back, CICSmarter!</p>
+
+      <div class="social-icons">
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" aria-label="Google"><i class="fa-brands fa-google"></i></a>
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      </div>
+      <div class="divider"><div class="divider-line"></div><span>or use your account</span><div class="divider-line"></div></div>
+
+      <input type="email"    id="login-email"    placeholder="Email Address" required/>
+      <input type="password" id="login-password" placeholder="Password"      required/>
+
+      <div class="row">
+        <label><input type="checkbox" id="remember-me" style="width:auto;margin:0;background:none;border:none;padding:0;"/> Remember me</label>
+        <a href="#">Forgot your password?</a>
+      </div>
+      <button class="submit-btn" type="button" id="login-submit-btn" onclick="handleLogin()">Sign In</button>
+    </form>
+  </div>
+
+  <!-- ═══════════════════════════════════ TOGGLE OVERLAY -->
+  <div class="toggle-container">
+    <div class="toggle">
+      <!-- LEFT panel: visible by default → shows Sign Up prompt -->
+      <div class="toggle-panel toggle-left">
+        <div class="toggle-dot">&#128218;</div>
+        <h1>Hello, CICSmarter!</h1>
+        <p>"Every line of code starts with a single log in." Register to unlock all features.</p>
+        <button id="register-toggle-btn">Sign Up</button>
+      </div>
+      <div class="toggle-panel toggle-right">
+        <div class="toggle-dot">&#9996;</div>
+        <h1>Welcome Back!</h1>
+        <p>Enter your credentials to access your account and continue your journey.</p>
+        <button id="login-toggle-btn">Sign In</button>
+      </div>
     </div>
+  </div>
 
+</div>
 
-    <!-- Main System Layout (Hidden by default) -->
-    <div id="main-layout" class="hidden">
-        <!-- Sidebar -->
-        <aside class="sidebar glass-sidebar">
-            <div class="sidebar-header">
-                <i class="fas fa-shield-halved"></i>
-                <span>DefenSched</span>
-            </div>
-            <nav class="sidebar-nav">
-                <ul id="nav-links">
-                    <!-- Dynamic nav links based on role -->
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <img src="https://ui-avatars.com/api/?name=User&background=0D1B3E&color=fff" alt="Avatar" id="user-avatar">
-                    <div class="user-details">
-                        <span id="user-name">User Name</span>
-                        <small id="user-role-label">Role</small>
-                    </div>
-                </div>
-                <button id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
-        </aside>
+<!-- Toast container -->
+<div id="toast-container"></div>
 
-        <!-- Main Content Area -->
-        <main class="content-area">
-            <!-- Top Navbar -->
-            <header class="top-navbar glass-navbar">
-                <div class="header-left">
-                    <button id="mobile-toggle"><i class="fas fa-bars"></i></button>
-                    <h2 id="current-panel-title">Dashboard</h2>
-                </div>
-                <div class="header-right">
-                    <button id="theme-toggle" class="nav-btn" title="Toggle Theme">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <div class="notif-bell" id="notif-toggle">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                        <div class="notif-dropdown glass-card hidden" id="notif-dropdown">
-                            <div class="notif-header">
-                                <span>Notifications</span>
-                                <a href="#">Mark all as read</a>
-                            </div>
-                            <div class="notif-list">
-                                <div class="notif-item">
-                                    <div class="notif-icon info"><i class="fas fa-calendar"></i></div>
-                                    <div class="notif-text">
-                                        <p>Your defense schedule is confirmed.</p>
-                                        <small>2 hours ago</small>
-                                    </div>
-                                </div>
-                                <div class="notif-item">
-                                    <div class="notif-icon success"><i class="fas fa-file-upload"></i></div>
-                                    <div class="notif-text">
-                                        <p>Manuscript submitted successfully.</p>
-                                        <small>5 hours ago</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="notif-footer">
-                                <a href="#" id="view-all-notifs">View All Notifications</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="date-display">
-                        <i class="fas fa-clock"></i>
-                        <span id="current-time">09:30 AM</span>
-                    </div>
-                </div>
-            </header>
+<script>
+'use strict';
 
-            <!-- Content Panels -->
-            <div id="panels-container">
-                
-                <!-- Panel 1: Central Dashboard (Shared) -->
-                <section id="panel-dashboard" class="panel active">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon blue"><i class="fas fa-calendar-alt"></i></div>
-                            <div class="stat-info">
-                                <h3>12</h3>
-                                <p>Total Appointments</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon purple"><i class="fas fa-shield-halved"></i></div>
-                            <div class="stat-info">
-                                <h3>4</h3>
-                                <p>Upcoming Defenses</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
-                            <div class="stat-info">
-                                <h3>2</h3>
-                                <p>Pending Approvals</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
-                            <div class="stat-info">
-                                <h3>85%</h3>
-                                <p>Completion Rate</p>
-                            </div>
-                        </div>
-                    </div>
+/* ── Panel toggle ──────────────────────────────────────── */
+const c = document.getElementById('container');
+/* ── Theme System ──────────────────────────────────────── */
+const updateThemeIcon = (theme) => {
+  const icon = document.getElementById('theme-icon');
+  if (theme === 'light') {
+    icon.innerHTML = '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  } else {
+    icon.innerHTML = '<path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+};
+const savedTheme = localStorage.getItem('defensched-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('defensched-theme', next);
+  updateThemeIcon(next);
+});
 
-                    <div class="dashboard-grid">
-                        <div class="card calendar-widget">
-                            <div class="card-header">
-                                <h3>Schedule Calendar</h3>
-                                <div class="cal-controls">
-                                    <button><i class="fas fa-chevron-left"></i></button>
-                                    <span>April 2026</span>
-                                    <button><i class="fas fa-chevron-right"></i></button>
-                                </div>
-                            </div>
-                            <div class="calendar-grid" id="dashboard-calendar">
-                                <!-- Calendar generated by JS -->
-                            </div>
-                        </div>
-                        <div class="card activity-widget">
-                            <div class="card-header">
-                                <h3>Real-Time Updates</h3>
-                            </div>
-                            <div class="activity-list">
-                                <div class="activity-item">
-                                    <div class="dot active"></div>
-                                    <p><strong>Room 302</strong> is now booked for tomorrow.</p>
-                                    <small>Just now</small>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="dot"></div>
-                                    <p><strong>Dr. Reyes</strong> updated availability.</p>
-                                    <small>15 mins ago</small>
-                                </div>
-                                <div class="activity-item">
-                                    <div class="dot"></div>
-                                    <p>New manuscript uploaded by <strong>Group Alpha</strong>.</p>
-                                    <small>1 hour ago</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+/* ── Panel toggle ──────────────────────────────────────── */
+document.getElementById('register-toggle-btn').addEventListener('click', () => c.classList.add('active'));
+document.getElementById('login-toggle-btn').addEventListener('click',    () => c.classList.remove('active'));
 
-                <!-- Panel 2: Appointment Scheduling -->
-                <section id="panel-scheduling" class="panel">
-                    <div class="split-view">
-                        <div class="card form-card">
-                            <h3>Book Appointment</h3>
-                            <form id="booking-form">
-                                <div class="input-group">
-                                    <label>Research Group Name</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-users"></i>
-                                        <input type="text" name="group_name" placeholder="e.g. Group Alpha" required>
-                                    </div>
-                                </div>
-                                <div class="input-group">
-                                    <label>Select Adviser</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-chalkboard-teacher"></i>
-                                        <select name="adviser_id" required>
-                                            <option value="">Choose Adviser</option>
-                                            <option value="2">Dr. Jose Reyes</option>
-                                            <option value="3">Prof. Maria Santos</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="grid-inputs">
-                                    <div class="input-group">
-                                        <label>Date</label>
-                                        <div class="input-wrapper">
-                                            <i class="fas fa-calendar-day"></i>
-                                            <input type="date" name="date" required>
-                                        </div>
-                                    </div>
-                                    <div class="input-group">
-                                        <label>Time</label>
-                                        <div class="input-wrapper">
-                                            <i class="fas fa-clock"></i>
-                                            <input type="time" name="time_slot" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="input-group">
-                                    <label>Venue</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        <select name="venue_id" required>
-                                            <option value="">Select Venue</option>
-                                            <option value="1">Room 301 - CICS Lab</option>
-                                            <option value="2">Room 302 - Multimedia Room</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="conflict-alert hidden" id="conflict-warning">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <span>Conflict Detected: Room is already booked at this time.</span>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <div class="card validation-sidebar">
-                            <h3>Quadruple-Check Validation</h3>
-                            <div class="validation-list">
-                                <div class="val-item" id="val-adviser">
-                                    <i class="fas fa-circle-check"></i>
-                                    <span>Adviser Availability</span>
-                                </div>
-                                <div class="val-item" id="val-panel">
-                                    <i class="fas fa-circle-check"></i>
-                                    <span>Panel Availability</span>
-                                </div>
-                                <div class="val-item" id="val-venue">
-                                    <i class="fas fa-circle-check"></i>
-                                    <span>Venue Availability</span>
-                                </div>
-                                <div class="val-item" id="val-rules">
-                                    <i class="fas fa-circle-check"></i>
-                                    <span>Schedule Rules Approval</span>
-                                </div>
-                            </div>
-                            <button class="btn-primary" id="confirm-booking" disabled>Confirm Appointment</button>
-                        </div>
-                    </div>
-                </section>
+/* ── Toast helper ──────────────────────────────────────── */
+function showToast(msg, type = 'info') {
+  const colors = { success:'#10B981', error:'#EF4444', warning:'#F59E0B', info:'#3B82F6' };
+  const icons  = { success:'fa-check-circle', error:'fa-times-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle' };
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.background = colors[type] || colors.info;
+  toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4500);
+}
 
-                <!-- Panel 5: Manuscript Submission -->
-                <section id="panel-manuscript" class="panel">
-                    <div class="card">
-                        <h3>Manuscript Submission</h3>
-                        <div class="upload-zone" id="drop-zone">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Drag and drop your manuscript here</p>
-                            <span>Supported formats: PDF, DOCX (Max 10MB)</span>
-                            <input type="file" id="file-input" hidden>
-                            <button class="btn-outline" onclick="document.getElementById('file-input').click()">Browse Files</button>
-                        </div>
-                        <div class="file-status-list">
-                            <div class="file-item">
-                                <div class="file-info">
-                                    <i class="fas fa-file-pdf"></i>
-                                    <div>
-                                        <p>Final_Draft_v1.pdf</p>
-                                        <small>8.4 MB</small>
-                                    </div>
-                                </div>
-                                <span class="badge success">Uploaded</span>
-                            </div>
-                        </div>
-                        <div class="submission-footer">
-                            <p><i class="fas fa-info-circle"></i> Once submitted, the appointment will be locked for editing.</p>
-                            <div class="send-status">
-                                <span>Auto-sending to Panelists...</span>
-                                <div class="progress-bar"><div class="progress" style="width: 100%"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+/* ── Session check on load ─────────────────────────────── */
+(async () => {
+  try {
+    const res = await fetch('/api/auth/me');
+    if (res.ok) {
+      const { user } = await res.json();
+      redirectByRole(user.role);
+    }
+  } catch(e) { /* not logged in */ }
+})();
 
-                <!-- Panel 6: Faculty Management -->
-                <section id="panel-faculty" class="panel">
-                    <div class="faculty-controls">
-                        <div class="card">
-                            <h3>Set Your Availability</h3>
-                            <div class="availability-toggle">
-                                <span>Mode:</span>
-                                <div class="toggle-switch">
-                                    <button class="active">Adviser</button>
-                                    <button>Panelist</button>
-                                </div>
-                            </div>
-                            <div class="time-grid">
-                                <!-- Time slots generated by JS -->
-                            </div>
-                        </div>
-                    </div>
-                </section>
+function redirectByRole(role) {
+  const map = { admin:'/admin-dashboard', faculty:'/faculty-dashboard', student:'/student-dashboard' };
+  if (map[role]) window.location.replace(map[role]);
+}
 
-                <!-- Panel 8: Honoraria Computation -->
-                <section id="panel-honoraria" class="panel">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>₱ 12,500</h3>
-                            <p>Total Panel Honoraria</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>₱ 8,000</h3>
-                            <p>Total Adviser Honoraria</p>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Summary Report</h3>
-                            <button class="btn-outline"><i class="fas fa-print"></i> Print</button>
-                        </div>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Faculty Name</th>
-                                    <th>Role</th>
-                                    <th>Sessions</th>
-                                    <th>Rate</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Dr. Jose Rizal</td>
-                                    <td>Panelist</td>
-                                    <td>5</td>
-                                    <td>₱ 1,500</td>
-                                    <td>₱ 7,500</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+/* ── Login handler ─────────────────────────────────────── */
+async function handleLogin() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn      = document.getElementById('login-submit-btn');
 
-                <!-- More panels will be toggled here -->
-            </div>
-        </main>
-    </div>
+  if (!email || !password) { showToast('Please enter your email and password.', 'warning'); return; }
 
-    <!-- Modals, Toasts, etc. -->
-    <div id="toast-container"></div>
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
 
-    <script src="script.js"></script>
+  try {
+    const res  = await fetch('/api/auth/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      showToast(`Welcome back, ${data.user.name}!`, 'success');
+      setTimeout(() => redirectByRole(data.user.role), 700);
+    } else {
+      showToast(data.error || 'Login failed. Please try again.', 'error');
+      btn.disabled = false; btn.textContent = 'Sign In';
+    }
+  } catch(e) {
+    showToast('Server error. Please try again later.', 'error');
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+/* ── Registration helpers ──────────────────────────────── */
+function regRoleChange() {
+  const role    = document.getElementById('reg-role').value;
+  const section = document.getElementById('reg-group-section');
+  section.style.display = (role === 'student') ? '' : 'none';
+  if (role !== 'student') setGroupMode(false);
+}
+
+let isGroupMode = false;
+function setGroupMode(isGroup) {
+  isGroupMode = isGroup;
+  const fields  = document.getElementById('reg-group-fields');
+  const btnSolo = document.getElementById('btn-solo');
+  const btnGrp  = document.getElementById('btn-grp');
+  fields.style.display      = isGroup ? '' : 'none';
+  btnSolo.style.background  = isGroup ? 'transparent' : '#2b1369';
+  btnSolo.style.color       = isGroup ? '#999' : '#fff';
+  btnGrp.style.background   = isGroup ? '#2b1369' : 'transparent';
+  btnGrp.style.color        = isGroup ? '#fff' : '#999';
+  if (isGroup) buildMemberFields();
+}
+
+function buildMemberFields() {
+  const size      = parseInt(document.getElementById('reg-group-size').value) || 2;
+  const container = document.getElementById('reg-members-container');
+  container.innerHTML = '';
+  for (let i = 2; i <= size; i++) {
+    const inp = document.createElement('input');
+    inp.type        = 'text';
+    inp.id          = `reg-member-${i}`;
+    inp.placeholder = `Member ${i} Full Name`;
+    inp.style.marginBottom = '6px';
+    container.appendChild(inp);
+  }
+}
+
+/* ── Register handler ──────────────────────────────────── */
+async function handleRegister() {
+  const role     = document.getElementById('reg-role').value;
+  const name     = document.getElementById('reg-name').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const btn      = document.getElementById('reg-submit-btn');
+
+  if (!name || !email || !password) {
+    showToast('Please fill in all required fields.', 'warning'); return;
+  }
+
+  // Build payload
+  let is_group    = false;
+  let group_name  = null;
+  let leader_name = null;
+  let member_names = [];
+
+  if (role === 'student') {
+    group_name = name;
+    if (isGroupMode) {
+      is_group    = true;
+      leader_name = (document.getElementById('reg-leader')?.value || '').trim();
+      if (!leader_name) { showToast("Please enter the team leader's name.", 'warning'); return; }
+      const size = parseInt(document.getElementById('reg-group-size').value) || 2;
+      for (let i = 2; i <= size; i++) {
+        const m = document.getElementById(`reg-member-${i}`);
+        if (m) member_names.push(m.value.trim());
+      }
+    }
+  }
+
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  try {
+    const res  = await fetch('/api/auth/register', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password, role, is_group, group_name, leader_name, member_names })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      showToast('Account created! You can now sign in.', 'success');
+      // Reset form
+      document.getElementById('reg-name').value     = '';
+      document.getElementById('reg-email').value    = '';
+      document.getElementById('reg-password').value = '';
+      isGroupMode = false;
+      setGroupMode(false);
+      document.getElementById('reg-group-section').style.display = '';
+      document.getElementById('reg-role').value = 'student';
+      // Switch to sign-in
+      setTimeout(() => c.classList.remove('active'), 1000);
+    } else {
+      showToast(data.error || 'Registration failed.', 'error');
+    }
+  } catch(e) {
+    showToast('Server error. Please try again later.', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign Up';
+  }
+}
+
+/* ── Enter-key support ─────────────────────────────────── */
+document.getElementById('login-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+document.getElementById('reg-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleRegister();
+});
+
+// Init: show group section by default (student is default role)
+regRoleChange();
+</script>
 </body>
 </html>
