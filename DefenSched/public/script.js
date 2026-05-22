@@ -362,19 +362,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 notifications.forEach(n => {
                     let iconClass = n.type === 'success' ? 'success' : (n.type === 'error' ? 'error' : 'info');
-                    let icon = n.type === 'success' ? 'fa-check' : 'fa-info';
+                    let icon = n.type === 'success' ? 'fa-check' : (n.type === 'error' ? 'fa-exclamation' : 'fa-info');
+                    const readBtn = !n.is_read ? `<button style="cursor:pointer;background:none;border:none;color:var(--primary);font-size:0.8rem;padding:0.2rem 0.4rem;border-radius:4px;font-weight:500;" onclick="markNotifRead(${n.id})">Mark Read</button>` : '';
+                    const deleteBtn = `<button style="cursor:pointer;background:none;border:none;color:var(--danger);font-size:0.8rem;padding:0.2rem 0.4rem;border-radius:4px;font-weight:500;" onclick="deleteNotification(${n.id})">Delete</button>`;
                     list.innerHTML += `
-                        <div class="notif-item ${n.is_read ? '' : 'unread'}" style="opacity: ${n.is_read ? '0.7' : '1'}">
+                        <div class="notif-item ${n.is_read ? '' : 'unread'}" style="opacity: ${n.is_read ? '0.7' : '1'}" data-notif-id="${n.id}">
                             <div class="notif-icon ${iconClass}"><i class="fas ${icon}"></i></div>
                             <div class="notif-text">
                                 <p>${n.message}</p>
                                 <small>${new Date(n.created_at).toLocaleString()}</small>
                             </div>
+                            <div style="display:flex;gap:6px;margin-left:auto;">${readBtn}${deleteBtn}</div>
                         </div>
                     `;
                 });
             }
         }
+    }
+
+    async function markNotifRead(id) {
+        await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+        await loadNotifications();
+    }
+
+    async function deleteNotification(id) {
+        if (!confirm('Delete this notification?')) return;
+        await fetch(`/api/notifications/${id}`, { method: 'DELETE' });
+        await loadNotifications();
     }
 
     async function loadDashboard() {
