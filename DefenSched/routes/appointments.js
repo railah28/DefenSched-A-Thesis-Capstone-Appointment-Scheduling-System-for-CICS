@@ -76,6 +76,14 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 
   const ex = exclude_id ? `AND a.id != ${parseInt(exclude_id)}` : '';
 
+  // Check if booking is in the past
+  const now = new Date();
+  const bookingDate = new Date(date + 'T' + time_slot.split('-')[0] + ':00:00');
+  let pastCheck = { ok: true, message: '' };
+  if (bookingDate <= now) {
+    pastCheck = { ok: false, message: 'Cannot book past dates or times.' };
+  }
+
   const dayName     = getDayName(date);
   const allowedDays = (settings.defense_days || '').split(',');
   const slotStart   = time_slot.split('-')[0];
@@ -89,16 +97,23 @@ router.get('/check-conflict', requireAuth, (req, res) => {
     rules = { ok: true, message: 'Within approved schedule window.' };
   }
 
-  const advConflict = db.prepare(`
+  // Check if adviser has marked this slot as available
+  const advAvail = db.prepare(`
+    SELECT id FROM faculty_availability
+    WHERE faculty_id = ? AND date = ? AND time_slot = ? AND availability_type = 'adviser'
+  `).get(adviser_id, date, time_slot);
+  const advHasConflict = db.prepare(`
     SELECT id FROM appointments
     WHERE adviser_id = ? AND date = ? AND time_slot = ? AND status != 'cancelled' ${ex}
   `).get(adviser_id, date, time_slot);
-  const adviser = advConflict
+  const adviser = advHasConflict
     ? { ok: false, message: 'Adviser has a conflict at this time.' }
+    : !advAvail
+    ? { ok: false, message: 'Adviser has not marked this time as available.' }
     : { ok: true,  message: 'Adviser is available.' };
 
   const pIds = panelist_ids ? panelist_ids.split(',').map(Number).filter(Boolean) : [];
-  let panelists = { ok: true, message: 'No panelists selected yet.', details: [] };
+  let panelists = { ok: true, message: 'No panelists selected.', details: [] };
   if (pIds.length) {
     let allOk = true;
     const details = pIds.map(pid => {
@@ -127,20 +142,45 @@ router.get('/check-conflict', requireAuth, (req, res) => {
     : { ok: true,  message: 'Venue is available.' };
 
   res.json({
-    adviser, panelists, venue, rules,
-    all_clear: adviser.ok && panelists.ok && venue.ok && rules.ok
+    pastTime: pastCheck, adviser, panelists, venue, rules,
+    all_clear: pastCheck.ok && adviser.ok && panelists.ok && venue.ok && rules.ok
   });
 });
 
 // ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, (req, res) => {
-  const { userId } = req.session;
+  const { userId, role } = req.session;
   const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes } = req.body;
   if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
     return res.status(400).json({ error: 'All fields are required.' });
 
+  // Prevent student double-booking
+  if (role === 'student') {
+    const existing = db.prepare(`
+      SELECT id FROM appointments
+      WHERE student_id = ? AND status IN ('pending', 'confirmed', 'rescheduled')
+    `).get(userId);
+    if (existing) {
+      return res.status(400).json({ error: 'You already have an active appointment.' });
+    }
+  }
+
+  // Check if booking is in the past
+  const now = new Date();
+  const bookingDate = new Date(date + 'T' + time_slot.split('-')[0] + ':00:00');
+  if (bookingDate <= now)
+    return res.status(409).json({ error: 'Cannot book past dates or times.' });
+
+  // Check if adviser has marked this slot as available
+  const advAvail = db.prepare(`
+    SELECT id FROM faculty_availability
+    WHERE faculty_id = ? AND date = ? AND time_slot = ? AND availability_type = 'adviser'
+  `).get(adviser_id, date, time_slot);
+  if (!advAvail)
+    return res.status(409).json({ error: 'Adviser has not marked this time as available.' });
+
   if (db.prepare(`SELECT id FROM appointments WHERE adviser_id=? AND date=? AND time_slot=? AND status!='cancelled'`).get(adviser_id, date, time_slot))
-    return res.status(409).json({ error: 'Conflict: Adviser is not available at that time.' });
+    return res.status(409).json({ error: 'Conflict: Adviser has a conflict at that time.' });
 
   if (db.prepare(`SELECT id FROM appointments WHERE venue_id=? AND date=? AND time_slot=? AND status!='cancelled'`).get(venue_id, date, time_slot))
     return res.status(409).json({ error: 'Conflict: Venue is already booked.' });
@@ -157,6 +197,13 @@ router.post('/', requireAuth, (req, res) => {
   // Notify adviser, panelists, and submitting student
   notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
   for (const pid of pIdsArr) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
+  const pIds = Array.isArray(panelist_ids) ? panelist_ids.filter(Boolean) : [];
+  const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
+  for (const pid of pIds) insPan.run(apptId, pid);
+
+  // Notify adviser, panelists, and submitting student
+  notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
+  for (const pid of pIds) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
   notify(userId, 'Appointment submitted. Upload your manuscript to confirm.', 'success');
 
   // Notify all admin users about the new booking
