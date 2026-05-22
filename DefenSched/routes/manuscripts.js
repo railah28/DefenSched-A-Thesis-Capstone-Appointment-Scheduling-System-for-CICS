@@ -109,4 +109,29 @@ router.get('/download/:id', requireAuth, (req, res) => {
   res.download(filePath, ms.original_name);
 });
 
+// GET /api/manuscripts/preview/:id — preview file inline
+router.get('/preview/:id', requireAuth, (req, res) => {
+  const ms = db.prepare('SELECT * FROM manuscripts WHERE id = ?').get(req.params.id);
+  if (!ms) return res.status(404).json({ error: 'File not found.' });
+  const filePath = path.join(UPLOADS_DIR, ms.filename);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File missing on server.' });
+  const ext = path.extname(ms.original_name).toLowerCase();
+  if (ext === '.pdf') {
+    res.setHeader('Content-Disposition', 'inline; filename="' + ms.original_name + '"');
+    res.setHeader('Content-Type', 'application/pdf');
+    fs.createReadStream(filePath).pipe(res);
+  } else {
+    res.download(filePath, ms.original_name);
+  }
+});
+
+// GET /api/manuscripts/download-all/:appointmentId — download all files for an appointment
+router.get('/download-all/:appointmentId', requireAuth, (req, res) => {
+  const ms = db.prepare('SELECT * FROM manuscripts WHERE appointment_id = ?').get(req.params.appointmentId);
+  if (!ms) return res.status(404).json({ error: 'No manuscript found for this appointment.' });
+  const filePath = path.join(UPLOADS_DIR, ms.filename);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File missing on server.' });
+  res.download(filePath, ms.original_name);
+});
+
 module.exports = router;

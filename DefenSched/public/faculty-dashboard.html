@@ -714,294 +714,306 @@
       overflow-x: auto;
     }
 
-    /* ── Enhanced Availability Calendar ──────────────────────────────── */
-    .avail-calendar {
-      display: table;
-      width: 100%;
-      border-collapse: collapse;
+    /* ── Panel card layout ────────────────────────────────── */
+    .panel-card {
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
-    .avail-calendar-row {
-      display: table-row;
-    }
-
-    .avail-calendar-cell {
-      display: table-cell;
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 0;
-      text-align: center;
-      vertical-align: middle;
-    }
-
-    .avail-calendar-cell:last-child {
-      border-right: none;
-    }
-
-    .avail-calendar-row:last-child .avail-calendar-cell {
-      border-bottom: none;
-    }
-
-    .avail-time-header {
-      background: var(--surface2);
-      font-weight: 600;
-      font-size: 11px;
-      padding: 8px 4px;
-      color: var(--text3);
-      font-family: var(--mono);
-      position: sticky;
-      left: 0;
-      z-index: 10;
-    }
-
-    .avail-day-header {
-      background: var(--surface2);
-      font-weight: 600;
-      font-size: 12px;
-      padding: 12px 8px;
-      color: var(--text);
-      min-width: 85px;
-    }
-
-    .avail-slot-cell {
-      position: relative;
-      padding: 4px;
-      min-height: 45px;
-      min-width: 85px;
-    }
-
-    .avail-slot-btn {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 500;
+      border-left: 4px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      margin-bottom: 10px;
       cursor: pointer;
       transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .panel-card:hover {
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+    .panel-card.pending { border-left-color: var(--warning); }
+    .panel-card.confirmed { border-left-color: var(--success); }
+    .panel-card.completed { border-left-color: var(--accent); opacity: .7; }
+    .panel-card.cancelled { border-left-color: var(--danger); opacity: .55; }
+    .panel-card.rescheduled { border-left-color: var(--purple); }
+
+    .panel-card-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+      flex-shrink: 0;
+    }
+    .panel-card-date {
       font-family: var(--mono);
-      padding: 6px 2px;
-    }
-
-    .avail-slot-btn:hover:not(:disabled) {
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .avail-slot-btn:disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    .avail-open {
-      background: var(--success-bg);
-      color: var(--success);
-      border: 1px solid var(--success);
-    }
-
-    .avail-open:hover:not(:disabled) {
-      background: var(--success);
-      color: #fff;
-    }
-
-    .avail-selected {
-      background: linear-gradient(135deg, #0d9488, #0ea5e9);
-      color: #fff;
-      border: 1px solid #0d9488;
+      font-size: 16px;
       font-weight: 600;
-      box-shadow: 0 2px 6px rgba(13, 148, 136, 0.15);
-    }
-
-    .avail-booked {
-      background: var(--surface2);
-      color: var(--text3);
-      border: 1px dashed var(--border);
-      cursor: not-allowed !important;
-    }
-
-    .avail-unavailable {
-      background: var(--surface2);
-      color: var(--text3);
-      border: 1px solid var(--border);
-      cursor: not-allowed !important;
-    }
-
-    .avail-summary-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 12px;
-      background: var(--surface2);
-      border-radius: var(--radius);
-      font-size: 13px;
-      margin-bottom: 8px;
-    }
-
-    .avail-summary-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .avail-summary-date {
-      font-weight: 500;
       color: var(--text);
-      font-family: var(--mono);
+      line-height: 1.2;
     }
-
-    .avail-summary-group {
-      color: var(--text2);
-      font-size: 12px;
-      margin-top: 2px;
-    }
-
-    .avail-summary-empty {
-      padding: 20px;
-      text-align: center;
+    .panel-card-month {
+      font-size: 10px;
       color: var(--text3);
-      font-size: 13px;
+      text-transform: uppercase;
+      font-weight: 600;
     }
-
-    /* ── Availability View Tabs ──────────────────────────────── */
-    .cal-view-tabs {
-      display: flex;
-      gap: 3px;
-      background: var(--surface2);
-      padding: 3px;
-      border-radius: 8px;
+    .panel-card-body {
+      flex: 1;
+      min-width: 0;
     }
-
-    .cal-view-tab {
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      color: var(--text2);
-      transition: all .15s;
-      user-select: none;
-    }
-
-    .cal-view-tab.active {
-      background: var(--surface);
-      color: var(--text);
-      box-shadow: 0 1px 3px rgba(0,0,0,.15);
-    }
-
-    /* ── Month Calendar ──────────────────────────────────────── */
-    .month-cal-nav {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .month-nav-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      color: var(--text2);
-      cursor: pointer;
-      padding: 5px 10px;
-      font-size: 13px;
-      font-family: var(--font);
-      transition: all .15s;
-    }
-
-    .month-nav-btn:hover {
-      background: var(--border);
-      color: var(--text);
-    }
-
-    .month-title {
+    .panel-card-group {
       font-size: 14px;
       font-weight: 600;
       color: var(--text);
-      flex: 1;
-      text-align: center;
     }
-
-    .month-cal {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .month-cal th {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text3);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      padding: 8px 4px;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .month-cal td {
-      border: 1px solid var(--border);
-      padding: 0;
-      vertical-align: top;
-      width: 14.28%;
-    }
-
-    .month-day {
-      padding: 4px 6px;
-      min-height: 80px;
-    }
-
-    .month-day-num {
+    .panel-card-meta {
       font-size: 12px;
-      font-weight: 600;
       color: var(--text2);
-      margin-bottom: 3px;
-      width: 22px;
-      height: 22px;
+      margin-top: 2px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .panel-card-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .panel-card-right {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    /* ── Modal ────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,.55);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px) scale(.97); }
+      to { opacity: 1; transform: none; }
+    }
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 20px 24px 14px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .modal-sub {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 3px;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
+      transition: all .15s;
+    }
+    .modal-close:hover {
+      background: var(--surface2);
+      color: var(--text);
     }
 
-    .month-day.is-today .month-day-num {
-      background: var(--accent);
-      color: #fff;
+    .modal-body {
+      padding: 18px 24px 20px;
+    }
+    .modal-field {
+      margin-bottom: 14px;
+    }
+    .modal-field:last-child {
+      margin-bottom: 0;
+    }
+    .modal-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+    .modal-value {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .modal-value a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .modal-value a:hover {
+      text-decoration: underline;
+    }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      padding: 14px 24px 20px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
     }
 
-    .month-day.other-month {
+    /* ── Calendar ─────────────────────────────────────────── */
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .cal-nav-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .cal-nav-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 12px;
+      font-family: var(--font);
+      transition: all .15s;
+    }
+    .cal-nav-btn:hover {
+      background: var(--surface2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      text-align: center;
+    }
+    .cal-day-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      padding: 6px 0;
+      text-transform: uppercase;
+    }
+    .cal-day {
+      font-size: 13px;
+      padding: 8px 4px;
+      border-radius: var(--radius);
+      color: var(--text2);
+      min-height: 40px;
+      position: relative;
+      cursor: default;
+      transition: all .1s;
+    }
+    .cal-day.other-month {
+      color: var(--text3);
       opacity: .4;
+    }
+    .cal-day.today {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .cal-day.has-defense {
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .cal-day.has-defense:hover {
       background: var(--surface2);
     }
+    .cal-dot {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 2px;
+    }
+    .cal-dot.panelist-dot {
+      background: var(--purple);
+    }
+    .cal-dot.adviser-dot {
+      background: var(--teal);
+    }
 
-    .month-day-events {
+    /* ── Search / filter bar ──────────────────────────────── */
+    .filter-bar {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .filter-bar .form-input {
+      flex: 1;
+    }
+    .filter-bar .form-select {
+      width: 140px;
     }
 
-    .month-day-event {
-      font-size: 10px;
+    /* ── View toggle ──────────────────────────────────────── */
+    .view-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 3px;
+    }
+    .view-toggle button {
+      background: none;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-family: var(--font);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .15s;
       font-weight: 500;
-      padding: 2px 5px;
-      border-radius: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
-
-    .month-event-avail {
-      background: var(--success-bg);
-      color: var(--success);
-    }
-
-    .month-event-booked {
-      background: var(--danger-bg);
-      color: var(--danger);
-    }
-
-    .month-event-selected {
-      background: linear-gradient(135deg, #0d9488, #0ea5e9);
-      color: #fff;
+    .view-toggle button.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
     }
   </style>
 </head>
@@ -1244,29 +1256,45 @@
           <div class="page-title">My Panel Schedule</div>
           <div class="page-sub">Appointments where you serve as panelist</div>
         </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="view-toggle">
+            <button class="active" data-view="list" onclick="togglePanelView('list')">List</button>
+            <button data-view="calendar" onclick="togglePanelView('calendar')">Calendar</button>
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Venue</th>
-                <th>Adviser</th>
-                <th>Status</th>
-                <th>Manuscript</th>
-              </tr>
-            </thead>
-            <tbody id="panel-tbody">
-              <tr>
-                <td colspan="7">
-                  <div class="skeleton"></div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+      <div class="filter-bar">
+        <input class="form-input" id="panel-search" type="text" placeholder="Search by group name..." oninput="filterPanelCards()">
+        <select class="form-select" id="panel-status-filter" onchange="filterPanelCards()">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="rescheduled">Rescheduled</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <!-- List view -->
+      <div id="panel-list-view">
+        <div id="panel-cards">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </div>
+
+      <!-- Calendar view -->
+      <div id="panel-calendar-view" style="display:none;">
+        <div class="card">
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="calPrevMonth()">&larr; Prev</button>
+            <span class="cal-nav-title" id="cal-title">May 2026</span>
+            <button class="cal-nav-btn" onclick="calNextMonth()">Next &rarr;</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div id="cal-defense-list" style="margin-top:12px;"></div>
         </div>
       </div>
     </section>
@@ -1356,11 +1384,32 @@
     </section>
   </main>
 
+  <!-- ── Appointment Detail Modal ──────────────────────────── -->
+  <div class="modal-overlay" id="appt-modal" onclick="if(event.target===this)closeApptModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-group-name">Group Name</div>
+          <div class="modal-sub" id="modal-sub">Defense appointment details</div>
+        </div>
+        <button class="modal-close" onclick="closeApptModal()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <div class="skeleton"></div>
+      </div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
   <script>
     'use strict';
 
     let _user = null, _appointments = [], _notifications = [], _manuscripts = [], _faculty = [], _settings = {}, _avail = [];
-    let _availView = 'week', _availMonthDate = new Date();
+    let _prevPanelCount = 0, _prevNotifCount = 0;
 
     // ── Helpers ──────────────────────────────────────────────────────────────
     function fmtStatus(s) { const m = { pending: 'tag-pending', confirmed: 'tag-confirmed', cancelled: 'tag-cancelled', completed: 'tag-completed', rescheduled: 'tag-rescheduled' }; return `<span class="tag ${m[s] || ''}">${s}</span>`; }
@@ -1402,7 +1451,25 @@
         const mb = document.getElementById('ms-badge');
         if (mb) { mb.textContent = _manuscripts.length; mb.style.display = _manuscripts.length > 0 ? '' : 'none'; }
         const pb = document.getElementById('panel-badge');
-        if (pb) { const p = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id) && a.status !== 'completed' && a.status !== 'cancelled').length; pb.textContent = p; pb.style.display = p > 0 ? '' : 'none'; }
+        if (pb) {
+          const p = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id) && a.status !== 'completed' && a.status !== 'cancelled').length;
+          pb.textContent = p;
+          pb.style.display = p > 0 ? '' : 'none';
+          // Toast on new assignments
+          if (_prevPanelCount > 0 && p > _prevPanelCount) {
+            showToast('📋 New panel assignment detected!', 'info');
+          }
+          _prevPanelCount = p;
+        }
+
+        // Toast on new notifications
+        const u = _notifications.filter(n => !n.is_read).length;
+        if (_prevNotifCount > 0 && u > _prevNotifCount) {
+          const diff = u - _prevNotifCount;
+          showToast(`🔔 ${diff} new notification${diff > 1 ? 's' : ''}`, 'info');
+        }
+        _prevNotifCount = u;
+
       } catch (e) { console.error('fetchAll error', e); }
     }
 
@@ -1550,15 +1617,277 @@
         : '<div class="card"><div class="db-empty">No advisee appointments yet</div></div>';
     }
 
-    // ── Load Panel Schedule ──────────────────────────────────────────────────
+    // ── Load Panel Schedule (card layout) ────────────────────────────────────
+    let _panelAppointments = [];
+    let _panelView = 'list';
+
     function loadPanel() {
-      const panel = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id)).sort((a, b) => a.date < b.date ? -1 : 1);
-      document.getElementById('panel-tbody').innerHTML = panel.length
-        ? panel.map(a => {
-          const hasMs = _manuscripts.some(m => m.appointment_id === a.id);
-          return `<tr><td>${a.group_name}</td><td style="font-family:var(--mono);font-size:12px">${fmtDate(a.date)}</td><td style="font-family:var(--mono);font-size:12px">${a.time_slot || '—'}</td><td>${a.venue_name || '—'}</td><td>${a.adviser_name || '—'}</td><td>${fmtStatus(a.status)}</td><td>${hasMs ? `<a href="/api/manuscripts/download/${_manuscripts.find(m => m.appointment_id === a.id).id}" target="_blank" class="btn btn-outline btn-sm">Download</a>` : '<span style="color:var(--text3);font-size:12px">—</span>'}</td></tr>`;
-        }).join('')
-        : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No panel assignments</td></tr>';
+      _panelAppointments = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id))
+        .sort((a, b) => a.date < b.date ? -1 : 1);
+      filterPanelCards();
+      if (_panelView === 'calendar') renderCalendar();
+    }
+
+    function filterPanelCards() {
+      const q = (document.getElementById('panel-search')?.value || '').toLowerCase();
+      const s = document.getElementById('panel-status-filter')?.value || '';
+      let filtered = _panelAppointments;
+      if (q) filtered = filtered.filter(a => a.group_name.toLowerCase().includes(q));
+      if (s) filtered = filtered.filter(a => a.status === s);
+
+      const el = document.getElementById('panel-cards');
+      if (!filtered.length) {
+        el.innerHTML = '<div class="card"><div class="db-empty">No panel assignments found</div></div>';
+        return;
+      }
+
+      el.innerHTML = filtered.map(a => {
+        const dt = a.date ? new Date(a.date + 'T00:00:00') : null;
+        const day = dt ? dt.getDate() : '—';
+        const mon = dt ? dt.toLocaleDateString('en-PH', { month: 'short' }) : '';
+        const hasMs = _manuscripts.some(m => m.appointment_id === a.id);
+        const venueIcon = a.venue_type === 'virtual' ? '🌐' : '📍';
+        const timeDisplay = a.time_slot || '—';
+        return `<div class="panel-card ${a.status}" onclick="openApptDetail(${a.id})">
+          <div class="panel-card-left">
+            <div class="panel-card-date">${day}</div>
+            <div class="panel-card-month">${mon}</div>
+          </div>
+          <div class="panel-card-body">
+            <div class="panel-card-group">${a.group_name}</div>
+            <div class="panel-card-meta">
+              <span>🕐 ${timeDisplay}</span>
+              <span>${venueIcon} ${a.venue_name || '—'}</span>
+              <span>👤 ${a.adviser_name || '—'}</span>
+            </div>
+          </div>
+          <div class="panel-card-right">
+            ${fmtStatus(a.status)}
+            ${hasMs ? '<span style="font-size:10px;color:var(--success);font-weight:600">📄 Uploaded</span>' : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Modal: Open Appointment Detail ───────────────────────────────────────
+    async function openApptDetail(apptId) {
+      const modal = document.getElementById('appt-modal');
+      const body = document.getElementById('modal-body');
+      const footer = document.getElementById('modal-footer');
+      body.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+      footer.innerHTML = '';
+      modal.classList.add('open');
+
+      try {
+        const res = await fetch(`/api/appointments/${apptId}`);
+        if (!res.ok) { body.innerHTML = '<div class="db-empty">Failed to load details</div>'; return; }
+        const { appointment: a } = await res.json();
+
+        document.getElementById('modal-group-name').textContent = a.group_name;
+        document.getElementById('modal-sub').textContent = `Defense appointment · ${a.status}`;
+
+        // Parse members JSON if available
+        let membersHtml = '';
+        if (a.student_members) {
+          try {
+            const m = JSON.parse(a.student_members);
+            const list = [m.leader, ...(m.members || [])].filter(Boolean);
+            membersHtml = list.length
+              ? list.map(n => `<div style="font-size:13px;color:var(--text2);padding:2px 0">• ${n}</div>`).join('')
+              : '<div style="font-size:13px;color:var(--text3)">No members data</div>';
+          } catch { membersHtml = '<div style="font-size:13px;color:var(--text3)">No members data</div>'; }
+        } else {
+          membersHtml = '<div style="font-size:13px;color:var(--text3)">' + (a.student_name || '—') + '</div>';
+        }
+
+        const panelistHtml = (a.panelists && a.panelists.length)
+          ? a.panelists.map(p => `<div style="font-size:13px;color:var(--text2);padding:2px 0">• ${p.name}</div>`).join('')
+          : '<div style="font-size:13px;color:var(--text3)">None assigned</div>';
+
+        const meetingHtml = a.meeting_link
+          ? `<a href="${a.meeting_link}" target="_blank">${a.meeting_link}</a>`
+          : '<span style="color:var(--text3)">No meeting link</span>';
+
+        const notesHtml = a.notes || '<span style="color:var(--text3)">No notes</span>';
+
+        body.innerHTML = `
+          <div class="modal-grid">
+            <div class="modal-field">
+              <div class="modal-label">Research Title</div>
+              <div class="modal-value">${a.research_title || a.group_name}</div>
+            </div>
+            <div class="modal-field">
+              <div class="modal-label">Status</div>
+              <div class="modal-value">${fmtStatus(a.status)}</div>
+            </div>
+          </div>
+          <div class="modal-grid">
+            <div class="modal-field">
+              <div class="modal-label">Date</div>
+              <div class="modal-value">${fmtDate(a.date)}</div>
+            </div>
+            <div class="modal-field">
+              <div class="modal-label">Time</div>
+              <div class="modal-value" style="font-family:var(--mono)">${a.time_slot || '—'}</div>
+            </div>
+          </div>
+          <div class="modal-grid">
+            <div class="modal-field">
+              <div class="modal-label">Venue</div>
+              <div class="modal-value">${a.venue_name || '—'}</div>
+            </div>
+            <div class="modal-field">
+              <div class="modal-label">Meeting Link</div>
+              <div class="modal-value">${meetingHtml}</div>
+            </div>
+          </div>
+          <div class="modal-field">
+            <div class="modal-label">Adviser</div>
+            <div class="modal-value">${a.adviser_name || '—'}</div>
+          </div>
+          <div class="modal-grid">
+            <div class="modal-field">
+              <div class="modal-label">Group Members</div>
+              <div class="modal-value">${membersHtml}</div>
+            </div>
+            <div class="modal-field">
+              <div class="modal-label">Panel Members</div>
+              <div class="modal-value">${panelistHtml}</div>
+            </div>
+          </div>
+          <div class="modal-field">
+            <div class="modal-label">Notes</div>
+            <div class="modal-value">${notesHtml}</div>
+          </div>`;
+
+        // Footer buttons
+        let footerBtns = '';
+        if (a.manuscript) {
+          footerBtns += `<a href="/api/manuscripts/download/${a.manuscript.id}" target="_blank" class="btn btn-primary btn-sm">📄 Download Paper</a>`;
+          footerBtns += `<a href="/api/manuscripts/preview/${a.manuscript.id}" target="_blank" class="btn btn-outline btn-sm">👁 View Document</a>`;
+          footerBtns += `<a href="/api/manuscripts/download-all/${a.id}" target="_blank" class="btn btn-outline btn-sm">📦 Download All</a>`;
+        } else {
+          footerBtns += '<span style="font-size:12px;color:var(--text3)">No manuscript uploaded yet</span>';
+        }
+        footer.innerHTML = footerBtns;
+
+      } catch (e) {
+        body.innerHTML = '<div class="db-empty">Error loading details</div>';
+      }
+    }
+
+    function closeApptModal() {
+      document.getElementById('appt-modal').classList.remove('open');
+    }
+
+    // ── View Toggle (List / Calendar) ───────────────────────────────────────
+    function togglePanelView(view) {
+      _panelView = view;
+      document.querySelectorAll('.view-toggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === view);
+      });
+      document.getElementById('panel-list-view').style.display = view === 'list' ? '' : 'none';
+      document.getElementById('panel-calendar-view').style.display = view === 'calendar' ? '' : 'none';
+      if (view === 'calendar') renderCalendar();
+    }
+
+    // ── Calendar ─────────────────────────────────────────────────────────────
+    let _calDate = new Date();
+
+    function renderCalendar() {
+      const year = _calDate.getFullYear();
+      const month = _calDate.getMonth();
+      document.getElementById('cal-title').textContent = _calDate.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' });
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrev = new Date(year, month, 0).getDate();
+
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      // Collect defense dates for this faculty (panel + adviser)
+      const defenseDates = {};
+      _appointments.filter(a => a.status !== 'cancelled' && (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id)))
+        .forEach(a => {
+          if (a.date) {
+            if (!defenseDates[a.date]) defenseDates[a.date] = [];
+            defenseDates[a.date].push(a);
+          }
+        });
+
+      const today = todayStr();
+
+      let html = dayNames.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+
+      // Previous month days
+      const startDay = firstDay === 0 ? 6 : firstDay - 1; // Monday start
+      for (let i = startDay - 1; i >= 0; i--) {
+        html += `<div class="cal-day other-month">${daysInPrev - i}</div>`;
+      }
+
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isToday = dateStr === today;
+        const hasDefense = defenseDates[dateStr];
+        const cls = [
+          'cal-day',
+          isToday ? 'today' : '',
+          hasDefense ? 'has-defense' : ''
+        ].filter(Boolean).join(' ');
+
+        const dotHtml = hasDefense
+          ? '<div>' + hasDefense.map(a => {
+              const isAdv = a.adviser_id === _user.id;
+              return `<span class="cal-dot ${isAdv ? 'adviser-dot' : 'panelist-dot'}" title="${a.group_name} (${isAdv ? 'Adviser' : 'Panelist'})"></span>`;
+            }).join('') + '</div>'
+          : '';
+
+        html += `<div class="${cls}" ${hasDefense ? `onclick="calShowDayDefenses('${dateStr}')"` : ''}>
+          ${d}${dotHtml}
+        </div>`;
+      }
+
+      // Next month days
+      const totalCells = startDay + daysInMonth;
+      const remaining = (7 - (totalCells % 7)) % 7;
+      for (let d = 1; d <= remaining; d++) {
+        html += `<div class="cal-day other-month">${d}</div>`;
+      }
+
+      document.getElementById('cal-grid').innerHTML = html;
+      document.getElementById('cal-defense-list').innerHTML = '';
+    }
+
+    function calPrevMonth() {
+      _calDate.setMonth(_calDate.getMonth() - 1);
+      renderCalendar();
+    }
+
+    function calNextMonth() {
+      _calDate.setMonth(_calDate.getMonth() + 1);
+      renderCalendar();
+    }
+
+    function calShowDayDefenses(dateStr) {
+      const defenses = _appointments.filter(a =>
+        a.date === dateStr && a.status !== 'cancelled' &&
+        (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id))
+      );
+      const el = document.getElementById('cal-defense-list');
+      if (!defenses.length) { el.innerHTML = ''; return; }
+
+      el.innerHTML = `<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em">Defenses on ${fmtDate(dateStr)}</div>
+        ${defenses.map(a => {
+          const role = a.adviser_id === _user.id ? 'Adviser' : 'Panelist';
+          return `<div class="panel-card ${a.status}" onclick="openApptDetail(${a.id})" style="margin-bottom:4px;padding:10px 14px">
+            <div class="panel-card-body">
+              <div class="panel-card-group">${a.group_name} <span style="font-size:11px;color:var(--text3);font-weight:400">(${role})</span></div>
+              <div class="panel-card-meta"><span>🕐 ${a.time_slot || '—'}</span><span>📍 ${a.venue_name || '—'}</span></div>
+            </div>
+            <div class="panel-card-right">${fmtStatus(a.status)}</div>
+          </div>`;
+        }).join('')}`;
     }
 
     function changeWeek(delta) {

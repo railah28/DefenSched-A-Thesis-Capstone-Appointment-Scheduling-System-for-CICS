@@ -423,6 +423,10 @@
           <input class="input" id="bk-group" type="text" placeholder="e.g. Group Alpha">
         </div>
         <div class="form-field">
+          <label>Research Title</label>
+          <input class="input" id="bk-title" type="text" placeholder="e.g. A Study on AI-based Scheduling Systems">
+        </div>
+        <div class="form-field">
           <label>Preferred Adviser</label>
           <select class="input" id="bk-adviser">
             <option value="">Loading faculty...</option>
@@ -440,9 +444,13 @@
         </div>
         <div class="form-field">
           <label>Venue</label>
-          <select class="input" id="bk-venue">
+          <select class="input" id="bk-venue" onchange="onVenueChange()">
             <option value="">Loading venues...</option>
           </select>
+        </div>
+        <div class="form-field" id="bk-meeting-link-field" style="display:none;">
+          <label>Meeting Link</label>
+          <input class="input" id="bk-meeting-link" type="url" placeholder="https://meet.google.com/...">
         </div>
         <div class="form-note">
           ℹ️ <strong>Note on panelists:</strong> Panelists will be assigned by the Research Coordinator after your appointment is reviewed. You don't need to choose them.
@@ -849,12 +857,22 @@ function renderMySchedule() {
     </div>`;
 }
 
+// ── Venue change handler (show/hide meeting link) ────────────────
+let _venues = [];
+async function onVenueChange() {
+  const venueId = parseInt(document.getElementById('bk-venue').value);
+  const venue = _venues.find(v => v.id === venueId);
+  document.getElementById('bk-meeting-link-field').style.display =
+    venue && venue.type === 'virtual' ? '' : 'none';
+}
+
 // ── Booking dropdowns ─────────────────────────────────────────────
 async function loadBookingDropdowns() {
   try {
     const [fRes, vRes] = await Promise.all([fetch('/api/faculty'), fetch('/api/venues')]);
     const { faculty } = await fRes.json();
     const { venues }  = await vRes.json();
+    _venues = venues;
     document.getElementById('bk-adviser').innerHTML = '<option value="">Choose adviser</option>' + faculty.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
     document.getElementById('bk-venue').innerHTML   = '<option value="">Choose venue</option>'   + venues.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
   } catch (e) { console.error('Dropdown load error', e); }
@@ -922,10 +940,12 @@ async function submitBooking() {
     return;
   }
   const group_name = document.getElementById('bk-group').value.trim();
+  const research_title = document.getElementById('bk-title').value.trim();
   const adviser_id = parseInt(document.getElementById('bk-adviser').value);
   const date       = document.getElementById('bk-date').value;
   const timeRaw    = document.getElementById('bk-time').value;
   const venue_id   = parseInt(document.getElementById('bk-venue').value);
+  const meeting_link = document.getElementById('bk-meeting-link').value.trim() || null;
   if (!group_name || !adviser_id || !date || !timeRaw || !venue_id) {
     showToast('Please fill in all fields.', 'error');
     return;
@@ -939,7 +959,7 @@ async function submitBooking() {
     const r = await fetch('/api/appointments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ group_name, adviser_id, panelist_ids: [], date, time_slot, venue_id })
+      body: JSON.stringify({ group_name, research_title, adviser_id, panelist_ids: [], date, time_slot, venue_id, meeting_link })
     });
     const d = await r.json();
     if (r.ok) {
