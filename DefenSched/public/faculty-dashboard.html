@@ -516,8 +516,10 @@
     }
 
     .avail-advisory {
-      background: var(--teal-bg);
-      color: var(--teal);
+      background: linear-gradient(135deg, #0d9488, #0ea5e9);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(13, 148, 136, 0.2);
     }
 
     .manuscript-item {
@@ -710,6 +712,308 @@
 
     .table-wrap {
       overflow-x: auto;
+    }
+
+    /* ── Panel card layout ────────────────────────────────── */
+    .panel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .panel-card:hover {
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+    .panel-card.pending { border-left-color: var(--warning); }
+    .panel-card.confirmed { border-left-color: var(--success); }
+    .panel-card.completed { border-left-color: var(--accent); opacity: .7; }
+    .panel-card.cancelled { border-left-color: var(--danger); opacity: .55; }
+    .panel-card.rescheduled { border-left-color: var(--purple); }
+
+    .panel-card-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+      flex-shrink: 0;
+    }
+    .panel-card-date {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .panel-card-month {
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .panel-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .panel-card-group {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .panel-card-meta {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 2px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .panel-card-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .panel-card-right {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    /* ── Modal ────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,.55);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px) scale(.97); }
+      to { opacity: 1; transform: none; }
+    }
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 20px 24px 14px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .modal-sub {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 3px;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+    .modal-close:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .modal-body {
+      padding: 18px 24px 20px;
+    }
+    .modal-field {
+      margin-bottom: 14px;
+    }
+    .modal-field:last-child {
+      margin-bottom: 0;
+    }
+    .modal-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+    .modal-value {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .modal-value a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .modal-value a:hover {
+      text-decoration: underline;
+    }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      padding: 14px 24px 20px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    /* ── Calendar ─────────────────────────────────────────── */
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .cal-nav-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .cal-nav-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 12px;
+      font-family: var(--font);
+      transition: all .15s;
+    }
+    .cal-nav-btn:hover {
+      background: var(--surface2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      text-align: center;
+    }
+    .cal-day-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      padding: 6px 0;
+      text-transform: uppercase;
+    }
+    .cal-day {
+      font-size: 13px;
+      padding: 8px 4px;
+      border-radius: var(--radius);
+      color: var(--text2);
+      min-height: 40px;
+      position: relative;
+      cursor: default;
+      transition: all .1s;
+    }
+    .cal-day.other-month {
+      color: var(--text3);
+      opacity: .4;
+    }
+    .cal-day.today {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .cal-day.has-defense {
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .cal-day.has-defense:hover {
+      background: var(--surface2);
+    }
+    .cal-dot {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 2px;
+    }
+    .cal-dot.panelist-dot {
+      background: var(--purple);
+    }
+    .cal-dot.adviser-dot {
+      background: var(--teal);
+    }
+
+    /* ── Search / filter bar ──────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .filter-bar .form-input {
+      flex: 1;
+    }
+    .filter-bar .form-select {
+      width: 140px;
+    }
+
+    /* ── View toggle ──────────────────────────────────────── */
+    .view-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 3px;
+    }
+    .view-toggle button {
+      background: none;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-family: var(--font);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all .15s;
+      font-weight: 500;
+    }
+    .view-toggle button.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
     }
   </style>
 </head>
@@ -952,29 +1256,45 @@
           <div class="page-title">My Panel Schedule</div>
           <div class="page-sub">Appointments where you serve as panelist</div>
         </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="view-toggle">
+            <button class="active" data-view="list" onclick="togglePanelView('list')">List</button>
+            <button data-view="calendar" onclick="togglePanelView('calendar')">Calendar</button>
+          </div>
+        </div>
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Venue</th>
-                <th>Adviser</th>
-                <th>Status</th>
-                <th>Manuscript</th>
-              </tr>
-            </thead>
-            <tbody id="panel-tbody">
-              <tr>
-                <td colspan="7">
-                  <div class="skeleton"></div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+      <div class="filter-bar">
+        <input class="form-input" id="panel-search" type="text" placeholder="Search by group name..." oninput="filterPanelCards()">
+        <select class="form-select" id="panel-status-filter" onchange="filterPanelCards()">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="rescheduled">Rescheduled</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <!-- List view -->
+      <div id="panel-list-view">
+        <div id="panel-cards">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </div>
+
+      <!-- Calendar view -->
+      <div id="panel-calendar-view" style="display:none;">
+        <div class="card">
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="calPrevMonth()">&larr; Prev</button>
+            <span class="cal-nav-title" id="cal-title">May 2026</span>
+            <button class="cal-nav-btn" onclick="calNextMonth()">Next &rarr;</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div id="cal-defense-list" style="margin-top:12px;"></div>
         </div>
       </div>
     </section>
@@ -987,30 +1307,51 @@
           <div class="page-sub">Set your available time slots as adviser or panelist</div>
         </div>
       </div>
-      <div class="card" style="max-width:800px">
+      <div class="card" style="max-width:900px">
         <div class="card-header">
           <span class="card-title">Your Availability</span>
-          <div style="display:flex;gap:8px;align-items:center">
-            <span style="font-size:12px;color:var(--text3)">Mode:</span>
-            <select id="avail-mode" class="form-select" style="width:120px">
-              <option value="adviser">Adviser</option>
-              <option value="panelist">Panelist</option>
-            </select>
-            <span id="avail-saving" style="font-size:11px;color:var(--text3);display:none">Saving…</span>
+          <div class="cal-view-tabs">
+            <div class="cal-view-tab active" onclick="switchAvailView('week',this)">&#128203; Week View</div>
+            <div class="cal-view-tab" onclick="switchAvailView('month',this)">&#128197; Month View</div>
           </div>
         </div>
-        <div id="avail-grid-container">
+        <!-- Week View Controls -->
+        <div id="avail-week-controls" style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--text3)">Week:</span>
+          <button class="btn btn-outline btn-sm" id="avail-prev-week-btn" onclick="changeWeek(-1)">◀ Prev</button>
+          <select id="avail-week-selector" class="form-select" style="width:250px" onchange="loadAvailability()"><option>Loading weeks...</option></select>
+          <button class="btn btn-outline btn-sm" id="avail-next-week-btn" onclick="changeWeek(1)">Next ▶</button>
+          <span style="font-size:12px;color:var(--text3)">Mode:</span>
+          <select id="avail-mode" class="form-select" style="width:120px">
+            <option value="adviser">Adviser</option>
+            <option value="panelist">Panelist</option>
+          </select>
+          <span id="avail-saving" style="font-size:11px;color:var(--text3);display:none">Saving…</span>
+        </div>
+        <!-- Month View Controls -->
+        <div id="avail-month-controls" style="display:none;margin-bottom:14px">
+          <div class="month-cal-nav">
+            <button class="month-nav-btn" onclick="changeAvailMonth(-1)">&#9664; Prev</button>
+            <span class="month-title" id="avail-month-label">—</span>
+            <button class="month-nav-btn" onclick="changeAvailMonth(1)">Next &#9654;</button>
+          </div>
+        </div>
+        <div id="avail-grid-container" style="overflow-x:auto;margin-bottom:16px">
           <div class="skeleton"></div>
         </div>
-        <div style="display:flex;gap:6px;margin-top:12px">
-          <span
-            style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--success-bg);color:var(--success);">●
-            Available</span>
-          <span style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--teal-bg);color:var(--teal);">●
-            Your slot</span>
-          <span
-            style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--danger-bg);color:var(--danger);">●
-            Booked by appointment</span>
+        <div id="avail-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:0">
+          <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:var(--success-bg);color:var(--success);font-weight:500">● Available (open)</span>
+          <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:linear-gradient(135deg, #0d9488, #0ea5e9);color:#ffffff;font-weight:600">● Your slot (selected)</span>
+          <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:var(--danger-bg);color:var(--danger);font-weight:500">● Booked (locked)</span>
+          <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:var(--surface2);color:var(--text3);font-weight:500">● Unavailable (past/blocked)</span>
+        </div>
+      </div>
+      <div class="card" style="max-width:900px;margin-top:16px">
+        <div class="card-header">
+          <span class="card-title">Summary of Scheduled Dates</span>
+        </div>
+        <div id="avail-summary-container">
+          <div class="skeleton"></div>
         </div>
       </div>
     </section>
@@ -1043,10 +1384,32 @@
     </section>
   </main>
 
+  <!-- ── Appointment Detail Modal ──────────────────────────── -->
+  <div class="modal-overlay" id="appt-modal" onclick="if(event.target===this)closeApptModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-group-name">Group Name</div>
+          <div class="modal-sub" id="modal-sub">Defense appointment details</div>
+        </div>
+        <button class="modal-close" onclick="closeApptModal()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <div class="skeleton"></div>
+      </div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
   <script>
     'use strict';
 
     let _user = null, _appointments = [], _notifications = [], _manuscripts = [], _faculty = [], _settings = {}, _avail = [];
+    let _prevPanelCount = 0, _prevNotifCount = 0;
 
     // ── Helpers ──────────────────────────────────────────────────────────────
     function fmtStatus(s) { const m = { pending: 'tag-pending', confirmed: 'tag-confirmed', cancelled: 'tag-cancelled', completed: 'tag-completed', rescheduled: 'tag-rescheduled' }; return `<span class="tag ${m[s] || ''}">${s}</span>`; }
@@ -1088,7 +1451,25 @@
         const mb = document.getElementById('ms-badge');
         if (mb) { mb.textContent = _manuscripts.length; mb.style.display = _manuscripts.length > 0 ? '' : 'none'; }
         const pb = document.getElementById('panel-badge');
-        if (pb) { const p = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id) && a.status !== 'completed' && a.status !== 'cancelled').length; pb.textContent = p; pb.style.display = p > 0 ? '' : 'none'; }
+        if (pb) {
+          const p = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id) && a.status !== 'completed' && a.status !== 'cancelled').length;
+          pb.textContent = p;
+          pb.style.display = p > 0 ? '' : 'none';
+          // Toast on new assignments
+          if (_prevPanelCount > 0 && p > _prevPanelCount) {
+            showToast('📋 New panel assignment detected!', 'info');
+          }
+          _prevPanelCount = p;
+        }
+
+        // Toast on new notifications
+        const u = _notifications.filter(n => !n.is_read).length;
+        if (_prevNotifCount > 0 && u > _prevNotifCount) {
+          const diff = u - _prevNotifCount;
+          showToast(`🔔 ${diff} new notification${diff > 1 ? 's' : ''}`, 'info');
+        }
+        _prevNotifCount = u;
+
       } catch (e) { console.error('fetchAll error', e); }
     }
 
@@ -1236,21 +1617,307 @@
         : '<div class="card"><div class="db-empty">No advisee appointments yet</div></div>';
     }
 
-    // ── Load Panel Schedule ──────────────────────────────────────────────────
+    // ── Load Panel Schedule (card layout) ────────────────────────────────────
+    let _panelAppointments = [];
+    let _panelView = 'list';
+
     function loadPanel() {
-      const panel = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id)).sort((a, b) => a.date < b.date ? -1 : 1);
-      document.getElementById('panel-tbody').innerHTML = panel.length
-        ? panel.map(a => {
-          const hasMs = _manuscripts.some(m => m.appointment_id === a.id);
-          return `<tr><td>${a.group_name}</td><td style="font-family:var(--mono);font-size:12px">${fmtDate(a.date)}</td><td style="font-family:var(--mono);font-size:12px">${a.time_slot || '—'}</td><td>${a.venue_name || '—'}</td><td>${a.adviser_name || '—'}</td><td>${fmtStatus(a.status)}</td><td>${hasMs ? `<a href="/api/manuscripts/download/${_manuscripts.find(m => m.appointment_id === a.id).id}" target="_blank" class="btn btn-outline btn-sm">Download</a>` : '<span style="color:var(--text3);font-size:12px">—</span>'}</td></tr>`;
-        }).join('')
-        : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No panel assignments</td></tr>';
+      _panelAppointments = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id))
+        .sort((a, b) => a.date < b.date ? -1 : 1);
+      filterPanelCards();
+      if (_panelView === 'calendar') renderCalendar();
+    }
+
+    function filterPanelCards() {
+      const q = (document.getElementById('panel-search')?.value || '').toLowerCase();
+      const s = document.getElementById('panel-status-filter')?.value || '';
+      let filtered = _panelAppointments;
+      if (q) filtered = filtered.filter(a => a.group_name.toLowerCase().includes(q));
+      if (s) filtered = filtered.filter(a => a.status === s);
+
+      const el = document.getElementById('panel-cards');
+      if (!filtered.length) {
+        el.innerHTML = '<div class="card"><div class="db-empty">No panel assignments found</div></div>';
+        return;
+      }
+
+      el.innerHTML = filtered.map(a => {
+        const dt = a.date ? new Date(a.date + 'T00:00:00') : null;
+        const day = dt ? dt.getDate() : '—';
+        const mon = dt ? dt.toLocaleDateString('en-PH', { month: 'short' }) : '';
+        const hasMs = _manuscripts.some(m => m.appointment_id === a.id);
+        const venueIcon = a.venue_type === 'virtual' ? '🌐' : '📍';
+        const timeDisplay = a.time_slot || '—';
+        return `<div class="panel-card ${a.status}" onclick="openApptDetail(${a.id})">
+          <div class="panel-card-left">
+            <div class="panel-card-date">${day}</div>
+            <div class="panel-card-month">${mon}</div>
+          </div>
+          <div class="panel-card-body">
+            <div class="panel-card-group">${a.group_name}</div>
+            <div class="panel-card-meta">
+              <span>🕐 ${timeDisplay}</span>
+              <span>${venueIcon} ${a.venue_name || '—'}</span>
+              <span>👤 ${a.adviser_name || '—'}</span>
+            </div>
+          </div>
+          <div class="panel-card-right">
+            ${fmtStatus(a.status)}
+            ${hasMs ? '<span style="font-size:10px;color:var(--success);font-weight:600">📄 Uploaded</span>' : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Modal: Open Appointment Detail ───────────────────────────────────────
+    async function openApptDetail(apptId) {
+      const modal = document.getElementById('appt-modal');
+      const body = document.getElementById('modal-body');
+      const footer = document.getElementById('modal-footer');
+      body.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+      footer.innerHTML = '';
+      modal.classList.add('open');
+
+      try {
+        const res = await fetch(`/api/appointments/${apptId}`);
+        if (!res.ok) { body.innerHTML = '<div class="db-empty">Failed to load details</div>'; return; }
+        const { appointment: a } = await res.json();
+
+        document.getElementById('modal-group-name').textContent = a.group_name;
+        document.getElementById('modal-sub').textContent = `Defense appointment · ${a.status}`;
+
+        // Parse members JSON if available
+        let membersHtml = '';
+        if (a.student_members) {
+          try {
+            const m = JSON.parse(a.student_members);
+            const list = [m.leader, ...(m.members || [])].filter(Boolean);
+            membersHtml = list.length
+              ? list.map(n => `<div style="font-size:13px;color:var(--text2);padding:2px 0">• ${n}</div>`).join('')
+              : '<div style="font-size:13px;color:var(--text3)">No members data</div>';
+          } catch { membersHtml = '<div style="font-size:13px;color:var(--text3)">No members data</div>'; }
+        } else {
+          membersHtml = '<div style="font-size:13px;color:var(--text3)">' + (a.student_name || '—') + '</div>';
+        }
+
+        const panelistHtml = (a.panelists && a.panelists.length)
+          ? a.panelists.map(p => `<div style="font-size:13px;color:var(--text2);padding:2px 0">• ${p.name}</div>`).join('')
+          : '<div style="font-size:13px;color:var(--text3)">None assigned</div>';
+
+        const meetingHtml = a.meeting_link
+          ? `<a href="${a.meeting_link}" target="_blank">${a.meeting_link}</a>`
+          : '<span style="color:var(--text3)">No meeting link</span>';
+
+        const notesHtml = a.notes || '<span style="color:var(--text3)">No notes</span>';
+
+        body.innerHTML = `
+          <div class="modal-grid">
+            <div class="modal-field">
+              <div class="modal-label">Research Title</div>
+              <div class="modal-value">${a.research_title || a.group_name}</div>
+            </div>
+            <div class="modal-field">
+              <div class="modal-label">Status</div>
+              <div class="modal-value">${fmtStatus(a.status)}</div>
+            </div>
+          </div>
+          <div class="modal-grid">
+            <div class="modal-field">
+              <div class="modal-label">Date</div>
+              <div class="modal-value">${fmtDate(a.date)}</div>
+            </div>
+            <div class="modal-field">
+              <div class="modal-label">Time</div>
+              <div class="modal-value" style="font-family:var(--mono)">${a.time_slot || '—'}</div>
+            </div>
+          </div>
+          <div class="modal-grid">
+            <div class="modal-field">
+              <div class="modal-label">Venue</div>
+              <div class="modal-value">${a.venue_name || '—'}</div>
+            </div>
+            <div class="modal-field">
+              <div class="modal-label">Meeting Link</div>
+              <div class="modal-value">${meetingHtml}</div>
+            </div>
+          </div>
+          <div class="modal-field">
+            <div class="modal-label">Adviser</div>
+            <div class="modal-value">${a.adviser_name || '—'}</div>
+          </div>
+          <div class="modal-grid">
+            <div class="modal-field">
+              <div class="modal-label">Group Members</div>
+              <div class="modal-value">${membersHtml}</div>
+            </div>
+            <div class="modal-field">
+              <div class="modal-label">Panel Members</div>
+              <div class="modal-value">${panelistHtml}</div>
+            </div>
+          </div>
+          <div class="modal-field">
+            <div class="modal-label">Notes</div>
+            <div class="modal-value">${notesHtml}</div>
+          </div>`;
+
+        // Footer buttons
+        let footerBtns = '';
+        if (a.manuscript) {
+          footerBtns += `<a href="/api/manuscripts/download/${a.manuscript.id}" target="_blank" class="btn btn-primary btn-sm">📄 Download Paper</a>`;
+          footerBtns += `<a href="/api/manuscripts/preview/${a.manuscript.id}" target="_blank" class="btn btn-outline btn-sm">👁 View Document</a>`;
+          footerBtns += `<a href="/api/manuscripts/download-all/${a.id}" target="_blank" class="btn btn-outline btn-sm">📦 Download All</a>`;
+        } else {
+          footerBtns += '<span style="font-size:12px;color:var(--text3)">No manuscript uploaded yet</span>';
+        }
+        footer.innerHTML = footerBtns;
+
+      } catch (e) {
+        body.innerHTML = '<div class="db-empty">Error loading details</div>';
+      }
+    }
+
+    function closeApptModal() {
+      document.getElementById('appt-modal').classList.remove('open');
+    }
+
+    // ── View Toggle (List / Calendar) ───────────────────────────────────────
+    function togglePanelView(view) {
+      _panelView = view;
+      document.querySelectorAll('.view-toggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === view);
+      });
+      document.getElementById('panel-list-view').style.display = view === 'list' ? '' : 'none';
+      document.getElementById('panel-calendar-view').style.display = view === 'calendar' ? '' : 'none';
+      if (view === 'calendar') renderCalendar();
+    }
+
+    // ── Calendar ─────────────────────────────────────────────────────────────
+    let _calDate = new Date();
+
+    function renderCalendar() {
+      const year = _calDate.getFullYear();
+      const month = _calDate.getMonth();
+      document.getElementById('cal-title').textContent = _calDate.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' });
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrev = new Date(year, month, 0).getDate();
+
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      // Collect defense dates for this faculty (panel + adviser)
+      const defenseDates = {};
+      _appointments.filter(a => a.status !== 'cancelled' && (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id)))
+        .forEach(a => {
+          if (a.date) {
+            if (!defenseDates[a.date]) defenseDates[a.date] = [];
+            defenseDates[a.date].push(a);
+          }
+        });
+
+      const today = todayStr();
+
+      let html = dayNames.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+
+      // Previous month days
+      const startDay = firstDay === 0 ? 6 : firstDay - 1; // Monday start
+      for (let i = startDay - 1; i >= 0; i--) {
+        html += `<div class="cal-day other-month">${daysInPrev - i}</div>`;
+      }
+
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isToday = dateStr === today;
+        const hasDefense = defenseDates[dateStr];
+        const cls = [
+          'cal-day',
+          isToday ? 'today' : '',
+          hasDefense ? 'has-defense' : ''
+        ].filter(Boolean).join(' ');
+
+        const dotHtml = hasDefense
+          ? '<div>' + hasDefense.map(a => {
+              const isAdv = a.adviser_id === _user.id;
+              return `<span class="cal-dot ${isAdv ? 'adviser-dot' : 'panelist-dot'}" title="${a.group_name} (${isAdv ? 'Adviser' : 'Panelist'})"></span>`;
+            }).join('') + '</div>'
+          : '';
+
+        html += `<div class="${cls}" ${hasDefense ? `onclick="calShowDayDefenses('${dateStr}')"` : ''}>
+          ${d}${dotHtml}
+        </div>`;
+      }
+
+      // Next month days
+      const totalCells = startDay + daysInMonth;
+      const remaining = (7 - (totalCells % 7)) % 7;
+      for (let d = 1; d <= remaining; d++) {
+        html += `<div class="cal-day other-month">${d}</div>`;
+      }
+
+      document.getElementById('cal-grid').innerHTML = html;
+      document.getElementById('cal-defense-list').innerHTML = '';
+    }
+
+    function calPrevMonth() {
+      _calDate.setMonth(_calDate.getMonth() - 1);
+      renderCalendar();
+    }
+
+    function calNextMonth() {
+      _calDate.setMonth(_calDate.getMonth() + 1);
+      renderCalendar();
+    }
+
+    function calShowDayDefenses(dateStr) {
+      const defenses = _appointments.filter(a =>
+        a.date === dateStr && a.status !== 'cancelled' &&
+        (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id))
+      );
+      const el = document.getElementById('cal-defense-list');
+      if (!defenses.length) { el.innerHTML = ''; return; }
+
+      el.innerHTML = `<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em">Defenses on ${fmtDate(dateStr)}</div>
+        ${defenses.map(a => {
+          const role = a.adviser_id === _user.id ? 'Adviser' : 'Panelist';
+          return `<div class="panel-card ${a.status}" onclick="openApptDetail(${a.id})" style="margin-bottom:4px;padding:10px 14px">
+            <div class="panel-card-body">
+              <div class="panel-card-group">${a.group_name} <span style="font-size:11px;color:var(--text3);font-weight:400">(${role})</span></div>
+              <div class="panel-card-meta"><span>🕐 ${a.time_slot || '—'}</span><span>📍 ${a.venue_name || '—'}</span></div>
+            </div>
+            <div class="panel-card-right">${fmtStatus(a.status)}</div>
+          </div>`;
+        }).join('')}`;
+    }
+
+    function changeWeek(delta) {
+      const select = document.getElementById('avail-week-selector');
+      if (!select) return;
+      const newIndex = select.selectedIndex + delta;
+      if (newIndex >= 0 && newIndex < select.options.length) {
+        select.selectedIndex = newIndex;
+        loadAvailability();
+      }
+    }
+
+    function updateWeekButtons() {
+      const select = document.getElementById('avail-week-selector');
+      const prevBtn = document.getElementById('avail-prev-week-btn');
+      const nextBtn = document.getElementById('avail-next-week-btn');
+      if (!select) return;
+      if (prevBtn) {
+        prevBtn.disabled = (select.selectedIndex <= 0);
+      }
+      if (nextBtn) {
+        nextBtn.disabled = (select.selectedIndex >= select.options.length - 1);
+      }
     }
 
     // ── Load Availability ────────────────────────────────────────────────────
     async function loadAvailability() {
       const el = document.getElementById('avail-grid-container');
       const mode = document.getElementById('avail-mode').value;
+      const weekSelector = document.getElementById('avail-week-selector');
       el.innerHTML = '<div class="skeleton"></div>';
 
       try {
@@ -1262,11 +1929,34 @@
         const start = parseInt((_settings.defense_start_time || '08:00').split(':')[0]);
         const end = parseInt((_settings.defense_end_time || '17:00').split(':')[0]);
         const days = (_settings.defense_days || 'Monday,Tuesday,Wednesday,Thursday,Friday').split(',');
-        const dayMap = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
+
+        // Initialize week selector if needed
+        if (weekSelector && (weekSelector.options.length === 1 && weekSelector.options[0].text === 'Loading weeks...' || weekSelector.options.length === 0)) {
+          weekSelector.innerHTML = '';
+          const now = new Date();
+          const curMonday = new Date(now);
+          curMonday.setDate(now.getDate() - now.getDay() + 1);
+          const currentWeekVal = curMonday.toISOString().split('T')[0];
+
+          for (let w = -2; w <= 12; w++) {
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() + (w * 7) - now.getDay() + 1);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 4);
+            const label = `Week of ${startOfWeek.toLocaleDateString('en-PH')} - ${endOfWeek.toLocaleDateString('en-PH')}`;
+            const value = startOfWeek.toISOString().split('T')[0];
+            weekSelector.appendChild(new Option(label, value));
+          }
+          weekSelector.value = currentWeekVal;
+          if (!weekSelector.value && weekSelector.options.length > 2) {
+            weekSelector.selectedIndex = 2;
+          }
+        }
 
         const today = new Date();
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+        const selectedWeekStart = weekSelector?.value || today.toISOString().split('T')[0];
+        const monday = new Date(selectedWeekStart + 'T00:00:00');
+        monday.setDate(monday.getDate() - monday.getDay() + 1);
         const weekDates = days.map((d, i) => {
           const dt = new Date(monday);
           dt.setDate(monday.getDate() + i);
@@ -1274,51 +1964,228 @@
         });
 
         const dayAbbr = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
-
         const bookedSlots = _appointments.filter(a =>
           weekDates.includes(a.date) && a.status !== 'cancelled' &&
           (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id))
         );
 
-        let html = '<div class="avail-grid">';
+        // Build calendar table
+        let html = '<div class="avail-calendar"><div class="avail-calendar-row">';
+        html += '<div class="avail-calendar-cell avail-time-header">Time</div>';
         days.forEach((day, di) => {
-          html += `<div class="avail-day"><div class="avail-label">${dayAbbr[day] || day.slice(0, 3)}</div>`;
-          for (let h = start; h < end; h++) {
+          const dateStr = weekDates[di];
+          let dateLabel = '';
+          if (dateStr) {
+            try {
+              const dateObj = new Date(dateStr + 'T00:00:00');
+              const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              dateLabel = `, ${formattedDate}`;
+            } catch (err) {
+              console.error('Error formatting date for header:', err);
+            }
+          }
+          const abbr = dayAbbr[day] || day.slice(0, 3);
+          html += `<div class="avail-calendar-cell avail-day-header">${abbr}${dateLabel}</div>`;
+        });
+        html += '</div>';
+
+        for (let h = start; h < end; h++) {
+          html += '<div class="avail-calendar-row">';
+          html += `<div class="avail-calendar-cell avail-time-header">${String(h).padStart(2, '0')}:00</div>`;
+
+          days.forEach((day, di) => {
             const ts = `${String(h).padStart(2, '0')}:00-${String(h + 1).padStart(2, '0')}:00`;
             const date = weekDates[di] || '';
             const isAvail = _avail.some(a => a.date === date && a.time_slot === ts && a.availability_type === mode);
             const isBooked = bookedSlots.some(a => a.date === date && a.time_slot === ts);
             const isPast = date && date < todayStr();
-            let cls = 'avail-slot ';
-            let clickable = false;
-            if (isBooked || isPast) {
-              cls += 'avail-busy';
+
+            let cls = 'avail-slot-btn ';
+            let disabled = false;
+            let title = '';
+
+            if (isBooked) {
+              cls += 'avail-booked';
+              disabled = true;
+              const appt = bookedSlots.find(a => a.date === date && a.time_slot === ts);
+              title = `Booked: ${appt.group_name}`;
+            } else if (isPast) {
+              cls += 'avail-unavailable';
+              disabled = true;
+              title = 'Past date';
             } else if (isAvail) {
-              cls += 'avail-advisory';
-              clickable = true;
+              cls += 'avail-selected';
+              title = 'Click to remove';
             } else {
               cls += 'avail-open';
-              clickable = !isPast;
+              title = 'Click to mark available';
             }
-            const onclick = clickable ? `onclick="toggleAvailSlot('${date}','${ts}','${mode}',this)"` : '';
-            html += `<div class="${cls}" ${onclick} style="${clickable ? 'cursor:pointer' : ''}">${String(h).padStart(2, '0')}:00</div>`;
-          }
+
+            const onclick = !disabled ? `onclick="toggleAvailSlot('${date}','${ts}','${mode}',this)"` : '';
+            html += `<div class="avail-calendar-cell avail-slot-cell">
+              <button class="${cls}" ${disabled ? 'disabled' : ''} ${onclick} title="${title}">
+                ${isBooked ? '🔒' : isAvail ? '✓' : ''}
+              </button>
+            </div>`;
+          });
           html += '</div>';
-        });
+        }
         html += '</div>';
         el.innerHTML = html;
+
+        // Load summary
+        loadAvailabilitySummary();
+        // Update week nav buttons
+        updateWeekButtons();
       } catch (e) {
         el.innerHTML = '<div class="db-empty">Error loading availability</div>';
       }
     }
 
-    document.getElementById('avail-mode')?.addEventListener('change', () => loadAvailability());
+    function loadAvailabilitySummary() {
+      const summaryEl = document.getElementById('avail-summary-container');
+      if (!summaryEl) return;
 
+      const bookedForThisFaculty = _appointments.filter(a =>
+        (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id)) &&
+        a.status !== 'cancelled'
+      ).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      if (bookedForThisFaculty.length === 0) {
+        summaryEl.innerHTML = '<div class="avail-summary-empty">No scheduled appointments</div>';
+        return;
+      }
+
+      summaryEl.innerHTML = bookedForThisFaculty.map(a => {
+        const dayName = getDayName(a.date);
+        const dateFormatted = fmtDate(a.date);
+        const roleLabel = a.adviser_id === _user.id ? 'Adviser' : 'Panelist';
+        return `<div class="avail-summary-item">
+          <div>
+            <div class="avail-summary-date">${dayName}, ${dateFormatted} · ${a.time_slot}</div>
+            <div class="avail-summary-group">${a.group_name}</div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);font-weight:500">${roleLabel}</div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('avail-mode')?.addEventListener('change', () => {
+      document.getElementById('avail-mode').options.length = 2; // Prevent duplicates
+      loadAvailability();
+    });
+
+    // ── Availability View Toggle ──────────────────────────────────────────
+    function switchAvailView(view, el) {
+      _availView = view;
+      document.querySelectorAll('.cal-view-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      const weekCtrl = document.getElementById('avail-week-controls');
+      const monthCtrl = document.getElementById('avail-month-controls');
+      const legend = document.getElementById('avail-legend');
+      if (weekCtrl) weekCtrl.style.display = view === 'week' ? 'flex' : 'none';
+      if (monthCtrl) monthCtrl.style.display = view === 'month' ? '' : 'none';
+      if (legend) legend.style.display = view === 'week' ? 'flex' : 'none';
+      if (view === 'week') {
+        loadAvailability();
+      } else {
+        loadAvailabilityMonthView();
+      }
+    }
+
+    function changeAvailMonth(delta) {
+      _availMonthDate = new Date(_availMonthDate.getFullYear(), _availMonthDate.getMonth() + delta, 1);
+      loadAvailabilityMonthView();
+    }
+
+    function loadAvailabilityMonthView() {
+      const el = document.getElementById('avail-grid-container');
+      const label = document.getElementById('avail-month-label');
+      const year = _availMonthDate.getFullYear();
+      const month = _availMonthDate.getMonth();
+
+      if (label) {
+        label.textContent = new Date(year, month, 1).toLocaleDateString('en-PH', { month: 'long', year: 'numeric' });
+      }
+
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let startDow = firstDay.getDay() - 1; // Mon=0
+      if (startDow < 0) startDow = 6;
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      const today = todayStr();
+
+      let html = '<table class="month-cal"><thead><tr>';
+      ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => html += `<th>${d}</th>`);
+      html += '</tr></thead><tbody>';
+
+      let dayCount = 1;
+      let nextMonthDay = 1;
+      for (let row = 0; row < 6; row++) {
+        if (row > 0 && dayCount > daysInMonth) break;
+        html += '<tr>';
+        for (let col = 0; col < 7; col++) {
+          const cellIdx = row * 7 + col;
+          let dateStr, displayNum, isOther = false;
+          if (cellIdx < startDow) {
+            const d = prevMonthDays - (startDow - cellIdx - 1);
+            dateStr = new Date(year, month - 1, d).toISOString().split('T')[0];
+            displayNum = d; isOther = true;
+          } else if (dayCount > daysInMonth) {
+            dateStr = new Date(year, month + 1, nextMonthDay).toISOString().split('T')[0];
+            displayNum = nextMonthDay; isOther = true; nextMonthDay++;
+          } else {
+            dateStr = new Date(year, month, dayCount).toISOString().split('T')[0];
+            displayNum = dayCount; dayCount++;
+          }
+          html += renderMonthCell(dateStr, displayNum, isOther, today);
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    }
+
+    function renderMonthCell(dateStr, dayNum, isOtherMonth, today) {
+      const isToday = dateStr === today;
+      const dayBooked = _appointments.filter(a =>
+        a.date === dateStr && a.status !== 'cancelled' &&
+        (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id))
+      );
+      const dayAvails = _avail.filter(a => a.date === dateStr);
+
+      let cellCls = `month-day${isOtherMonth ? ' other-month' : ''}${isToday ? ' is-today' : ''}`;
+      let eventsHtml = '<div class="month-day-events">';
+
+      if (dayBooked.length > 0) {
+        dayBooked.slice(0, 2).forEach(a => {
+          eventsHtml += `<div class="month-day-event month-event-booked" title="${a.group_name} &middot; ${a.time_slot}">🔒 ${a.group_name}</div>`;
+        });
+        if (dayBooked.length > 2) {
+          eventsHtml += `<div class="month-day-event" style="color:var(--text3);font-size:9px">+${dayBooked.length - 2} more booked</div>`;
+        }
+      } else if (dayAvails.length > 0) {
+        const types = [...new Set(dayAvails.map(a => a.availability_type))];
+        types.forEach(t => {
+          const cnt = dayAvails.filter(a => a.availability_type === t).length;
+          eventsHtml += `<div class="month-day-event month-event-selected" title="${cnt} slot(s) as ${t}">✓ ${cnt} ${t}</div>`;
+        });
+      }
+      eventsHtml += '</div>';
+
+      return `<td><div class="${cellCls}"><div class="month-day-num">${dayNum}</div>${eventsHtml}</div></td>`;
+    }
+
+    let _savingAvail = false;
     async function toggleAvailSlot(date, time_slot, type, el) {
+      if (_savingAvail) return;
       if (!date) { showToast('Cannot modify past dates', 'warning'); return; }
-      const isSet = el.classList.contains('avail-advisory');
+
+      _savingAvail = true;
+      el.disabled = true;
+      const isSet = el.classList.contains('avail-selected');
       const saveEl = document.getElementById('avail-saving');
-      saveEl.style.display = 'inline';
+      if (saveEl) saveEl.style.display = 'inline';
 
       try {
         if (isSet) {
@@ -1326,8 +2193,9 @@
           if (slot) {
             const res = await fetch(`/api/faculty/${_user.id}/availability/${slot.id}`, { method: 'DELETE' });
             if (res.ok) {
-              el.classList.remove('avail-advisory');
+              el.classList.remove('avail-selected');
               el.classList.add('avail-open');
+              el.textContent = '';
               showToast('Slot removed', 'info');
             }
           }
@@ -1339,7 +2207,8 @@
           });
           if (res.ok) {
             el.classList.remove('avail-open');
-            el.classList.add('avail-advisory');
+            el.classList.add('avail-selected');
+            el.textContent = '✓';
             showToast('Slot added', 'success');
           } else {
             const d = await res.json();
@@ -1352,7 +2221,9 @@
       } catch (e) {
         showToast('Server error', 'error');
       } finally {
-        saveEl.style.display = 'none';
+        _savingAvail = false;
+        el.disabled = false;
+        if (saveEl) saveEl.style.display = 'none';
       }
     }
 
@@ -1456,3 +2327,9 @@
 </body>
 
 </html>
+
+
+
+
+
+
