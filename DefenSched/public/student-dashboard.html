@@ -426,7 +426,7 @@
         <div class="form-row">
           <div class="form-field">
             <label>Preferred Date</label>
-            <input class="input" id="bk-date" type="date">
+            <input class="input" id="bk-date" type="date" required>
           </div>
           <div class="form-field">
             <label>Start Time</label>
@@ -582,6 +582,7 @@ function switchPanel(name, el) {
   document.getElementById('header-book-btn').style.display = name === 'book' ? 'none' : '';
 
   if (name === 'schedule-board') loadScheduleBoard();
+  if (name === 'book')           updateBookingPanel();
   if (name === 'my-schedule')    renderMySchedule();
   if (name === 'manuscript')     loadManuscript();
   if (name === 'notifications')  loadNotifications();
@@ -611,8 +612,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load appointment & populate dropdowns
   await loadAppointment();
-  loadBookingDropdowns();
+  await loadBookingDropdowns();
   loadNotifBadge();
+  // Set min date on initial load
+  const dateInput = document.getElementById('bk-date');
+  if (dateInput) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.min = `${yyyy}-${mm}-${dd}`;
+  }
 });
 
 // ── Load appointment ──────────────────────────────────────────────
@@ -840,6 +850,25 @@ async function loadBookingDropdowns() {
   } catch (e) { console.error('Dropdown load error', e); }
 }
 
+// ── Update booking panel state ────────────────────────────────────
+function updateBookingPanel() {
+  const dateInput = document.getElementById('bk-date');
+  // Set minimum date to today to prevent booking past dates
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  dateInput.min = `${yyyy}-${mm}-${dd}`;
+  dateInput.value = ''; // Clear previous selection
+  
+  // Refresh appointment data and update booking notice
+  if (_appointment && ['pending','confirmed'].includes(_appointment.status)) {
+    document.getElementById('book-existing-notice').style.display = '';
+  } else {
+    document.getElementById('book-existing-notice').style.display = 'none';
+  }
+}
+
 // ── Check availability ────────────────────────────────────────────
 async function checkConflict() {
   const date      = document.getElementById('bk-date').value;
@@ -859,6 +888,7 @@ async function checkConflict() {
     const r = await fetch(`/api/appointments/check-conflict?date=${date}&time_slot=${encodeURIComponent(time_slot)}&adviser_id=${adviser}&venue_id=${venue}&panelist_ids=`);
     const d = await r.json();
     const items = [
+      { label: 'Date & Time',    ok: d.pastTime?.ok, msg: d.pastTime?.message },
       { label: 'Schedule rules', ok: d.rules?.ok,    msg: d.rules?.message    },
       { label: 'Adviser',        ok: d.adviser?.ok,  msg: d.adviser?.message  },
       { label: 'Venue',          ok: d.venue?.ok,    msg: d.venue?.message    },

@@ -779,6 +779,77 @@
       overflow-x: auto
     }
 
+    /* ── Schedule Calendar View ────────────────────────────────────── */
+    .schedule-calendar {
+      display: table;
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .schedule-calendar-row {
+      display: table-row;
+    }
+
+    .schedule-calendar-cell {
+      display: table-cell;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 0;
+      min-height: 50px;
+      min-width: 100px;
+    }
+
+    .schedule-calendar-cell:last-child {
+      border-right: none;
+    }
+
+    .schedule-calendar-row:last-child .schedule-calendar-cell {
+      border-bottom: none;
+    }
+
+    .schedule-slot {
+      width: 100%;
+      height: 100%;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .schedule-slot-item {
+      background: linear-gradient(135deg, var(--accent-glow), rgba(79, 142, 247, .08));
+      border: 1px solid var(--accent-glow);
+      border-radius: 3px;
+      padding: 3px 6px;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.15s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .schedule-slot-item:hover {
+      background: linear-gradient(135deg, var(--accent), rgba(79, 142, 247, .2));
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(79, 142, 247, .25);
+      transform: scale(1.02);
+    }
+
+    .schedule-slot-empty {
+      background: var(--surface2);
+      color: var(--text3);
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .db-tabs {
       display: flex;
       gap: 4px;
@@ -1065,27 +1136,45 @@
           </select>
         </div>
       </div>
-      <div class="card">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Group</th>
-              <th>Adviser</th>
-              <th>Panelists</th>
-              <th>Date & Time</th>
-              <th>Venue</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="board-tbody">
-            <tr>
-              <td colspan="7">
-                <div class="skeleton"></div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="section-tabs" style="margin-bottom:20px">
+        <div class="section-tab active" onclick="switchScheduleBoardView('table', this)">📋 Table View</div>
+        <div class="section-tab" onclick="switchScheduleBoardView('calendar', this)">📅 Calendar View</div>
+      </div>
+      <div id="schedule-view-table" class="sub-panel active">
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Adviser</th>
+                <th>Panelists</th>
+                <th>Date & Time</th>
+                <th>Venue</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="board-tbody">
+              <tr>
+                <td colspan="7">
+                  <div class="skeleton"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="schedule-view-calendar" class="sub-panel">
+        <div class="card">
+          <div style="margin-bottom:16px">
+            <select id="calendar-week-selector" class="form-select" style="width:250px" onchange="loadScheduleCalendar()">
+              <option>Loading weeks...</option>
+            </select>
+          </div>
+          <div id="schedule-calendar-container" style="overflow-x:auto">
+            <div class="skeleton"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1559,6 +1648,128 @@
       const f = document.getElementById('board-filter').value;
       const rows = _appointments.filter(a => !f || a.status === f).sort((a, b) => a.date < b.date ? -1 : 1);
       document.getElementById('board-tbody').innerHTML = rows.length ? rows.map(a => `<tr><td><div style="font-weight:600">${a.group_name}</div></td><td>${a.adviser_name || '—'}</td><td style="font-size:12px">${(a.panelists || []).map(p => p.name).join(', ') || '—'}</td><td style="font-family:var(--mono);font-size:12px">${fmtDate(a.date)}<br>${a.time_slot || '—'}</td><td>${a.venue_name || '—'}</td><td>${fmtStatus(a.status)}</td><td><button class="btn btn-ghost btn-sm" onclick="openStatusModal(${a.id},'${a.group_name.replace(/'/g, "\\'")}','${a.status}')">Update</button></td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No appointments found</td></tr>';
+    }
+
+    function switchScheduleBoardView(view, el) {
+      document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById(`schedule-view-${view}`).classList.add('active');
+      if (view === 'calendar') loadScheduleCalendar();
+    }
+
+    function loadScheduleCalendar() {
+      const container = document.getElementById('schedule-calendar-container');
+      const weekSelector = document.getElementById('calendar-week-selector');
+
+      // If not initialized, populate week selector
+      if (weekSelector.options[0].text === 'Loading weeks...') {
+        weekSelector.innerHTML = '';
+        const today = new Date();
+        for (let w = 0; w < 4; w++) {
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() + (w * 7) - today.getDay() + 1);
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(startOfWeek.getDate() + 4);
+          const label = `Week of ${startOfWeek.toLocaleDateString('en-PH')} - ${endOfWeek.toLocaleDateString('en-PH')}`;
+          const value = startOfWeek.toISOString().split('T')[0];
+          weekSelector.appendChild(new Option(label, value));
+        }
+      }
+
+      const startDate = new Date(weekSelector.value + 'T00:00:00');
+      const start = 8; // Defense start time
+      const end = 17;
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+      let html = '<div class="schedule-calendar"><div class="schedule-calendar-row">';
+      html += '<div class="schedule-calendar-cell" style="background:var(--surface2);font-weight:600;padding:8px;min-width:70px">Time</div>';
+
+      days.forEach((day, di) => {
+        const d = new Date(startDate);
+        d.setDate(startDate.getDate() + di);
+        const dayLabel = d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' });
+        html += `<div class="schedule-calendar-cell" style="background:var(--surface2);font-weight:600;padding:8px;text-align:center">${dayLabel}</div>`;
+      });
+      html += '</div>';
+
+      for (let h = start; h < end; h++) {
+        html += '<div class="schedule-calendar-row">';
+        html += `<div class="schedule-calendar-cell" style="background:var(--surface2);font-weight:600;padding:4px;text-align:center;font-size:11px;font-family:var(--mono)">${String(h).padStart(2, '0')}:00</div>`;
+
+        days.forEach((day, di) => {
+          const d = new Date(startDate);
+          d.setDate(startDate.getDate() + di);
+          const dateStr = d.toISOString().split('T')[0];
+          const ts = `${String(h).padStart(2, '0')}:00-${String(h + 1).padStart(2, '0')}:00`;
+
+          const appts = _appointments.filter(a => a.date === dateStr && a.time_slot === ts && a.status !== 'cancelled');
+
+          html += '<div class="schedule-calendar-cell"><div class="schedule-slot">';
+          if (appts.length > 0) {
+            appts.forEach(a => {
+              html += `<div class="schedule-slot-item" onclick="openApptDetailModal(${a.id})" title="${a.group_name}">${a.group_name}</div>`;
+            });
+          } else {
+            html += '<div class="schedule-slot-empty">—</div>';
+          }
+          html += '</div></div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+
+      container.innerHTML = html;
+    }
+
+    function openApptDetailModal(apptId) {
+      const appt = _appointments.find(a => a.id === apptId);
+      if (!appt) return;
+
+      // Create and show modal
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay open';
+      modal.innerHTML = `
+        <div class="modal" style="width:480px">
+          <div class="modal-header">
+            <span class="modal-title">Appointment Details</span>
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+            <div class="form-group">
+              <label class="form-label">Group Name</label>
+              <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text);font-weight:500">${appt.group_name}</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date & Time</label>
+              <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text);font-weight:500;font-family:var(--mono)">${fmtDate(appt.date)}<br>${appt.time_slot || '—'}</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Adviser</label>
+              <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text)">${appt.adviser_name || '—'}</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Venue</label>
+              <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text)">${appt.venue_name || '—'}</div>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Panelists</label>
+              <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text)">
+                ${(appt.panelists || []).map(p => p.name).join(', ') || '—'}
+              </div>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Status</label>
+              <div>${fmtStatus(appt.status)}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">Close</button>
+            <button class="btn btn-primary" onclick="openStatusModal(${appt.id},'${appt.group_name.replace(/'/g, "\\'")}','${appt.status}'); this.closest('.modal-overlay').remove()">Update Status</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
     }
 
     // ── ALL APPOINTMENTS (with inline DB status edit + delete) ──────────
