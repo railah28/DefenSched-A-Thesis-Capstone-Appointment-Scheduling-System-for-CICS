@@ -185,7 +185,7 @@ router.post('/', requireAuth, (req, res) => {
 
   // Notify adviser, panelists, and submitting student
   notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
-  for (const pid of safePanelistIds) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
+  for (const pid of pIds) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
   notify(userId, 'Appointment submitted. Upload your manuscript to confirm.', 'success');
 
   // Notify all admin users about the new booking
