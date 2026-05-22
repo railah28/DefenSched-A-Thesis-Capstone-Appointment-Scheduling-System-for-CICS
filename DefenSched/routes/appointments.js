@@ -136,7 +136,7 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 router.post('/', requireAuth, (req, res) => {
   const { userId } = req.session;
   const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes } = req.body;
-  if (!group_name || !adviser_id || !date || !time_slot || !venue_id || !panelist_ids?.length)
+  if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
     return res.status(400).json({ error: 'All fields are required.' });
 
   if (db.prepare(`SELECT id FROM appointments WHERE adviser_id=? AND date=? AND time_slot=? AND status!='cancelled'`).get(adviser_id, date, time_slot))
