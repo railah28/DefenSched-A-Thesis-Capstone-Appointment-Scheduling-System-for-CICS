@@ -16,6 +16,7 @@
     --danger: #dc2626; --danger-bg: #fef2f2;
     --info: #0369a1; --info-bg: #f0f9ff;
     --orange: #ea580c; --orange-bg: #fff7ed;
+    --purple: #8b5cf6; --purple-bg: #f5f3ff;
     --font: 'Plus Jakarta Sans', sans-serif;
     --mono: 'Space Mono', monospace;
     --radius: 10px; --radius-lg: 16px;
@@ -43,6 +44,8 @@
     --info-bg: rgba(79, 142, 247, .12);
     --orange: #f5a623;
     --orange-bg: rgba(245, 166, 35, .12);
+    --purple: #a78bfa;
+    --purple-bg: rgba(167, 139, 250, .12);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 14px; }
@@ -88,6 +91,7 @@
   .status-banner { border-radius: var(--radius-lg); padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border: 1px solid; }
   .status-confirmed { background: var(--success-bg); border-color: #bbf7d0; }
   .status-pending { background: var(--warning-bg); border-color: #fde68a; }
+  .status-rescheduled { background: var(--purple-bg); border-color: #ddd6fe; }
   .status-none { background: var(--surface2); border-color: var(--border2); }
   .status-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .status-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
@@ -108,6 +112,7 @@
   .tag-pending { background: var(--warning-bg); color: var(--warning); }
   .tag-cancelled { background: var(--danger-bg); color: var(--danger); }
   .tag-final { background: var(--accent-light); color: var(--accent); }
+  .tag-rescheduled { background: var(--purple-bg); color: var(--purple); }
   .tag-title { background: var(--orange-bg); color: var(--orange); }
 
   /* ── Defense detail ── */
@@ -418,6 +423,10 @@
           <input class="input" id="bk-group" type="text" placeholder="e.g. Group Alpha">
         </div>
         <div class="form-field">
+          <label>Research Title</label>
+          <input class="input" id="bk-title" type="text" placeholder="e.g. A Study on AI-based Scheduling Systems">
+        </div>
+        <div class="form-field">
           <label>Preferred Adviser</label>
           <select class="input" id="bk-adviser">
             <option value="">Loading faculty...</option>
@@ -426,7 +435,7 @@
         <div class="form-row">
           <div class="form-field">
             <label>Preferred Date</label>
-            <input class="input" id="bk-date" type="date">
+            <input class="input" id="bk-date" type="date" required>
           </div>
           <div class="form-field">
             <label>Start Time</label>
@@ -435,9 +444,13 @@
         </div>
         <div class="form-field">
           <label>Venue</label>
-          <select class="input" id="bk-venue">
+          <select class="input" id="bk-venue" onchange="onVenueChange()">
             <option value="">Loading venues...</option>
           </select>
+        </div>
+        <div class="form-field" id="bk-meeting-link-field" style="display:none;">
+          <label>Meeting Link</label>
+          <input class="input" id="bk-meeting-link" type="url" placeholder="https://meet.google.com/...">
         </div>
         <div class="form-note">
           ℹ️ <strong>Note on panelists:</strong> Panelists will be assigned by the Research Coordinator after your appointment is reviewed. You don't need to choose them.
@@ -582,6 +595,7 @@ function switchPanel(name, el) {
   document.getElementById('header-book-btn').style.display = name === 'book' ? 'none' : '';
 
   if (name === 'schedule-board') loadScheduleBoard();
+  if (name === 'book')           updateBookingPanel();
   if (name === 'my-schedule')    renderMySchedule();
   if (name === 'manuscript')     loadManuscript();
   if (name === 'notifications')  loadNotifications();
@@ -611,8 +625,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load appointment & populate dropdowns
   await loadAppointment();
-  loadBookingDropdowns();
+  await loadBookingDropdowns();
   loadNotifBadge();
+  // Set min date on initial load
+  const dateInput = document.getElementById('bk-date');
+  if (dateInput) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.min = `${yyyy}-${mm}-${dd}`;
+  }
 });
 
 // ── Load appointment ──────────────────────────────────────────────
@@ -659,14 +682,19 @@ function renderStatusBanner() {
   }
   const isConfirmed = a.status === 'confirmed';
   const isPending   = a.status === 'pending';
-  const bgClass = isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : 'status-none';
-  const color   = isConfirmed ? 'var(--success)'  : isPending ? 'var(--warning)' : 'var(--text3)';
-  const iconBg  = isConfirmed ? '#dcfce7' : isPending ? '#fef9c3' : 'var(--surface2)';
+  const isRescheduled = a.status === 'rescheduled';
+  const bgClass = isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : isRescheduled ? 'status-rescheduled' : 'status-none';
+  const color   = isConfirmed ? 'var(--success)'  : isPending ? 'var(--warning)' : isRescheduled ? 'var(--purple)' : 'var(--text3)';
+  const iconBg  = isConfirmed ? '#dcfce7' : isPending ? '#fef9c3' : isRescheduled ? 'var(--purple-bg)' : 'var(--surface2)';
   const icon    = isConfirmed
     ? `<svg width="20" height="20" fill="none" stroke="#16a34a" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke-width="2.5" stroke-linecap="round"/></svg>`
-    : `<svg width="20" height="20" fill="none" stroke="${isPending?'#ca8a04':'#a1a1aa'}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`;
-  const statusText = isConfirmed ? 'Confirmed — Final Defense' : isPending ? 'Pending — Awaiting Approval' : a.status.charAt(0).toUpperCase()+a.status.slice(1);
-  const cancelBtn = (a.status === 'pending' || a.status === 'confirmed')
+    : isPending
+    ? `<svg width="20" height="20" fill="none" stroke="#ca8a04" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
+    : isRescheduled
+    ? `<svg width="20" height="20" fill="none" stroke="var(--purple)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
+    : `<svg width="20" height="20" fill="none" stroke="#a1a1aa" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const statusText = isConfirmed ? 'Confirmed — Final Defense' : isPending ? 'Pending — Awaiting Approval' : isRescheduled ? 'Rescheduled — Final Defense' : a.status.charAt(0).toUpperCase()+a.status.slice(1);
+  const cancelBtn = (a.status === 'pending' || a.status === 'confirmed' || a.status === 'rescheduled')
     ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">
         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke-width="2"/></svg>
         Cancel appointment
@@ -766,7 +794,7 @@ async function loadScheduleBoard() {
       el.innerHTML = '<div class="empty-state"><div class="empty-title">No defenses scheduled yet.</div></div>';
       return;
     }
-    const tagMap = { confirmed:'tag-final', pending:'tag-pending', completed:'tag-confirmed', cancelled:'tag-cancelled' };
+    const tagMap = { confirmed:'tag-final', pending:'tag-pending', completed:'tag-completed', cancelled:'tag-cancelled', rescheduled:'tag-rescheduled' };
     el.innerHTML = `<table class="sched-table">
       <thead><tr><th>Time</th><th>Group</th><th>Venue</th><th>Adviser</th><th>Status</th></tr></thead>
       <tbody>${active.map(a => `
@@ -797,7 +825,7 @@ function renderMySchedule() {
   const panelists = (a.panelists && a.panelists.length > 0)
     ? a.panelists.map(p=>`<div style="font-size:13px;color:var(--text2);">• ${p.name}</div>`).join('')
     : '<div style="font-size:13px;color:var(--text3);">To be assigned by Research Coordinator</div>';
-  const cancelBtn = (a.status==='pending'||a.status==='confirmed')
+  const cancelBtn = (a.status==='pending'||a.status==='confirmed'||a.status==='rescheduled')
     ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">Cancel Appointment</button>` : '';
   el.innerHTML = `
     <div class="grid-2">
@@ -829,15 +857,44 @@ function renderMySchedule() {
     </div>`;
 }
 
+// ── Venue change handler (show/hide meeting link) ────────────────
+let _venues = [];
+async function onVenueChange() {
+  const venueId = parseInt(document.getElementById('bk-venue').value);
+  const venue = _venues.find(v => v.id === venueId);
+  document.getElementById('bk-meeting-link-field').style.display =
+    venue && venue.type === 'virtual' ? '' : 'none';
+}
+
 // ── Booking dropdowns ─────────────────────────────────────────────
 async function loadBookingDropdowns() {
   try {
     const [fRes, vRes] = await Promise.all([fetch('/api/faculty'), fetch('/api/venues')]);
     const { faculty } = await fRes.json();
     const { venues }  = await vRes.json();
+    _venues = venues;
     document.getElementById('bk-adviser').innerHTML = '<option value="">Choose adviser</option>' + faculty.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
     document.getElementById('bk-venue').innerHTML   = '<option value="">Choose venue</option>'   + venues.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
   } catch (e) { console.error('Dropdown load error', e); }
+}
+
+// ── Update booking panel state ────────────────────────────────────
+function updateBookingPanel() {
+  const dateInput = document.getElementById('bk-date');
+  // Set minimum date to today to prevent booking past dates
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  dateInput.min = `${yyyy}-${mm}-${dd}`;
+  dateInput.value = ''; // Clear previous selection
+  
+  // Refresh appointment data and update booking notice
+  if (_appointment && ['pending','confirmed','rescheduled'].includes(_appointment.status)) {
+    document.getElementById('book-existing-notice').style.display = '';
+  } else {
+    document.getElementById('book-existing-notice').style.display = 'none';
+  }
 }
 
 // ── Check availability ────────────────────────────────────────────
@@ -859,6 +916,7 @@ async function checkConflict() {
     const r = await fetch(`/api/appointments/check-conflict?date=${date}&time_slot=${encodeURIComponent(time_slot)}&adviser_id=${adviser}&venue_id=${venue}&panelist_ids=`);
     const d = await r.json();
     const items = [
+      { label: 'Date & Time',    ok: d.pastTime?.ok, msg: d.pastTime?.message },
       { label: 'Schedule rules', ok: d.rules?.ok,    msg: d.rules?.message    },
       { label: 'Adviser',        ok: d.adviser?.ok,  msg: d.adviser?.message  },
       { label: 'Venue',          ok: d.venue?.ok,    msg: d.venue?.message    },
@@ -876,16 +934,18 @@ async function checkConflict() {
 
 // ── Submit booking ────────────────────────────────────────────────
 async function submitBooking() {
-  if (_appointment && ['pending','confirmed'].includes(_appointment.status)) {
+  if (_appointment && ['pending','confirmed','rescheduled'].includes(_appointment.status)) {
     showToast('You already have an active appointment.', 'error');
     document.getElementById('book-existing-notice').style.display = '';
     return;
   }
   const group_name = document.getElementById('bk-group').value.trim();
+  const research_title = document.getElementById('bk-title').value.trim();
   const adviser_id = parseInt(document.getElementById('bk-adviser').value);
   const date       = document.getElementById('bk-date').value;
   const timeRaw    = document.getElementById('bk-time').value;
   const venue_id   = parseInt(document.getElementById('bk-venue').value);
+  const meeting_link = document.getElementById('bk-meeting-link').value.trim() || null;
   if (!group_name || !adviser_id || !date || !timeRaw || !venue_id) {
     showToast('Please fill in all fields.', 'error');
     return;
@@ -899,7 +959,7 @@ async function submitBooking() {
     const r = await fetch('/api/appointments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ group_name, adviser_id, panelist_ids: [], date, time_slot, venue_id })
+      body: JSON.stringify({ group_name, research_title, adviser_id, panelist_ids: [], date, time_slot, venue_id, meeting_link })
     });
     const d = await r.json();
     if (r.ok) {
