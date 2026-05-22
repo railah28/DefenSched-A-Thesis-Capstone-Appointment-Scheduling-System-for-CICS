@@ -516,8 +516,10 @@
     }
 
     .avail-advisory {
-      background: var(--teal-bg);
-      color: var(--teal);
+      background: linear-gradient(135deg, #0d9488, #0ea5e9);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(13, 148, 136, 0.2);
     }
 
     .manuscript-item {
@@ -1305,30 +1307,51 @@
           <div class="page-sub">Set your available time slots as adviser or panelist</div>
         </div>
       </div>
-      <div class="card" style="max-width:800px">
+      <div class="card" style="max-width:900px">
         <div class="card-header">
           <span class="card-title">Your Availability</span>
-          <div style="display:flex;gap:8px;align-items:center">
-            <span style="font-size:12px;color:var(--text3)">Mode:</span>
-            <select id="avail-mode" class="form-select" style="width:120px">
-              <option value="adviser">Adviser</option>
-              <option value="panelist">Panelist</option>
-            </select>
-            <span id="avail-saving" style="font-size:11px;color:var(--text3);display:none">Saving…</span>
+          <div class="cal-view-tabs">
+            <div class="cal-view-tab active" onclick="switchAvailView('week',this)">&#128203; Week View</div>
+            <div class="cal-view-tab" onclick="switchAvailView('month',this)">&#128197; Month View</div>
           </div>
         </div>
-        <div id="avail-grid-container">
+        <!-- Week View Controls -->
+        <div id="avail-week-controls" style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--text3)">Week:</span>
+          <button class="btn btn-outline btn-sm" id="avail-prev-week-btn" onclick="changeWeek(-1)">◀ Prev</button>
+          <select id="avail-week-selector" class="form-select" style="width:250px" onchange="loadAvailability()"><option>Loading weeks...</option></select>
+          <button class="btn btn-outline btn-sm" id="avail-next-week-btn" onclick="changeWeek(1)">Next ▶</button>
+          <span style="font-size:12px;color:var(--text3)">Mode:</span>
+          <select id="avail-mode" class="form-select" style="width:120px">
+            <option value="adviser">Adviser</option>
+            <option value="panelist">Panelist</option>
+          </select>
+          <span id="avail-saving" style="font-size:11px;color:var(--text3);display:none">Saving…</span>
+        </div>
+        <!-- Month View Controls -->
+        <div id="avail-month-controls" style="display:none;margin-bottom:14px">
+          <div class="month-cal-nav">
+            <button class="month-nav-btn" onclick="changeAvailMonth(-1)">&#9664; Prev</button>
+            <span class="month-title" id="avail-month-label">—</span>
+            <button class="month-nav-btn" onclick="changeAvailMonth(1)">Next &#9654;</button>
+          </div>
+        </div>
+        <div id="avail-grid-container" style="overflow-x:auto;margin-bottom:16px">
           <div class="skeleton"></div>
         </div>
-        <div style="display:flex;gap:6px;margin-top:12px">
-          <span
-            style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--success-bg);color:var(--success);">●
-            Available</span>
-          <span style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--teal-bg);color:var(--teal);">●
-            Your slot</span>
-          <span
-            style="font-size:11px;padding:3px 8px;border-radius:99px;background:var(--danger-bg);color:var(--danger);">●
-            Booked by appointment</span>
+        <div id="avail-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:0">
+          <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:var(--success-bg);color:var(--success);font-weight:500">● Available (open)</span>
+          <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:linear-gradient(135deg, #0d9488, #0ea5e9);color:#ffffff;font-weight:600">● Your slot (selected)</span>
+          <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:var(--danger-bg);color:var(--danger);font-weight:500">● Booked (locked)</span>
+          <span style="font-size:11px;padding:6px 12px;border-radius:99px;background:var(--surface2);color:var(--text3);font-weight:500">● Unavailable (past/blocked)</span>
+        </div>
+      </div>
+      <div class="card" style="max-width:900px;margin-top:16px">
+        <div class="card-header">
+          <span class="card-title">Summary of Scheduled Dates</span>
+        </div>
+        <div id="avail-summary-container">
+          <div class="skeleton"></div>
         </div>
       </div>
     </section>
@@ -1867,10 +1890,34 @@
         }).join('')}`;
     }
 
+    function changeWeek(delta) {
+      const select = document.getElementById('avail-week-selector');
+      if (!select) return;
+      const newIndex = select.selectedIndex + delta;
+      if (newIndex >= 0 && newIndex < select.options.length) {
+        select.selectedIndex = newIndex;
+        loadAvailability();
+      }
+    }
+
+    function updateWeekButtons() {
+      const select = document.getElementById('avail-week-selector');
+      const prevBtn = document.getElementById('avail-prev-week-btn');
+      const nextBtn = document.getElementById('avail-next-week-btn');
+      if (!select) return;
+      if (prevBtn) {
+        prevBtn.disabled = (select.selectedIndex <= 0);
+      }
+      if (nextBtn) {
+        nextBtn.disabled = (select.selectedIndex >= select.options.length - 1);
+      }
+    }
+
     // ── Load Availability ────────────────────────────────────────────────────
     async function loadAvailability() {
       const el = document.getElementById('avail-grid-container');
       const mode = document.getElementById('avail-mode').value;
+      const weekSelector = document.getElementById('avail-week-selector');
       el.innerHTML = '<div class="skeleton"></div>';
 
       try {
@@ -1882,11 +1929,34 @@
         const start = parseInt((_settings.defense_start_time || '08:00').split(':')[0]);
         const end = parseInt((_settings.defense_end_time || '17:00').split(':')[0]);
         const days = (_settings.defense_days || 'Monday,Tuesday,Wednesday,Thursday,Friday').split(',');
-        const dayMap = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
+
+        // Initialize week selector if needed
+        if (weekSelector && (weekSelector.options.length === 1 && weekSelector.options[0].text === 'Loading weeks...' || weekSelector.options.length === 0)) {
+          weekSelector.innerHTML = '';
+          const now = new Date();
+          const curMonday = new Date(now);
+          curMonday.setDate(now.getDate() - now.getDay() + 1);
+          const currentWeekVal = curMonday.toISOString().split('T')[0];
+
+          for (let w = -2; w <= 12; w++) {
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() + (w * 7) - now.getDay() + 1);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 4);
+            const label = `Week of ${startOfWeek.toLocaleDateString('en-PH')} - ${endOfWeek.toLocaleDateString('en-PH')}`;
+            const value = startOfWeek.toISOString().split('T')[0];
+            weekSelector.appendChild(new Option(label, value));
+          }
+          weekSelector.value = currentWeekVal;
+          if (!weekSelector.value && weekSelector.options.length > 2) {
+            weekSelector.selectedIndex = 2;
+          }
+        }
 
         const today = new Date();
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+        const selectedWeekStart = weekSelector?.value || today.toISOString().split('T')[0];
+        const monday = new Date(selectedWeekStart + 'T00:00:00');
+        monday.setDate(monday.getDate() - monday.getDay() + 1);
         const weekDates = days.map((d, i) => {
           const dt = new Date(monday);
           dt.setDate(monday.getDate() + i);
@@ -1894,51 +1964,228 @@
         });
 
         const dayAbbr = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
-
         const bookedSlots = _appointments.filter(a =>
           weekDates.includes(a.date) && a.status !== 'cancelled' &&
           (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id))
         );
 
-        let html = '<div class="avail-grid">';
+        // Build calendar table
+        let html = '<div class="avail-calendar"><div class="avail-calendar-row">';
+        html += '<div class="avail-calendar-cell avail-time-header">Time</div>';
         days.forEach((day, di) => {
-          html += `<div class="avail-day"><div class="avail-label">${dayAbbr[day] || day.slice(0, 3)}</div>`;
-          for (let h = start; h < end; h++) {
+          const dateStr = weekDates[di];
+          let dateLabel = '';
+          if (dateStr) {
+            try {
+              const dateObj = new Date(dateStr + 'T00:00:00');
+              const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              dateLabel = `, ${formattedDate}`;
+            } catch (err) {
+              console.error('Error formatting date for header:', err);
+            }
+          }
+          const abbr = dayAbbr[day] || day.slice(0, 3);
+          html += `<div class="avail-calendar-cell avail-day-header">${abbr}${dateLabel}</div>`;
+        });
+        html += '</div>';
+
+        for (let h = start; h < end; h++) {
+          html += '<div class="avail-calendar-row">';
+          html += `<div class="avail-calendar-cell avail-time-header">${String(h).padStart(2, '0')}:00</div>`;
+
+          days.forEach((day, di) => {
             const ts = `${String(h).padStart(2, '0')}:00-${String(h + 1).padStart(2, '0')}:00`;
             const date = weekDates[di] || '';
             const isAvail = _avail.some(a => a.date === date && a.time_slot === ts && a.availability_type === mode);
             const isBooked = bookedSlots.some(a => a.date === date && a.time_slot === ts);
             const isPast = date && date < todayStr();
-            let cls = 'avail-slot ';
-            let clickable = false;
-            if (isBooked || isPast) {
-              cls += 'avail-busy';
+
+            let cls = 'avail-slot-btn ';
+            let disabled = false;
+            let title = '';
+
+            if (isBooked) {
+              cls += 'avail-booked';
+              disabled = true;
+              const appt = bookedSlots.find(a => a.date === date && a.time_slot === ts);
+              title = `Booked: ${appt.group_name}`;
+            } else if (isPast) {
+              cls += 'avail-unavailable';
+              disabled = true;
+              title = 'Past date';
             } else if (isAvail) {
-              cls += 'avail-advisory';
-              clickable = true;
+              cls += 'avail-selected';
+              title = 'Click to remove';
             } else {
               cls += 'avail-open';
-              clickable = !isPast;
+              title = 'Click to mark available';
             }
-            const onclick = clickable ? `onclick="toggleAvailSlot('${date}','${ts}','${mode}',this)"` : '';
-            html += `<div class="${cls}" ${onclick} style="${clickable ? 'cursor:pointer' : ''}">${String(h).padStart(2, '0')}:00</div>`;
-          }
+
+            const onclick = !disabled ? `onclick="toggleAvailSlot('${date}','${ts}','${mode}',this)"` : '';
+            html += `<div class="avail-calendar-cell avail-slot-cell">
+              <button class="${cls}" ${disabled ? 'disabled' : ''} ${onclick} title="${title}">
+                ${isBooked ? '🔒' : isAvail ? '✓' : ''}
+              </button>
+            </div>`;
+          });
           html += '</div>';
-        });
+        }
         html += '</div>';
         el.innerHTML = html;
+
+        // Load summary
+        loadAvailabilitySummary();
+        // Update week nav buttons
+        updateWeekButtons();
       } catch (e) {
         el.innerHTML = '<div class="db-empty">Error loading availability</div>';
       }
     }
 
-    document.getElementById('avail-mode')?.addEventListener('change', () => loadAvailability());
+    function loadAvailabilitySummary() {
+      const summaryEl = document.getElementById('avail-summary-container');
+      if (!summaryEl) return;
 
+      const bookedForThisFaculty = _appointments.filter(a =>
+        (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id)) &&
+        a.status !== 'cancelled'
+      ).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      if (bookedForThisFaculty.length === 0) {
+        summaryEl.innerHTML = '<div class="avail-summary-empty">No scheduled appointments</div>';
+        return;
+      }
+
+      summaryEl.innerHTML = bookedForThisFaculty.map(a => {
+        const dayName = getDayName(a.date);
+        const dateFormatted = fmtDate(a.date);
+        const roleLabel = a.adviser_id === _user.id ? 'Adviser' : 'Panelist';
+        return `<div class="avail-summary-item">
+          <div>
+            <div class="avail-summary-date">${dayName}, ${dateFormatted} · ${a.time_slot}</div>
+            <div class="avail-summary-group">${a.group_name}</div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);font-weight:500">${roleLabel}</div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('avail-mode')?.addEventListener('change', () => {
+      document.getElementById('avail-mode').options.length = 2; // Prevent duplicates
+      loadAvailability();
+    });
+
+    // ── Availability View Toggle ──────────────────────────────────────────
+    function switchAvailView(view, el) {
+      _availView = view;
+      document.querySelectorAll('.cal-view-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      const weekCtrl = document.getElementById('avail-week-controls');
+      const monthCtrl = document.getElementById('avail-month-controls');
+      const legend = document.getElementById('avail-legend');
+      if (weekCtrl) weekCtrl.style.display = view === 'week' ? 'flex' : 'none';
+      if (monthCtrl) monthCtrl.style.display = view === 'month' ? '' : 'none';
+      if (legend) legend.style.display = view === 'week' ? 'flex' : 'none';
+      if (view === 'week') {
+        loadAvailability();
+      } else {
+        loadAvailabilityMonthView();
+      }
+    }
+
+    function changeAvailMonth(delta) {
+      _availMonthDate = new Date(_availMonthDate.getFullYear(), _availMonthDate.getMonth() + delta, 1);
+      loadAvailabilityMonthView();
+    }
+
+    function loadAvailabilityMonthView() {
+      const el = document.getElementById('avail-grid-container');
+      const label = document.getElementById('avail-month-label');
+      const year = _availMonthDate.getFullYear();
+      const month = _availMonthDate.getMonth();
+
+      if (label) {
+        label.textContent = new Date(year, month, 1).toLocaleDateString('en-PH', { month: 'long', year: 'numeric' });
+      }
+
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let startDow = firstDay.getDay() - 1; // Mon=0
+      if (startDow < 0) startDow = 6;
+      const prevMonthDays = new Date(year, month, 0).getDate();
+      const today = todayStr();
+
+      let html = '<table class="month-cal"><thead><tr>';
+      ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => html += `<th>${d}</th>`);
+      html += '</tr></thead><tbody>';
+
+      let dayCount = 1;
+      let nextMonthDay = 1;
+      for (let row = 0; row < 6; row++) {
+        if (row > 0 && dayCount > daysInMonth) break;
+        html += '<tr>';
+        for (let col = 0; col < 7; col++) {
+          const cellIdx = row * 7 + col;
+          let dateStr, displayNum, isOther = false;
+          if (cellIdx < startDow) {
+            const d = prevMonthDays - (startDow - cellIdx - 1);
+            dateStr = new Date(year, month - 1, d).toISOString().split('T')[0];
+            displayNum = d; isOther = true;
+          } else if (dayCount > daysInMonth) {
+            dateStr = new Date(year, month + 1, nextMonthDay).toISOString().split('T')[0];
+            displayNum = nextMonthDay; isOther = true; nextMonthDay++;
+          } else {
+            dateStr = new Date(year, month, dayCount).toISOString().split('T')[0];
+            displayNum = dayCount; dayCount++;
+          }
+          html += renderMonthCell(dateStr, displayNum, isOther, today);
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    }
+
+    function renderMonthCell(dateStr, dayNum, isOtherMonth, today) {
+      const isToday = dateStr === today;
+      const dayBooked = _appointments.filter(a =>
+        a.date === dateStr && a.status !== 'cancelled' &&
+        (a.adviser_id === _user.id || a.panelists?.some(p => p.id === _user.id))
+      );
+      const dayAvails = _avail.filter(a => a.date === dateStr);
+
+      let cellCls = `month-day${isOtherMonth ? ' other-month' : ''}${isToday ? ' is-today' : ''}`;
+      let eventsHtml = '<div class="month-day-events">';
+
+      if (dayBooked.length > 0) {
+        dayBooked.slice(0, 2).forEach(a => {
+          eventsHtml += `<div class="month-day-event month-event-booked" title="${a.group_name} &middot; ${a.time_slot}">🔒 ${a.group_name}</div>`;
+        });
+        if (dayBooked.length > 2) {
+          eventsHtml += `<div class="month-day-event" style="color:var(--text3);font-size:9px">+${dayBooked.length - 2} more booked</div>`;
+        }
+      } else if (dayAvails.length > 0) {
+        const types = [...new Set(dayAvails.map(a => a.availability_type))];
+        types.forEach(t => {
+          const cnt = dayAvails.filter(a => a.availability_type === t).length;
+          eventsHtml += `<div class="month-day-event month-event-selected" title="${cnt} slot(s) as ${t}">✓ ${cnt} ${t}</div>`;
+        });
+      }
+      eventsHtml += '</div>';
+
+      return `<td><div class="${cellCls}"><div class="month-day-num">${dayNum}</div>${eventsHtml}</div></td>`;
+    }
+
+    let _savingAvail = false;
     async function toggleAvailSlot(date, time_slot, type, el) {
+      if (_savingAvail) return;
       if (!date) { showToast('Cannot modify past dates', 'warning'); return; }
-      const isSet = el.classList.contains('avail-advisory');
+
+      _savingAvail = true;
+      el.disabled = true;
+      const isSet = el.classList.contains('avail-selected');
       const saveEl = document.getElementById('avail-saving');
-      saveEl.style.display = 'inline';
+      if (saveEl) saveEl.style.display = 'inline';
 
       try {
         if (isSet) {
@@ -1946,8 +2193,9 @@
           if (slot) {
             const res = await fetch(`/api/faculty/${_user.id}/availability/${slot.id}`, { method: 'DELETE' });
             if (res.ok) {
-              el.classList.remove('avail-advisory');
+              el.classList.remove('avail-selected');
               el.classList.add('avail-open');
+              el.textContent = '';
               showToast('Slot removed', 'info');
             }
           }
@@ -1959,7 +2207,8 @@
           });
           if (res.ok) {
             el.classList.remove('avail-open');
-            el.classList.add('avail-advisory');
+            el.classList.add('avail-selected');
+            el.textContent = '✓';
             showToast('Slot added', 'success');
           } else {
             const d = await res.json();
@@ -1972,7 +2221,9 @@
       } catch (e) {
         showToast('Server error', 'error');
       } finally {
-        saveEl.style.display = 'none';
+        _savingAvail = false;
+        el.disabled = false;
+        if (saveEl) saveEl.style.display = 'none';
       }
     }
 
@@ -2076,3 +2327,9 @@
 </body>
 
 </html>
+
+
+
+
+
+
