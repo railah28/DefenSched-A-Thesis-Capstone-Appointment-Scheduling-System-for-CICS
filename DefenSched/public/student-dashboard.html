@@ -92,11 +92,14 @@
   .status-confirmed { background: var(--success-bg); border-color: #bbf7d0; }
   .status-pending { background: var(--warning-bg); border-color: #fde68a; }
   .status-rescheduled { background: var(--purple-bg); border-color: #ddd6fe; }
+  .status-cancelled { background: var(--danger-bg); border-color: #fecaca; }
   .status-none { background: var(--surface2); border-color: var(--border2); }
   .status-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .status-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
   .status-text { font-size: 15px; font-weight: 700; }
   .status-sub { font-size: 12px; margin-top: 2px; }
+
+  .tag-completed { background: var(--success-bg); color: var(--success); }
 
   /* ── Cards ── */
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
@@ -306,6 +309,10 @@
       <div class="card" id="defense-detail-card">
         <div class="card-header"><span class="card-title">My defense details</span><span class="tag tag-pending" id="defense-tag">—</span></div>
         <div class="defense-detail" style="margin-bottom:14px;">
+          <div class="detail-item" style="grid-column:1/-1">
+            <div class="detail-label">Thesis Title</div>
+            <div class="detail-value" id="d-title">—</div>
+          </div>
           <div class="detail-item">
             <div class="detail-label">Date</div>
             <div class="detail-value" id="d-date">—</div>
@@ -419,6 +426,10 @@
 
       <div style="display:flex;flex-direction:column;gap:14px;" id="book-form">
         <div class="form-field">
+          <label>Capstone/Thesis Title *</label>
+          <input class="input" id="bk-title" type="text" placeholder="e.g. AI-Powered Scheduling System" required>
+        </div>
+        <div class="form-field">
           <label>Group Name</label>
           <input class="input" id="bk-group" type="text" placeholder="e.g. Group Alpha">
         </div>
@@ -443,6 +454,10 @@
           <select class="input" id="bk-venue">
             <option value="">Loading venues...</option>
           </select>
+        </div>
+        <div class="form-field" id="bk-meeting-link-wrap" style="display:none">
+          <label>Meeting Link (for online defense)</label>
+          <input class="input" id="bk-meeting-link" type="url" placeholder="https://meet.google.com/...">
         </div>
         <div class="form-note">
           ℹ️ <strong>Note on panelists:</strong> Panelists will be assigned by the Research Coordinator after your appointment is reviewed. You don't need to choose them.
@@ -566,12 +581,14 @@ history.pushState(null, '', window.location.href);
 window.addEventListener('popstate', () => history.pushState(null, '', window.location.href));
 
 // ── Panel switching ───────────────────────────────────────────────
-function switchPanel(name, el) {
+async function switchPanel(name, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   if (el) el.classList.add('active');
   _currentPanel = name;
+
+  if (name === 'overview') await loadAppointment();
 
   const titles = {
     'overview': ['Overview', 'Your defense status at a glance'],
@@ -636,7 +653,12 @@ async function loadAppointment() {
     const r = await fetch('/api/appointments');
     if (!r.ok) return;
     const { appointments } = await r.json();
-    _appointment = appointments[0] || null;
+    const sorted = appointments.slice().sort((a, b) => {
+      if (a.date === b.date) return (a.time_slot || '').localeCompare(b.time_slot || '');
+      return (b.date || '').localeCompare(a.date || '');
+    });
+    const active = sorted.find(a => (a.status || '').trim().toLowerCase() !== 'cancelled');
+    _appointment = active || sorted[0] || null;
     renderStatusBanner();
     renderOverviewDetails();
     renderChecklist();
@@ -672,21 +694,26 @@ function renderStatusBanner() {
       </button>`;
     return;
   }
-  const isConfirmed = a.status === 'confirmed';
-  const isPending   = a.status === 'pending';
-  const isRescheduled = a.status === 'rescheduled';
-  const bgClass = isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : isRescheduled ? 'status-rescheduled' : 'status-none';
-  const color   = isConfirmed ? 'var(--success)'  : isPending ? 'var(--warning)' : isRescheduled ? 'var(--purple)' : 'var(--text3)';
-  const iconBg  = isConfirmed ? '#dcfce7' : isPending ? '#fef9c3' : isRescheduled ? 'var(--purple-bg)' : 'var(--surface2)';
-  const icon    = isConfirmed
+  const status = (a.status || '').trim().toLowerCase();
+  const isConfirmed = status === 'confirmed' || status === 'approved';
+  const isPending   = status === 'pending';
+  const isRescheduled = status === 'rescheduled';
+  const isCompleted = status === 'completed';
+  const isCancelled = status === 'cancelled';
+  const bgClass = isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : isRescheduled ? 'status-rescheduled' : isCompleted ? 'status-confirmed' : isCancelled ? 'status-cancelled' : 'status-none';
+  const color   = isConfirmed ? 'var(--success)'  : isPending ? 'var(--warning)' : isRescheduled ? 'var(--purple)' : isCompleted ? 'var(--success)' : isCancelled ? 'var(--danger)' : 'var(--text3)';
+  const iconBg  = isConfirmed ? '#dcfce7' : isPending ? '#fef9c3' : isRescheduled ? 'var(--purple-bg)' : isCompleted ? '#dcfce7' : isCancelled ? '#fee2e2' : 'var(--surface2)';
+  const icon    = isConfirmed || isCompleted
     ? `<svg width="20" height="20" fill="none" stroke="#16a34a" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke-width="2.5" stroke-linecap="round"/></svg>`
     : isPending
     ? `<svg width="20" height="20" fill="none" stroke="#ca8a04" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
     : isRescheduled
     ? `<svg width="20" height="20" fill="none" stroke="var(--purple)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
+    : isCancelled
+    ? `<svg width="20" height="20" fill="none" stroke="#dc2626" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke-width="2"/></svg>`
     : `<svg width="20" height="20" fill="none" stroke="#a1a1aa" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`;
-  const statusText = isConfirmed ? 'Confirmed — Final Defense' : isPending ? 'Pending — Awaiting Approval' : isRescheduled ? 'Rescheduled — Final Defense' : a.status.charAt(0).toUpperCase()+a.status.slice(1);
-  const cancelBtn = (a.status === 'pending' || a.status === 'confirmed' || a.status === 'rescheduled')
+  const statusText = isConfirmed ? 'Confirmed — Final Defense' : isPending ? 'Pending — Awaiting Approval' : isRescheduled ? 'Rescheduled — Final Defense' : isCompleted ? 'Completed — Defense Finished' : isCancelled ? 'Cancelled — No active appointment' : a.status.charAt(0).toUpperCase()+a.status.slice(1);
+  const cancelBtn = (status === 'pending' || status === 'confirmed' || status === 'approved' || status === 'rescheduled')
     ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">
         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke-width="2"/></svg>
         Cancel appointment
@@ -718,6 +745,7 @@ function renderOverviewDetails() {
     document.getElementById('defense-tag').className    = 'tag';
     return;
   }
+  document.getElementById('d-title').textContent = a.thesis_title || '—';
   document.getElementById('d-date').textContent  = a.date || '—';
   document.getElementById('d-day').textContent   = a.date ? new Date(a.date+'T00:00:00').toLocaleDateString('en-PH',{weekday:'long'}) : '—';
   document.getElementById('d-time').textContent  = a.time_slot || '—';
@@ -817,17 +845,20 @@ function renderMySchedule() {
   const panelists = (a.panelists && a.panelists.length > 0)
     ? a.panelists.map(p=>`<div style="font-size:13px;color:var(--text2);">• ${p.name}</div>`).join('')
     : '<div style="font-size:13px;color:var(--text3);">To be assigned by Research Coordinator</div>';
-  const cancelBtn = (a.status==='pending'||a.status==='confirmed'||a.status==='rescheduled')
+  const apptStatus = (a.status || '').trim().toLowerCase();
+  const cancelBtn = (apptStatus === 'pending' || apptStatus === 'confirmed' || apptStatus === 'approved' || apptStatus === 'rescheduled')
     ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">Cancel Appointment</button>` : '';
   el.innerHTML = `
     <div class="grid-2">
       <div class="card">
         <div class="card-header"><span class="card-title">Appointment Details</span><span class="tag tag-${a.status}">${a.status}</span></div>
         <div class="defense-detail" style="margin-bottom:16px;">
+          <div class="detail-item"><div class="detail-label">Thesis Title</div><div class="detail-value">${a.thesis_title||'—'}</div></div>
           <div class="detail-item"><div class="detail-label">Date</div><div class="detail-value">${a.date||'—'}</div></div>
           <div class="detail-item"><div class="detail-label">Time</div><div class="detail-value" style="font-family:var(--mono);">${a.time_slot||'—'}</div></div>
           <div class="detail-item"><div class="detail-label">Venue</div><div class="detail-value">${a.venue_name||'—'}</div></div>
           <div class="detail-item"><div class="detail-label">Group</div><div class="detail-value">${a.group_name||'—'}</div></div>
+          ${a.meeting_link ? `<div class="detail-item" style="grid-column:1/-1"><div class="detail-label">Meeting Link</div><div class="detail-value"><a href="${a.meeting_link}" target="_blank" style="color:var(--accent)">${a.meeting_link}</a></div></div>` : ''}
         </div>
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">Adviser</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">${a.adviser_name||'—'}</div>
@@ -850,15 +881,30 @@ function renderMySchedule() {
 }
 
 // ── Booking dropdowns ─────────────────────────────────────────────
+let _venues = [];
 async function loadBookingDropdowns() {
   try {
     const [fRes, vRes] = await Promise.all([fetch('/api/faculty'), fetch('/api/venues')]);
     const { faculty } = await fRes.json();
     const { venues }  = await vRes.json();
+    _venues = venues;
     document.getElementById('bk-adviser').innerHTML = '<option value="">Choose adviser</option>' + faculty.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
     document.getElementById('bk-venue').innerHTML   = '<option value="">Choose venue</option>'   + venues.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
   } catch (e) { console.error('Dropdown load error', e); }
 }
+
+// Show/hide meeting link field based on venue type
+document.getElementById('bk-venue')?.addEventListener('change', function() {
+  const venueId = parseInt(this.value);
+  const venue = _venues.find(v => v.id === venueId);
+  const wrap = document.getElementById('bk-meeting-link-wrap');
+  if (wrap) {
+    wrap.style.display = venue && venue.type === 'virtual' ? '' : 'none';
+    if (venue && venue.type !== 'virtual') {
+      document.getElementById('bk-meeting-link').value = '';
+    }
+  }
+});
 
 // ── Update booking panel state ────────────────────────────────────
 function updateBookingPanel() {
@@ -921,12 +967,14 @@ async function submitBooking() {
     document.getElementById('book-existing-notice').style.display = '';
     return;
   }
-  const group_name = document.getElementById('bk-group').value.trim();
-  const adviser_id = parseInt(document.getElementById('bk-adviser').value);
-  const date       = document.getElementById('bk-date').value;
-  const timeRaw    = document.getElementById('bk-time').value;
-  const venue_id   = parseInt(document.getElementById('bk-venue').value);
-  if (!group_name || !adviser_id || !date || !timeRaw || !venue_id) {
+  const thesis_title = document.getElementById('bk-title').value.trim();
+  const group_name   = document.getElementById('bk-group').value.trim();
+  const adviser_id   = parseInt(document.getElementById('bk-adviser').value);
+  const date         = document.getElementById('bk-date').value;
+  const timeRaw      = document.getElementById('bk-time').value;
+  const venue_id     = parseInt(document.getElementById('bk-venue').value);
+  const meeting_link = document.getElementById('bk-meeting-link').value.trim() || null;
+  if (!thesis_title || !group_name || !adviser_id || !date || !timeRaw || !venue_id) {
     showToast('Please fill in all fields.', 'error');
     return;
   }
@@ -939,7 +987,7 @@ async function submitBooking() {
     const r = await fetch('/api/appointments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ group_name, adviser_id, panelist_ids: [], date, time_slot, venue_id })
+      body: JSON.stringify({ group_name, adviser_id, panelist_ids: [], date, time_slot, venue_id, thesis_title, meeting_link })
     });
     const d = await r.json();
     if (r.ok) {

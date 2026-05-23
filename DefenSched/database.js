@@ -106,6 +106,8 @@ db.exec(`
 // ── Migrations (idempotent) ────────────────────────────────────
 try { db.exec(`ALTER TABLE users ADD COLUMN members TEXT`); } catch (_) { /* column already exists */ }
 try { db.exec(`ALTER TABLE users ADD COLUMN is_group INTEGER NOT NULL DEFAULT 0`); } catch (_) { /* column already exists */ }
+try { db.exec(`ALTER TABLE appointments ADD COLUMN thesis_title TEXT`); } catch (_) { /* column already exists */ }
+try { db.exec(`ALTER TABLE appointments ADD COLUMN meeting_link TEXT`); } catch (_) { /* column already exists */ }
 
 // ── Seed ────────────────────────────────────────────────────────
 function seed() {
@@ -154,11 +156,11 @@ function seed() {
   const fri = new Date(monday); fri.setDate(monday.getDate() + 4); const friStr = fri.toISOString().split('T')[0];
 
   const insA = db.prepare(`
-    INSERT INTO appointments (group_name, student_id, adviser_id, date, time_slot, venue_id, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO appointments (group_name, student_id, adviser_id, date, time_slot, venue_id, status, thesis_title, meeting_link)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
-  insA.run('Group Alpha', 5, 2, thuStr, '09:00-10:00', 1, 'confirmed');
-  insA.run('Group Beta', 6, 3, friStr, '10:00-11:00', 2, 'pending');
+  insA.run('Group Alpha', 5, 2, thuStr, '09:00-10:00', 1, 'confirmed', 'AI-Powered Scheduling System for CICS', null);
+  insA.run('Group Beta', 6, 3, friStr, '10:00-11:00', 2, 'pending', 'Mobile-Based Attendance Monitoring with QR Code', null);
 
   const insAP = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
   insAP.run(1, 3);
