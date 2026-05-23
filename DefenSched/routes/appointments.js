@@ -276,7 +276,57 @@ router.post('/', requireAuth, requireActive, (req, res) => {
 });*/
 
 // ── PUT /api/appointments/:id ─────────────────────────────────────
+
+// ── PUT /api/appointments/:id ─────────────────────────────────────
 router.put('/:id', requireAuth, requireActive, (req, res) => {
+  const { userId, role } = req.session;
+  const appt = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
+  if (!appt) return res.status(404).json({ error: 'Appointment not found.' });
+  
+  if (role === 'student' && appt.student_id !== userId)
+    return res.status(403).json({ error: 'Cannot modify another group\'s appointment.' });
+
+  
+  if (req.body.status && req.body.status.toLowerCase() === 'cancelled') {
+    if (role === 'student') {
+      return res.status(403).json({ error: 'Unauthorized: Students are not permitted to cancel appointments.' });
+    }
+  }
+
+  const fields = ['status','date','time_slot','venue_id','notes','meeting_link'];
+  const updates = {};
+  fields.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+  updates.updated_at = new Date().toISOString();
+
+ 
+  if (updates.status && updates.status.toLowerCase() === 'cancelled') {
+    updates.status = 'cancelled';
+
+    db.prepare('DELETE FROM appointment_panelists WHERE appointment_id = ?').run(req.params.id);
+
+    notify(appt.student_id, `Your appointment request for ${appt.group_name} has been cancelled.`, 'error');
+    
+    notify(appt.adviser_id, `The scheduled defense for ${appt.group_name} on ${appt.date} has been cancelled.`, 'warning');
+  }
+
+  const set = Object.keys(updates).map(k => `${k} = ?`).join(', ');
+  db.prepare(`UPDATE appointments SET ${set} WHERE id = ?`).run(...Object.values(updates), req.params.id);
+
+  if (updates.status !== 'cancelled' && role !== 'student' && (req.body.date || req.body.time_slot)) {
+    notify(appt.student_id, `Your defense has been rescheduled to ${req.body.date || appt.date} at ${req.body.time_slot || appt.time_slot}.`, 'warning');
+    
+    const panRes = db.prepare('SELECT panelist_id FROM appointment_panelists WHERE appointment_id = ?').all(req.params.id);
+    for (const p of panRes) {
+      if (p.panelist_id !== appt.student_id) {
+        notify(p.panelist_id, `The defense for ${appt.group_name} has been rescheduled to ${req.body.date || appt.date} at ${req.body.time_slot || appt.time_slot}.`, 'warning');
+      }
+    }
+  }
+
+  res.json({ success: true });
+});
+
+/*router.put('/:id', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   const appt = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
   if (!appt) return res.status(404).json({ error: 'Appointment not found.' });
@@ -303,7 +353,7 @@ router.put('/:id', requireAuth, requireActive, (req, res) => {
   }
 
   res.json({ success: true });
-});
+});*/
 
 // ── DELETE /api/appointments/:id — hard delete ────────────────────
 router.delete('/:id', requireAuth, requireActive, requireRole('admin'), (req, res) => {
