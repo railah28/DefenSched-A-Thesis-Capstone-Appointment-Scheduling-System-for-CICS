@@ -190,13 +190,6 @@ router.post('/', requireAuth, (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
   `).run(group_name, userId, adviser_id, date, time_slot, venue_id, notes || null, thesis_title || null, meeting_link || null);
 
-  const pIdsArr = panelist_ids || [];
-  const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
-  for (const pid of pIdsArr) insPan.run(apptId, pid);
-
-  // Notify adviser, panelists, and submitting student
-  notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
-  for (const pid of pIdsArr) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
   const pIds = Array.isArray(panelist_ids) ? panelist_ids.filter(Boolean) : [];
   const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
   for (const pid of pIds) insPan.run(apptId, pid);

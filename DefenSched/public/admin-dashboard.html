@@ -1273,9 +1273,11 @@
       </div>
       <div id="schedule-view-calendar" class="sub-panel">
         <div class="card">
-          <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px">
+          <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <span style="font-size:12px;color:var(--text3)">Week:</span>
+            <button class="btn btn-outline btn-sm" id="calendar-prev-week-btn" onclick="changeCalendarWeek(-1)">◀ Prev</button>
             <select id="calendar-week-selector" class="form-select" style="width:260px" onchange="loadScheduleCalendar()"><option>Loading weeks...</option></select>
+            <button class="btn btn-outline btn-sm" id="calendar-next-week-btn" onclick="changeCalendarWeek(1)">Next ▶</button>
           </div>
           <div id="schedule-calendar-container" style="overflow-x:auto">
             <div class="skeleton"></div>
@@ -1804,7 +1806,31 @@
       loadScheduleMonthView();
     }
 
-    function loadScheduleMonthView() {
+function formatLocalDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      function changeCalendarWeek(delta) {
+        const selector = document.getElementById('calendar-week-selector');
+        if (!selector || !selector.options.length) return;
+        const newIndex = Math.min(Math.max(selector.selectedIndex + delta, 0), selector.options.length - 1);
+        selector.selectedIndex = newIndex;
+        loadScheduleCalendar();
+      }
+
+      function updateCalendarWeekNav() {
+        const selector = document.getElementById('calendar-week-selector');
+        const prev = document.getElementById('calendar-prev-week-btn');
+        const next = document.getElementById('calendar-next-week-btn');
+        if (!selector) return;
+        if (prev) prev.disabled = selector.selectedIndex <= 0;
+        if (next) next.disabled = selector.selectedIndex >= selector.options.length - 1;
+      }
+
+      function loadScheduleMonthView() {
       const el = document.getElementById('schedule-month-container');
       const label = document.getElementById('schedule-month-label');
       const year = _scheduleMonthDate.getFullYear();
@@ -1891,7 +1917,7 @@
           const endOfWeek = new Date(startOfWeek);
           endOfWeek.setDate(startOfWeek.getDate() + 4);
           const label = `Week of ${startOfWeek.toLocaleDateString('en-PH')} - ${endOfWeek.toLocaleDateString('en-PH')}`;
-          const value = startOfWeek.toISOString().split('T')[0];
+          const value = formatLocalDate(startOfWeek);
           const opt = new Option(label, value);
           weekSelector.appendChild(opt);
           if (w === 0) selectedIdx = weekSelector.options.length - 1;
@@ -1903,7 +1929,7 @@
       const start = 8;
       const end = 17;
       const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = formatLocalDate(new Date());
 
       // Status color map for calendar items
       const statusColors = {
@@ -1953,6 +1979,7 @@
       html += '</div>';
 
       container.innerHTML = html;
+      updateCalendarWeekNav();
     }
 
     function openApptDetailModal(apptId) {
