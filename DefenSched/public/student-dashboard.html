@@ -1,673 +1,1508 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DefenSched — Student Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #fafafa; --surface: #ffffff; --surface2: #f4f4f5;
-    --border: #e4e4e7; --border2: #d4d4d8;
-    --accent: #6d28d9; --accent-light: #f5f3ff; --accent2: #5b21b6;
-    --text: #18181b; --text2: #52525b; --text3: #a1a1aa;
-    --success: #16a34a; --success-bg: #f0fdf4;
-    --warning: #ca8a04; --warning-bg: #fefce8;
-    --danger: #dc2626; --danger-bg: #fef2f2;
-    --info: #0369a1; --info-bg: #f0f9ff;
-    --orange: #ea580c; --orange-bg: #fff7ed;
-    --purple: #8b5cf6; --purple-bg: #f5f3ff;
-    --font: 'Plus Jakarta Sans', sans-serif;
-    --mono: 'Space Mono', monospace;
-    --radius: 10px; --radius-lg: 16px;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DefenSched — Student Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --surface2: #f4f4f5;
+      --border: #e4e4e7;
+      --border2: #d4d4d8;
+      --accent: #6d28d9;
+      --accent-light: #f5f3ff;
+      --accent2: #5b21b6;
+      --text: #18181b;
+      --text2: #52525b;
+      --text3: #a1a1aa;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --warning: #ca8a04;
+      --warning-bg: #fefce8;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --info: #0369a1;
+      --info-bg: #f0f9ff;
+      --orange: #ea580c;
+      --orange-bg: #fff7ed;
+      --purple: #8b5cf6;
+      --purple-bg: #f5f3ff;
+      --font: 'Plus Jakarta Sans', sans-serif;
+      --mono: 'Space Mono', monospace;
+      --radius: 10px;
+      --radius-lg: 16px;
+    }
 
-  [data-theme="dark"] {
-    --bg: #0d0f14;
-    --surface: #13161d;
-    --surface2: #1a1e28;
-    --border: #252a38;
-    --border2: #2e3447;
-    --text: #e8eaf0;
-    --text2: #8b90a0;
-    --text3: #555b70;
-    --accent: #4f8ef7;
-    --accent-light: rgba(79, 142, 247, .12);
-    --accent2: #3a6fd8;
-    --success: #3ecf8e;
-    --success-bg: rgba(62, 207, 142, .12);
-    --warning: #f5a623;
-    --warning-bg: rgba(245, 166, 35, .12);
-    --danger: #e05c5c;
-    --danger-bg: rgba(224, 92, 92, .12);
-    --info: #4f8ef7;
-    --info-bg: rgba(79, 142, 247, .12);
-    --orange: #f5a623;
-    --orange-bg: rgba(245, 166, 35, .12);
-    --purple: #a78bfa;
-    --purple-bg: rgba(167, 139, 250, .12);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; font-size: 14px; }
+    [data-theme="dark"] {
+      --bg: #0d0f14;
+      --surface: #13161d;
+      --surface2: #1a1e28;
+      --border: #252a38;
+      --border2: #2e3447;
+      --text: #e8eaf0;
+      --text2: #8b90a0;
+      --text3: #555b70;
+      --accent: #4f8ef7;
+      --accent-light: rgba(79, 142, 247, .12);
+      --accent2: #3a6fd8;
+      --success: #3ecf8e;
+      --success-bg: rgba(62, 207, 142, .12);
+      --warning: #f5a623;
+      --warning-bg: rgba(245, 166, 35, .12);
+      --danger: #e05c5c;
+      --danger-bg: rgba(224, 92, 92, .12);
+      --info: #4f8ef7;
+      --info-bg: rgba(79, 142, 247, .12);
+      --orange: #f5a623;
+      --orange-bg: rgba(245, 166, 35, .12);
+      --purple: #a78bfa;
+      --purple-bg: rgba(167, 139, 250, .12);
+    }
 
-  .sidebar {
-    width: 220px; min-height: 100vh; background: var(--surface);
-    border-right: 1px solid var(--border); display: flex; flex-direction: column;
-    position: fixed; top: 0; left: 0; bottom: 0;
-  }
-  .logo { padding: 22px 20px 18px; border-bottom: 1px solid var(--border); }
-  .logo-name { font-size: 15px; font-weight: 700; color: var(--text); }
-  .logo-badge { font-size: 10px; font-weight: 600; background: var(--accent-light); color: var(--accent); border-radius: 99px; padding: 2px 8px; margin-left: 6px; }
-  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
-  .nav { flex: 1; padding: 10px; }
-  .nav-section { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 10px 4px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--radius); cursor: pointer; color: var(--text2); font-size: 13px; font-weight: 500; transition: all 0.15s; margin-bottom: 2px; user-select: none; }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: var(--accent-light); color: var(--accent); }
-  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-  .nav-badge { margin-left: auto; font-size: 10px; font-family: var(--mono); background: var(--danger); color: #fff; border-radius: 99px; padding: 1px 6px; }
-  .sidebar-user { padding: 14px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6d28d9, #ea580c); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  .main { margin-left: 220px; flex: 1; padding: 28px 32px; }
-  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
-  .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-  .page-sub { font-size: 13px; color: var(--text2); margin-top: 3px; font-weight: 400; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      font-size: 14px;
+    }
 
-  /* ── Panels ── */
-  .panel { display: none; }
-  .panel.active { display: block; }
+    .sidebar {
+      width: 220px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
 
-  /* ── Buttons ── */
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font); transition: all 0.15s; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent2); }
-  .btn-outline { background: var(--surface); color: var(--text2); border: 1px solid var(--border2); font-weight: 500; }
-  .btn-outline:hover { background: var(--surface2); }
-  .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; font-weight: 600; font-size: 12px; padding: 7px 14px; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .logo {
+      padding: 22px 20px 18px;
+      border-bottom: 1px solid var(--border);
+    }
 
-  /* ── Status Banner ── */
-  .status-banner { border-radius: var(--radius-lg); padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border: 1px solid; }
-  .status-confirmed { background: var(--success-bg); border-color: #bbf7d0; }
-  .status-pending { background: var(--warning-bg); border-color: #fde68a; }
-  .status-rescheduled { background: var(--purple-bg); border-color: #ddd6fe; }
-  .status-none { background: var(--surface2); border-color: var(--border2); }
-  .status-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .status-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
-  .status-text { font-size: 15px; font-weight: 700; }
-  .status-sub { font-size: 12px; margin-top: 2px; }
+    .logo-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
 
-  /* ── Cards ── */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .card-title { font-size: 13px; font-weight: 700; }
-  .card-action { font-size: 12px; color: var(--accent); cursor: pointer; font-weight: 600; }
+    .logo-badge {
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 99px;
+      padding: 2px 8px;
+      margin-left: 6px;
+    }
 
-  /* ── Tags ── */
-  .tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; }
-  .tag-confirmed { background: var(--success-bg); color: var(--success); }
-  .tag-pending { background: var(--warning-bg); color: var(--warning); }
-  .tag-cancelled { background: var(--danger-bg); color: var(--danger); }
-  .tag-final { background: var(--accent-light); color: var(--accent); }
-  .tag-rescheduled { background: var(--purple-bg); color: var(--purple); }
-  .tag-title { background: var(--orange-bg); color: var(--orange); }
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 3px;
+    }
 
-  /* ── Defense detail ── */
-  .defense-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .detail-item { background: var(--surface2); border-radius: var(--radius); padding: 12px 14px; }
-  .detail-label { font-size: 10px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
-  .detail-value { font-size: 13px; font-weight: 600; color: var(--text); }
-  .detail-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .nav {
+      flex: 1;
+      padding: 10px;
+    }
 
-  /* ── Panelist chips ── */
-  .panelist-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-  .panelist-chip { display: flex; align-items: center; gap: 8px; }
-  .panelist-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
-  .panelist-name { font-size: 12px; font-weight: 500; color: var(--text); }
-  .panelist-role { font-size: 11px; color: var(--text3); }
+    .nav-section {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text3);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 10px 10px 4px;
+    }
 
-  /* ── Steps ── */
-  .step-list { display: flex; flex-direction: column; gap: 0; }
-  .step-item { display: flex; gap: 12px; padding-bottom: 16px; }
-  .step-item:last-child { padding-bottom: 0; }
-  .step-left { display: flex; flex-direction: column; align-items: center; }
-  .step-circle { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
-  .step-circle.done { background: var(--success); color: #fff; }
-  .step-circle.active { background: var(--accent); color: #fff; }
-  .step-circle.todo { background: var(--surface2); color: var(--text3); border: 1.5px solid var(--border2); }
-  .step-line { width: 2px; flex: 1; background: var(--border); margin-top: 4px; }
-  .step-item:last-child .step-line { display: none; }
-  .step-body { padding-top: 2px; }
-  .step-name { font-size: 13px; font-weight: 600; }
-  .step-name.done-text { color: var(--success); }
-  .step-name.active-text { color: var(--accent); }
-  .step-name.todo-text { color: var(--text3); }
-  .step-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+      user-select: none;
+    }
 
-  /* ── Board ── */
-  .board-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .board-row:last-child { border-bottom: none; }
-  .board-time { font-family: var(--mono); font-size: 11px; color: var(--text3); min-width: 52px; }
-  .board-info { flex: 1; }
-  .board-name { font-size: 13px; font-weight: 600; color: var(--text); }
-  .board-meta { font-size: 11px; color: var(--text3); margin-top: 1px; }
-  .board-row.mine { background: var(--accent-light); border-radius: var(--radius); padding: 10px; border: none; margin-bottom: 4px; }
-  .board-row.mine .board-name { color: var(--accent); }
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
 
-  /* ── Upload ── */
-  .upload-zone { border: 1.5px dashed var(--border2); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; }
-  .upload-zone:hover { border-color: var(--accent); background: var(--accent-light); }
-  .upload-zone.dragover { border-color: var(--accent); background: var(--accent-light); }
-  .upload-icon { width: 36px; height: 36px; background: var(--surface2); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
-  .upload-icon svg { width: 18px; height: 18px; stroke: var(--text3); }
-  .upload-label { font-size: 13px; font-weight: 600; color: var(--text2); }
-  .upload-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+    .nav-item.active {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
 
-  /* ── Notifications ── */
-  .notif-item { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .notif-item:last-child { border-bottom: none; }
-  .notif-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-  .notif-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
-  .notif-text strong { color: var(--text); font-weight: 600; }
-  .notif-time { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+    .nav-item svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
 
-  /* ── Schedule board table ── */
-  .sched-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .sched-table th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
-  .sched-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text2); }
-  .sched-table tr:last-child td { border-bottom: none; }
-  .sched-table tr.mine-row td { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-family: var(--mono);
+      background: var(--danger);
+      color: #fff;
+      border-radius: 99px;
+      padding: 1px 6px;
+    }
 
-  /* ── Empty state ── */
-  .empty-state { padding: 40px; text-align: center; color: var(--text3); }
-  .empty-state svg { width: 40px; height: 40px; stroke: var(--text3); margin: 0 auto 12px; display: block; }
-  .empty-title { font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
-  .empty-sub { font-size: 12px; }
+    .sidebar-user {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  /* ── Modal ── */
-  .modal-bg { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.5); align-items: center; justify-content: center; }
-  .modal-bg.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 30px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,.15); }
-  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
-  .modal-title { font-size: 16px; font-weight: 700; }
-  .modal-sub { font-size: 12px; color: var(--text3); margin-top: 3px; }
-  .modal-footer { display: flex; gap: 10px; margin-top: 22px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .form-field { display: flex; flex-direction: column; gap: 5px; }
-  .form-field label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .07em; }
-  .input { width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-size: 13px; font-family: var(--font); outline: none; transition: border .15s; }
-  .input:focus { border-color: var(--accent); }
-  select.input option { background: var(--surface); }
-  .form-note { font-size: 11px; color: var(--text3); padding: 10px 12px; background: var(--info-bg); border: 1px solid #bae6fd; border-radius: 8px; line-height: 1.5; }
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6d28d9, #ea580c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
 
-  /* ── Toast ── */
-  #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
-  .toast { padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.2); animation: fadeIn .2s ease; }
+    .main {
+      margin-left: 220px;
+      flex: 1;
+      padding: 28px 32px;
+    }
 
-  .ver-badge { font-family: var(--mono); font-size: 10px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 2px 7px; font-weight: 700; color: var(--text3); }
-  .ver-badge.current { background: var(--accent-light); border-color: #c4b5fd; color: var(--accent); }
-  .version-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-  .version-item:last-child { border-bottom: none; }
-</style>
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .page-sub {
+      font-size: 13px;
+      color: var(--text2);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    /* ── Panels ── */
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-family: var(--font);
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent2);
+    }
+
+    .btn-outline {
+      background: var(--surface);
+      color: var(--text2);
+      border: 1px solid var(--border2);
+      font-weight: 500;
+    }
+
+    .btn-outline:hover {
+      background: var(--surface2);
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #fecaca;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 7px 14px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* ── Status Banner ── */
+    .status-banner {
+      border-radius: var(--radius-lg);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      border: 1px solid;
+    }
+
+    .status-confirmed {
+      background: var(--success-bg);
+      border-color: #bbf7d0;
+    }
+
+    .status-pending {
+      background: var(--warning-bg);
+      border-color: #fde68a;
+    }
+
+    .status-rescheduled {
+      background: var(--purple-bg);
+      border-color: #ddd6fe;
+    }
+
+    .status-none {
+      background: var(--surface2);
+      border-color: var(--border2);
+    }
+
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .status-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 3px;
+    }
+
+    .status-text {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .status-sub {
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    /* ── Cards ── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .card-action {
+      font-size: 12px;
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* ── Tags ── */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 99px;
+    }
+
+    .tag-confirmed {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .tag-pending {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+
+    .tag-cancelled {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .tag-final {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .tag-rescheduled {
+      background: var(--purple-bg);
+      color: var(--purple);
+    }
+
+    .tag-title {
+      background: var(--orange-bg);
+      color: var(--orange);
+    }
+
+    /* ── Defense detail ── */
+    .defense-detail {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .detail-item {
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+
+    .detail-label {
+      font-size: 10px;
+      color: var(--text3);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .detail-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    /* ── Panelist chips ── */
+    .panelist-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .panelist-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panelist-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .panelist-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .panelist-role {
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    /* ── Steps ── */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 12px;
+      padding-bottom: 16px;
+    }
+
+    .step-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .step-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-circle.done {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .step-circle.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .step-circle.todo {
+      background: var(--surface2);
+      color: var(--text3);
+      border: 1.5px solid var(--border2);
+    }
+
+    .step-line {
+      width: 2px;
+      flex: 1;
+      background: var(--border);
+      margin-top: 4px;
+    }
+
+    .step-item:last-child .step-line {
+      display: none;
+    }
+
+    .step-body {
+      padding-top: 2px;
+    }
+
+    .step-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .step-name.done-text {
+      color: var(--success);
+    }
+
+    .step-name.active-text {
+      color: var(--accent);
+    }
+
+    .step-name.todo-text {
+      color: var(--text3);
+    }
+
+    .step-desc {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    /* ── Board ── */
+    .board-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .board-row:last-child {
+      border-bottom: none;
+    }
+
+    .board-time {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      min-width: 52px;
+    }
+
+    .board-info {
+      flex: 1;
+    }
+
+    .board-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .board-meta {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 1px;
+    }
+
+    .board-row.mine {
+      background: var(--accent-light);
+      border-radius: var(--radius);
+      padding: 10px;
+      border: none;
+      margin-bottom: 4px;
+    }
+
+    .board-row.mine .board-name {
+      color: var(--accent);
+    }
+
+    /* ── Upload ── */
+    .upload-zone {
+      border: 1.5px dashed var(--border2);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .upload-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--surface2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+    }
+
+    .upload-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text3);
+    }
+
+    .upload-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+    }
+
+    .upload-sub {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 3px;
+    }
+
+    /* ── Notifications ── */
+    .notif-item {
+      display: flex;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .notif-item:last-child {
+      border-bottom: none;
+    }
+
+    .notif-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .notif-text {
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.5;
+    }
+
+    .notif-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .notif-time {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 2px;
+      font-family: var(--mono);
+    }
+
+    /* ── Schedule board table ── */
+    .sched-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .sched-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sched-table td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+    }
+
+    .sched-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .sched-table tr.mine-row td {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: var(--text3);
+    }
+
+    .empty-state svg {
+      width: 40px;
+      height: 40px;
+      stroke: var(--text3);
+      margin: 0 auto 12px;
+      display: block;
+    }
+
+    .empty-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 4px;
+    }
+
+    .empty-sub {
+      font-size: 12px;
+    }
+
+    /* ── Modal ── */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0, 0, 0, .5);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-bg.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 30px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .15);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-sub {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 3px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-field label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .input {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font);
+      outline: none;
+      transition: border .15s;
+    }
+
+    .input:focus {
+      border-color: var(--accent);
+    }
+
+    select.input option {
+      background: var(--surface);
+    }
+
+    .form-note {
+      font-size: 11px;
+      color: var(--text3);
+      padding: 10px 12px;
+      background: var(--info-bg);
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      line-height: 1.5;
+    }
+
+    /* ── Toast ── */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
+      animation: fadeIn .2s ease;
+    }
+
+    .ver-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-weight: 700;
+      color: var(--text3);
+    }
+
+    .ver-badge.current {
+      background: var(--accent-light);
+      border-color: #c4b5fd;
+      color: var(--accent);
+    }
+
+    .version-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .version-item:last-child {
+      border-bottom: none;
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ── Sidebar ─────────────────────────────────────────────── -->
-<aside class="sidebar">
-  <div class="logo">
-    <div><span class="logo-name">DefenSched</span><span class="logo-badge">Student</span></div>
-    <div class="logo-sub">CICS · MSU Main Campus</div>
-  </div>
-  <nav class="nav">
-    <div class="nav-section">Main</div>
-    <div class="nav-item active" data-panel="overview" onclick="switchPanel('overview', this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.8"/></svg>
-      Overview
+  <!-- ── Sidebar ─────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div><span class="logo-name">DefenSched</span><span class="logo-badge">Student</span></div>
+      <div class="logo-sub">CICS · MSU Main Campus</div>
     </div>
-    <div class="nav-item" data-panel="schedule-board" onclick="switchPanel('schedule-board', this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-width="1.8" stroke-linecap="round"/></svg>
-      Defense schedule board
-    </div>
-    <div class="nav-section">My defense</div>
-    <div class="nav-item" data-panel="book" onclick="switchPanel('book', this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke-width="1.8" stroke-linecap="round"/></svg>
-      Book a defense
-    </div>
-    <div class="nav-item" data-panel="my-schedule" onclick="switchPanel('my-schedule', this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.8"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.8"/><path d="M9 16l2 2 4-4" stroke-width="1.8" stroke-linecap="round"/></svg>
-      My schedule
-    </div>
-    <div class="nav-item" data-panel="manuscript" onclick="switchPanel('manuscript', this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="1.8" stroke-linecap="round"/></svg>
-      Manuscript submission
-      <span class="nav-badge" id="ms-badge" style="display:none;">!</span>
-    </div>
-    <div class="nav-item" data-panel="notifications" onclick="switchPanel('notifications', this)">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke-width="1.8" stroke-linecap="round"/></svg>
-      Notifications
-      <span class="nav-badge" id="notif-badge" style="display:none;"></span>
-    </div>
-  </nav>
-  <div class="sidebar-user">
-    <div class="avatar" id="user-avatar">G4</div>
-    <div style="flex:1;min-width:0;">
-      <div style="font-size:13px;font-weight:600;" id="user-display-name">Loading...</div>
-      <div style="font-size:11px;color:var(--text3);">Student</div>
-    </div>
-    <button id="theme-toggle" title="Toggle Theme" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
-      <svg id="theme-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
-    <button id="logout-btn" title="Logout" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;flex-shrink:0;">
-      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </button>
-  </div>
-</aside>
-
-<!-- ── Main ────────────────────────────────────────────────── -->
-<main class="main">
-
-  <!-- Page header (dynamic) -->
-  <div class="page-header">
-    <div>
-      <div class="page-title" id="page-title">Overview</div>
-      <div class="page-sub" id="page-sub">AY 2025–2026 · Second Semester</div>
-    </div>
-    <button class="btn btn-primary" id="header-book-btn" onclick="switchPanel('book', document.querySelector('[data-panel=book]'))">
-      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/></svg>
-      Book a defense
-    </button>
-  </div>
-
-  <!-- ══ PANEL: Overview ══════════════════════════════════════ -->
-  <div class="panel active" id="panel-overview">
-
-    <!-- Status banner (dynamic) -->
-    <div class="status-banner status-none" id="status-banner">
-      <div style="display:flex;align-items:center;gap:14px;">
-        <div class="status-icon" style="background:var(--surface2);">
-          <svg width="20" height="20" fill="none" stroke="var(--text3)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
-        <div>
-          <div class="status-label" style="color:var(--text3);">Defense Status</div>
-          <div class="status-text" style="color:var(--text2);">Loading...</div>
-          <div class="status-sub" style="color:var(--text3);">Please wait</div>
-        </div>
+    <nav class="nav">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" data-panel="overview" onclick="switchPanel('overview', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.8" />
+          <rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.8" />
+          <rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.8" />
+          <rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.8" />
+        </svg>
+        Overview
       </div>
+      <div class="nav-item" data-panel="schedule-board" onclick="switchPanel('schedule-board', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        Defense schedule board
+      </div>
+      <div class="nav-section">My defense</div>
+      <div class="nav-item" data-panel="book" onclick="switchPanel('book', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.8" />
+          <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" stroke-width="1.8"
+            stroke-linecap="round" />
+        </svg>
+        Book a defense
+      </div>
+      <div class="nav-item" data-panel="my-schedule" onclick="switchPanel('my-schedule', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.8" />
+          <path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.8" />
+          <path d="M9 16l2 2 4-4" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        My schedule
+      </div>
+      <div class="nav-item" data-panel="manuscript" onclick="switchPanel('manuscript', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="1.8"
+            stroke-linecap="round" />
+        </svg>
+        Manuscript submission
+        <span class="nav-badge" id="ms-badge" style="display:none;">!</span>
+      </div>
+      <div class="nav-item" data-panel="notifications" onclick="switchPanel('notifications', this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke-width="1.8"
+            stroke-linecap="round" />
+        </svg>
+        Notifications
+        <span class="nav-badge" id="notif-badge" style="display:none;"></span>
+      </div>
+    </nav>
+    <div class="sidebar-user">
+      <div class="avatar" id="user-avatar">G4</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;" id="user-display-name">Loading...</div>
+        <div style="font-size:11px;color:var(--text3);">Student</div>
+      </div>
+      <button id="theme-toggle" title="Toggle Theme"
+        style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+        <svg id="theme-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <button id="logout-btn" title="Logout"
+        style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;flex-shrink:0;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Page header (dynamic) -->
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="page-title">Overview</div>
+        <div class="page-sub" id="page-sub">AY 2025–2026 · Second Semester</div>
+      </div>
+      <button class="btn btn-primary" id="header-book-btn"
+        onclick="switchPanel('book', document.querySelector('[data-panel=book]'))">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2" />
+          <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" />
+        </svg>
+        Book a defense
+      </button>
     </div>
 
-    <!-- Defense details + checklist -->
-    <div class="grid-2" style="margin-bottom:14px;">
-      <div class="card" id="defense-detail-card">
-        <div class="card-header"><span class="card-title">My defense details</span><span class="tag tag-pending" id="defense-tag">—</span></div>
-        <div class="defense-detail" style="margin-bottom:14px;">
-          <div class="detail-item" style="grid-column:1/-1">
-            <div class="detail-label">Thesis Title</div>
-            <div class="detail-value" id="d-title">—</div>
+    <!-- ══ PANEL: Overview ══════════════════════════════════════ -->
+    <div class="panel active" id="panel-overview">
+
+      <!-- Status banner (dynamic) -->
+      <div class="status-banner status-none" id="status-banner">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="status-icon" style="background:var(--surface2);">
+            <svg width="20" height="20" fill="none" stroke="var(--text3)" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke-width="2" />
+              <path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round" />
+            </svg>
           </div>
-          <div class="detail-item">
-            <div class="detail-label">Date</div>
-            <div class="detail-value" id="d-date">—</div>
-            <div class="detail-sub" id="d-day">—</div>
+          <div>
+            <div class="status-label" style="color:var(--text3);">Defense Status</div>
+            <div class="status-text" style="color:var(--text2);">Loading...</div>
+            <div class="status-sub" style="color:var(--text3);">Please wait</div>
           </div>
-          <div class="detail-item">
-            <div class="detail-label">Time</div>
-            <div class="detail-value" id="d-time" style="font-family:var(--mono);">—</div>
-            <div class="detail-sub">Defense session</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Venue</div>
-            <div class="detail-value" id="d-venue">—</div>
-            <div class="detail-sub">CICS Building</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Stage</div>
-            <div class="detail-value"><span class="tag tag-final" style="font-size:12px;">Final defense</span></div>
-          </div>
-        </div>
-        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assigned adviser</div>
-        <div class="panelist-chip" style="margin-bottom:14px;">
-          <div class="panelist-dot" id="adviser-dot" style="background:linear-gradient(135deg,#0d9488,#2563eb);">—</div>
-          <div><div class="panelist-name" id="adviser-name">—</div><div class="panelist-role">Primary Adviser</div></div>
-        </div>
-        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assigned panelists</div>
-        <div class="panelist-list" id="panelist-list">
-          <div style="font-size:12px;color:var(--text3);">Panelists will be assigned by the Research Coordinator.</div>
         </div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:14px;">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Defense checklist</span></div>
-          <div class="step-list" id="checklist">
-            <div class="step-item">
-              <div class="step-left"><div class="step-circle todo" id="step1-circle">1</div><div class="step-line"></div></div>
-              <div class="step-body"><div class="step-name todo-text" id="step1-name">Book a defense slot</div><div class="step-desc" id="step1-desc">Submit your appointment request</div></div>
+      <!-- Defense details + checklist -->
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="card" id="defense-detail-card">
+          <div class="card-header"><span class="card-title">My defense details</span><span class="tag tag-pending"
+              id="defense-tag">—</span></div>
+          <div class="defense-detail" style="margin-bottom:14px;">
+            <div class="detail-item" style="grid-column:1/-1">
+              <div class="detail-label">Thesis Title</div>
+              <div class="detail-value" id="d-title">—</div>
             </div>
-            <div class="step-item">
-              <div class="step-left"><div class="step-circle todo" id="step2-circle">2</div><div class="step-line"></div></div>
-              <div class="step-body"><div class="step-name todo-text" id="step2-name">Upload manuscript</div><div class="step-desc" id="step2-desc">PDF or DOCX — required to confirm slot</div></div>
+            <div class="detail-item">
+              <div class="detail-label">Date</div>
+              <div class="detail-value" id="d-date">—</div>
+              <div class="detail-sub" id="d-day">—</div>
             </div>
-            <div class="step-item">
-              <div class="step-left"><div class="step-circle todo" id="step3-circle">3</div><div class="step-line"></div></div>
-              <div class="step-body"><div class="step-name todo-text" id="step3-name">Slot confirmed</div><div class="step-desc" id="step3-desc">Research Coordinator approves schedule</div></div>
+            <div class="detail-item">
+              <div class="detail-label">Time</div>
+              <div class="detail-value" id="d-time" style="font-family:var(--mono);">—</div>
+              <div class="detail-sub">Defense session</div>
             </div>
-            <div class="step-item">
-              <div class="step-left"><div class="step-circle todo" id="step4-circle">4</div><div class="step-line"></div></div>
-              <div class="step-body"><div class="step-name todo-text" id="step4-name">Final defense</div><div class="step-desc" id="step4-desc">Defense day</div></div>
+            <div class="detail-item">
+              <div class="detail-label">Venue</div>
+              <div class="detail-value" id="d-venue">—</div>
+              <div class="detail-sub">CICS Building</div>
             </div>
-            <div class="step-item">
-              <div class="step-left"><div class="step-circle todo" id="step5-circle">5</div></div>
-              <div class="step-body"><div class="step-name todo-text">Completion &amp; hard binding</div><div class="step-desc">After successful defense</div></div>
+            <div class="detail-item">
+              <div class="detail-label">Stage</div>
+              <div class="detail-value"><span class="tag tag-final" style="font-size:12px;">Final defense</span></div>
+            </div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assigned adviser</div>
+          <div class="panelist-chip" style="margin-bottom:14px;">
+            <div class="panelist-dot" id="adviser-dot" style="background:linear-gradient(135deg,#0d9488,#2563eb);">—
+            </div>
+            <div>
+              <div class="panelist-name" id="adviser-name">—</div>
+              <div class="panelist-role">Primary Adviser</div>
+            </div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Assigned panelists</div>
+          <div class="panelist-list" id="panelist-list">
+            <div style="font-size:12px;color:var(--text3);">Panelists will be assigned by the Research Coordinator.
             </div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-header"><span class="card-title">Quick actions</span></div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <button class="btn btn-outline" style="justify-content:flex-start;" onclick="switchPanel('book', document.querySelector('[data-panel=book]'))">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/></svg>
-              Book a defense slot
-            </button>
-            <button class="btn btn-outline" style="justify-content:flex-start;" onclick="switchPanel('manuscript', document.querySelector('[data-panel=manuscript]'))">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="2" stroke-linecap="round"/></svg>
-              Upload manuscript
-            </button>
-            <button class="btn btn-outline" style="justify-content:flex-start;" onclick="switchPanel('schedule-board', document.querySelector('[data-panel=schedule-board]'))">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-width="2" stroke-linecap="round"/></svg>
-              View schedule board
-            </button>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Defense checklist</span></div>
+            <div class="step-list" id="checklist">
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-circle todo" id="step1-circle">1</div>
+                  <div class="step-line"></div>
+                </div>
+                <div class="step-body">
+                  <div class="step-name todo-text" id="step1-name">Book a defense slot</div>
+                  <div class="step-desc" id="step1-desc">Submit your appointment request</div>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-circle todo" id="step2-circle">2</div>
+                  <div class="step-line"></div>
+                </div>
+                <div class="step-body">
+                  <div class="step-name todo-text" id="step2-name">Upload manuscript</div>
+                  <div class="step-desc" id="step2-desc">PDF or DOCX — required to confirm slot</div>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-circle todo" id="step3-circle">3</div>
+                  <div class="step-line"></div>
+                </div>
+                <div class="step-body">
+                  <div class="step-name todo-text" id="step3-name">Slot confirmed</div>
+                  <div class="step-desc" id="step3-desc">Research Coordinator approves schedule</div>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-circle todo" id="step4-circle">4</div>
+                  <div class="step-line"></div>
+                </div>
+                <div class="step-body">
+                  <div class="step-name todo-text" id="step4-name">Final defense</div>
+                  <div class="step-desc" id="step4-desc">Defense day</div>
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-left">
+                  <div class="step-circle todo" id="step5-circle">5</div>
+                </div>
+                <div class="step-body">
+                  <div class="step-name todo-text">Completion &amp; hard binding</div>
+                  <div class="step-desc">After successful defense</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Quick actions</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="btn btn-outline" style="justify-content:flex-start;"
+                onclick="switchPanel('book', document.querySelector('[data-panel=book]'))">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" />
+                </svg>
+                Book a defense slot
+              </button>
+              <button class="btn btn-outline" style="justify-content:flex-start;"
+                onclick="switchPanel('manuscript', document.querySelector('[data-panel=manuscript]'))">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="2"
+                    stroke-linecap="round" />
+                </svg>
+                Upload manuscript
+              </button>
+              <button class="btn btn-outline" style="justify-content:flex-start;"
+                onclick="switchPanel('schedule-board', document.querySelector('[data-panel=schedule-board]'))">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                View schedule board
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══ PANEL: Schedule Board ════════════════════════════════ -->
-  <div class="panel" id="panel-schedule-board">
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Defense Schedule Board</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="board-date-label">All upcoming defenses</div>
-        </div>
-      </div>
-      <div id="board-content">
-        <div class="empty-state">
-          <svg fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5"/></svg>
-          <div class="empty-title">Loading schedule...</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ PANEL: Book a Defense ════════════════════════════════ -->
-  <div class="panel" id="panel-book">
-    <div class="card" style="max-width:560px;">
-      <div class="card-header" style="margin-bottom:20px;">
-        <div>
-          <div class="card-title" style="font-size:15px;">Book a Defense Slot</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px;">Submit your defense appointment request</div>
-        </div>
-      </div>
-
-      <div id="book-existing-notice" style="display:none;margin-bottom:16px;padding:12px 14px;background:var(--warning-bg);border:1px solid #fde68a;border-radius:10px;font-size:13px;color:var(--warning);">
-        ⚠️ You already have an active appointment. Cancel it first before booking a new one.
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:14px;" id="book-form">
-        <div class="form-field">
-          <label>Capstone/Thesis Title *</label>
-          <input class="input" id="bk-title" type="text" placeholder="e.g. AI-Powered Scheduling System" required>
-        </div>
-        <div class="form-field">
-          <label>Group Name</label>
-          <input class="input" id="bk-group" type="text" placeholder="e.g. Group Alpha">
-        </div>
-        <div class="form-field">
-          <label>Preferred Adviser</label>
-          <select class="input" id="bk-adviser">
-            <option value="">Loading faculty...</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="form-field">
-            <label>Preferred Date</label>
-            <input class="input" id="bk-date" type="date" required>
-          </div>
-          <div class="form-field">
-            <label>Start Time</label>
-            <input class="input" id="bk-time" type="time" min="08:00" max="16:00">
-          </div>
-        </div>
-        <div class="form-field">
-          <label>Venue</label>
-          <select class="input" id="bk-venue">
-            <option value="">Loading venues...</option>
-          </select>
-        </div>
-        <div class="form-field" id="bk-meeting-link-wrap" style="display:none">
-          <label>Meeting Link (for online defense)</label>
-          <input class="input" id="bk-meeting-link" type="url" placeholder="https://meet.google.com/...">
-        </div>
-        <div class="form-note">
-          ℹ️ <strong>Note on panelists:</strong> Panelists will be assigned by the Research Coordinator after your appointment is reviewed. You don't need to choose them.
-        </div>
-        <div id="conflict-check-result" style="display:none;"></div>
-        <div style="display:flex;gap:10px;margin-top:6px;">
-          <button class="btn btn-outline" style="flex:1;" id="bk-check-btn" onclick="checkConflict()">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="10" stroke-width="2"/></svg>
-            Check availability
-          </button>
-          <button class="btn btn-primary" style="flex:2;" id="bk-submit" onclick="submitBooking()">
-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/></svg>
-            Confirm Booking
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ PANEL: My Schedule ════════════════════════════════════ -->
-  <div class="panel" id="panel-my-schedule">
-    <div id="my-schedule-content">
-      <div class="empty-state">
-        <svg fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5"/><path d="M9 16l2 2 4-4" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <div class="empty-title">Loading your schedule...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ PANEL: Manuscript Submission ═════════════════════════ -->
-  <div class="panel" id="panel-manuscript">
-    <div class="grid-2">
+    <!-- ══ PANEL: Schedule Board ════════════════════════════════ -->
+    <div class="panel" id="panel-schedule-board">
       <div class="card">
-        <div class="card-header"><span class="card-title">Upload Manuscript</span></div>
-        <div id="upload-gate">
-          <div class="empty-state" style="padding:20px;">
-            <svg fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5"/></svg>
-            <div class="empty-title">No appointment yet</div>
-            <div class="empty-sub">Book a defense slot first before uploading your manuscript.</div>
-          </div>
-        </div>
-        <div id="upload-area" style="display:none;">
-          <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
-            <div class="upload-icon">
-              <svg fill="none" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <div class="card-header">
+          <div>
+            <div class="card-title">Defense Schedule Board</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="board-date-label">All upcoming defenses
             </div>
-            <div class="upload-label">Drop PDF/DOCX here or click to upload</div>
-            <div class="upload-sub">PDF or DOCX only · max 10MB</div>
           </div>
-          <input type="file" id="file-input" accept=".pdf,.docx,.doc" style="display:none;" onchange="uploadManuscript(this)">
-          <div id="upload-progress" style="display:none;margin-top:10px;font-size:13px;color:var(--text2);text-align:center;">Uploading...</div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><span class="card-title">Submission History</span></div>
-        <div id="manuscript-history">
-          <div style="font-size:13px;color:var(--text3);">No submissions yet.</div>
+        <div id="board-content">
+          <div class="empty-state">
+            <svg fill="none" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5" />
+              <path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5" />
+            </svg>
+            <div class="empty-title">Loading schedule...</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══ PANEL: Notifications ══════════════════════════════════ -->
-  <div class="panel" id="panel-notifications">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Notifications</span>
-        <span class="card-action" onclick="markAllRead()">Mark all read</span>
+    <!-- ══ PANEL: Book a Defense ════════════════════════════════ -->
+    <div class="panel" id="panel-book">
+      <div class="card" style="max-width:560px;">
+        <div class="card-header" style="margin-bottom:20px;">
+          <div>
+            <div class="card-title" style="font-size:15px;">Book a Defense Slot</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px;">Submit your defense appointment request</div>
+          </div>
+        </div>
+
+        <div id="book-existing-notice"
+          style="display:none;margin-bottom:16px;padding:12px 14px;background:var(--warning-bg);border:1px solid #fde68a;border-radius:10px;font-size:13px;color:var(--warning);">
+          ⚠️ You already have an active appointment. Cancel it first before booking a new one.
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;" id="book-form">
+          <div class="form-field">
+            <label>Capstone/Thesis Title *</label>
+            <input class="input" id="bk-title" type="text" placeholder="e.g. AI-Powered Scheduling System" required>
+          </div>
+          <div class="form-field">
+            <label>Group Name</label>
+            <input class="input" id="bk-group" type="text" placeholder="e.g. Group Alpha">
+          </div>
+          <div class="form-field">
+            <label>Adviser</label>
+            <select class="input" id="bk-adviser">
+              <option value="">Loading faculty...</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Preferred Date</label>
+              <input class="input" id="bk-date" type="date" required>
+            </div>
+            <div class="form-field">
+              <label>Start Time</label>
+              <input class="input" id="bk-time" type="time" min="08:00" max="16:00">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Venue</label>
+            <select class="input" id="bk-venue">
+              <option value="">Loading venues...</option>
+            </select>
+          </div>
+          <div class="form-field" id="bk-meeting-link-wrap" style="display:none">
+            <label>Meeting Link (for online defense)</label>
+            <input class="input" id="bk-meeting-link" type="url" placeholder="https://meet.google.com/...">
+          </div>
+          <div class="form-note">
+            ℹ️ <strong>Note on panelists:</strong> Panelists will be assigned by the Research Coordinator after your
+            appointment is reviewed. You don't need to choose them.
+          </div>
+          <div id="conflict-check-result" style="display:none;"></div>
+          <div style="display:flex;gap:10px;margin-top:6px;">
+            <button class="btn btn-outline" style="flex:1;" id="bk-check-btn" onclick="checkConflict()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" />
+                <circle cx="12" cy="12" r="10" stroke-width="2" />
+              </svg>
+              Check availability
+            </button>
+            <button class="btn btn-primary" style="flex:2;" id="bk-submit" onclick="submitBooking()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" />
+              </svg>
+              Confirm Booking
+            </button>
+          </div>
+        </div>
       </div>
-      <div id="notif-list">
+    </div>
+
+    <!-- ══ PANEL: My Schedule ════════════════════════════════════ -->
+    <div class="panel" id="panel-my-schedule">
+      <div id="my-schedule-content">
         <div class="empty-state">
-          <svg fill="none" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke-width="1.5" stroke-linecap="round"/></svg>
-          <div class="empty-title">Loading notifications...</div>
+          <svg fill="none" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5" />
+            <path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5" />
+            <path d="M9 16l2 2 4-4" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          <div class="empty-title">Loading your schedule...</div>
         </div>
       </div>
     </div>
-  </div>
 
-</main>
+    <!-- ══ PANEL: Manuscript Submission ═════════════════════════ -->
+    <div class="panel" id="panel-manuscript">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Upload Manuscript</span></div>
+          <div id="upload-gate">
+            <div class="empty-state" style="padding:20px;">
+              <svg fill="none" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5" />
+                <path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5" />
+              </svg>
+              <div class="empty-title">No appointment yet</div>
+              <div class="empty-sub">Book a defense slot first before uploading your manuscript.</div>
+            </div>
+          </div>
+          <div id="upload-area" style="display:none;">
+            <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+              <div class="upload-icon">
+                <svg fill="none" viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="1.8"
+                    stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="upload-label">Drop PDF/DOCX here or click to upload</div>
+              <div class="upload-sub">PDF or DOCX only · max 10MB</div>
+            </div>
+            <input type="file" id="file-input" accept=".pdf,.docx,.doc" style="display:none;"
+              onchange="uploadManuscript(this)">
+            <div id="upload-progress"
+              style="display:none;margin-top:10px;font-size:13px;color:var(--text2);text-align:center;">Uploading...
+            </div>
+          </div>
+        </div>
 
-<div id="toast-container"></div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Submission History</span></div>
+          <div id="manuscript-history">
+            <div style="font-size:13px;color:var(--text3);">No submissions yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<script>
-// ── State ─────────────────────────────────────────────────────────
-let _user = null;
-let _appointment = null;
-let _currentPanel = 'overview';
+    <!-- ══ PANEL: Notifications ══════════════════════════════════ -->
+    <div class="panel" id="panel-notifications">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Notifications</span>
+          <span class="card-action" onclick="markAllRead()">Mark all read</span>
+        </div>
+        <div id="notif-list">
+          <div class="empty-state">
+            <svg fill="none" viewBox="0 0 24 24">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke-width="1.5"
+                stroke-linecap="round" />
+            </svg>
+            <div class="empty-title">Loading notifications...</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-// ── THEME INITIALIZATION ──
-const initTheme = () => {
-  const savedTheme = localStorage.getItem('defensched-theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  updateThemeIcon(savedTheme);
-};
-const updateThemeIcon = (theme) => {
-  const icon = document.getElementById('theme-icon');
-  if (!icon) return;
-  if (theme === 'dark') {
-    icon.innerHTML = '<path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />';
-  } else {
-    icon.innerHTML = '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />';
-  }
-};
-document.addEventListener('DOMContentLoaded', () => {
-  const toggleBtn = document.getElementById('theme-toggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('defensched-theme', newTheme);
-      updateThemeIcon(newTheme);
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script>
+    // ── State ─────────────────────────────────────────────────────────
+    let _user = null;
+    let _appointment = null;
+    let _currentPanel = 'overview';
+
+    // ── THEME INITIALIZATION ──
+    const initTheme = () => {
+      const savedTheme = localStorage.getItem('defensched-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    };
+    const updateThemeIcon = (theme) => {
+      const icon = document.getElementById('theme-icon');
+      if (!icon) return;
+      if (theme === 'dark') {
+        icon.innerHTML = '<path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />';
+      } else {
+        icon.innerHTML = '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />';
+      }
+    };
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('defensched-theme', newTheme);
+          updateThemeIcon(newTheme);
+        });
+      }
+      initTheme();
     });
-  }
-  initTheme();
-});
 
-// ── Prevent back button to login ─────────────────────────────────────
-history.pushState(null, '', window.location.href);
-window.addEventListener('popstate', () => history.pushState(null, '', window.location.href));
+    // ── Prevent back button to login ─────────────────────────────────────
+    history.pushState(null, '', window.location.href);
+    window.addEventListener('popstate', () => history.pushState(null, '', window.location.href));
 
-// ── Panel switching ───────────────────────────────────────────────
-function switchPanel(name, el) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  if (el) el.classList.add('active');
-  _currentPanel = name;
+    // ── Panel switching ───────────────────────────────────────────────
+    function switchPanel(name, el) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('panel-' + name).classList.add('active');
+      if (el) el.classList.add('active');
+      _currentPanel = name;
 
-  const titles = {
-    'overview': ['Overview', 'Your defense status at a glance'],
-    'schedule-board': ['Defense Schedule Board', 'All upcoming defenses'],
-    'book': ['Book a Defense', 'Submit your appointment request'],
-    'my-schedule': ['My Schedule', 'Your confirmed defense details'],
-    'manuscript': ['Manuscript Submission', 'Upload your defense manuscript'],
-    'notifications': ['Notifications', 'System alerts and updates'],
-  };
-  const [t, s] = titles[name] || ['Dashboard', ''];
-  document.getElementById('page-title').textContent = t;
-  document.getElementById('page-sub').textContent   = s;
-  document.getElementById('header-book-btn').style.display = name === 'book' ? 'none' : '';
+      const titles = {
+        'overview': ['Overview', 'Your defense status at a glance'],
+        'schedule-board': ['Defense Schedule Board', 'All upcoming defenses'],
+        'book': ['Book a Defense', 'Submit your appointment request'],
+        'my-schedule': ['My Schedule', 'Your confirmed defense details'],
+        'manuscript': ['Manuscript Submission', 'Upload your defense manuscript'],
+        'notifications': ['Notifications', 'System alerts and updates'],
+      };
+      const [t, s] = titles[name] || ['Dashboard', ''];
+      document.getElementById('page-title').textContent = t;
+      document.getElementById('page-sub').textContent = s;
+      document.getElementById('header-book-btn').style.display = name === 'book' ? 'none' : '';
 
-  if (name === 'schedule-board') loadScheduleBoard();
-  if (name === 'book')           updateBookingPanel();
-  if (name === 'my-schedule')    renderMySchedule();
-  if (name === 'manuscript')     loadManuscript();
-  if (name === 'notifications')  loadNotifications();
-}
-
-// ── Auth + Init ───────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const r = await fetch('/api/auth/me');
-    if (!r.ok) { window.location.replace('/'); return; }
-    const { user } = await r.json();
-    if (user.role !== 'student') { window.location.replace('/'); return; }
-    _user = user;
-  } catch { window.location.replace('/'); return; }
-
-  // Populate user info
-  const name     = _user.group_name || _user.name;
-  const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('user-avatar').textContent      = initials;
-  document.getElementById('user-display-name').textContent = name;
-  document.getElementById('page-sub').textContent = `AY 2025–2026 · Hello, ${name}!`;
-
-  document.getElementById('logout-btn').onclick = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    window.location.replace('/');
-  };
-
-  // Load appointment & populate dropdowns
-  await loadAppointment();
-  await loadBookingDropdowns();
-  loadNotifBadge();
-  // Set min date on initial load
-  const dateInput = document.getElementById('bk-date');
-  if (dateInput) {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    dateInput.min = `${yyyy}-${mm}-${dd}`;
-  }
-});
-
-// ── Load appointment ──────────────────────────────────────────────
-async function loadAppointment() {
-  try {
-    const r = await fetch('/api/appointments');
-    if (!r.ok) return;
-    const { appointments } = await r.json();
-    _appointment = appointments[0] || null;
-    renderStatusBanner();
-    renderOverviewDetails();
-    renderChecklist();
-    // Check if manuscript needed
-    if (_appointment && !_appointment.manuscript_uploaded) {
-      document.getElementById('ms-badge').style.display = '';
-    } else {
-      document.getElementById('ms-badge').style.display = 'none';
+      if (name === 'schedule-board') loadScheduleBoard();
+      if (name === 'book') updateBookingPanel();
+      if (name === 'my-schedule') renderMySchedule();
+      if (name === 'manuscript') loadManuscript();
+      if (name === 'notifications') loadNotifications();
     }
-  } catch (e) { console.error('loadAppointment error', e); }
-}
 
-// ── Status banner ─────────────────────────────────────────────────
-function renderStatusBanner() {
-  const banner = document.getElementById('status-banner');
-  const a = _appointment;
-  if (!a) {
-    banner.className = 'status-banner status-none';
-    banner.innerHTML = `
+    // ── Auth + Init ───────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const r = await fetch('/api/auth/me');
+        if (!r.ok) { window.location.replace('/'); return; }
+        const { user } = await r.json();
+        if (user.role !== 'student') { window.location.replace('/'); return; }
+        _user = user;
+      } catch { window.location.replace('/'); return; }
+
+      // Populate user info
+      const name = _user.group_name || _user.name;
+      const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('user-avatar').textContent = initials;
+      document.getElementById('user-display-name').textContent = name;
+      document.getElementById('page-sub').textContent = `AY 2025–2026 · Hello, ${name}!`;
+
+      document.getElementById('logout-btn').onclick = async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.replace('/');
+      };
+
+      // Load appointment & populate dropdowns
+      await loadAppointment();
+      await loadBookingDropdowns();
+      loadNotifBadge();
+      // Set min date on initial load
+      const dateInput = document.getElementById('bk-date');
+      if (dateInput) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.min = `${yyyy}-${mm}-${dd}`;
+      }
+    });
+
+    // ── Load appointment ──────────────────────────────────────────────
+    async function loadAppointment() {
+      try {
+        const r = await fetch('/api/appointments');
+        if (!r.ok) return;
+        const { appointments } = await r.json();
+        _appointment = appointments[0] || null;
+        renderStatusBanner();
+        renderOverviewDetails();
+        renderChecklist();
+        // Check if manuscript needed
+        if (_appointment && !_appointment.manuscript_uploaded) {
+          document.getElementById('ms-badge').style.display = '';
+        } else {
+          document.getElementById('ms-badge').style.display = 'none';
+        }
+      } catch (e) { console.error('loadAppointment error', e); }
+    }
+
+    // ── Status banner ─────────────────────────────────────────────────
+    function renderStatusBanner() {
+      const banner = document.getElementById('status-banner');
+      const a = _appointment;
+      if (!a) {
+        banner.className = 'status-banner status-none';
+        banner.innerHTML = `
       <div style="display:flex;align-items:center;gap:14px;">
         <div class="status-icon" style="background:var(--surface2);">
           <svg width="20" height="20" fill="none" stroke="var(--text3)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>
@@ -682,29 +1517,29 @@ function renderStatusBanner() {
         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="2"/></svg>
         Book a defense
       </button>`;
-    return;
-  }
-  const isConfirmed = a.status === 'confirmed';
-  const isPending   = a.status === 'pending';
-  const isRescheduled = a.status === 'rescheduled';
-  const bgClass = isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : isRescheduled ? 'status-rescheduled' : 'status-none';
-  const color   = isConfirmed ? 'var(--success)'  : isPending ? 'var(--warning)' : isRescheduled ? 'var(--purple)' : 'var(--text3)';
-  const iconBg  = isConfirmed ? '#dcfce7' : isPending ? '#fef9c3' : isRescheduled ? 'var(--purple-bg)' : 'var(--surface2)';
-  const icon    = isConfirmed
-    ? `<svg width="20" height="20" fill="none" stroke="#16a34a" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke-width="2.5" stroke-linecap="round"/></svg>`
-    : isPending
-    ? `<svg width="20" height="20" fill="none" stroke="#ca8a04" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
-    : isRescheduled
-    ? `<svg width="20" height="20" fill="none" stroke="var(--purple)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
-    : `<svg width="20" height="20" fill="none" stroke="#a1a1aa" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`;
-  const statusText = isConfirmed ? 'Confirmed — Final Defense' : isPending ? 'Pending — Awaiting Approval' : isRescheduled ? 'Rescheduled — Final Defense' : a.status.charAt(0).toUpperCase()+a.status.slice(1);
-  const cancelBtn = (a.status === 'pending' || a.status === 'confirmed' || a.status === 'rescheduled')
-    ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">
+        return;
+      }
+      const isConfirmed = a.status === 'confirmed';
+      const isPending = a.status === 'pending';
+      const isRescheduled = a.status === 'rescheduled';
+      const bgClass = isConfirmed ? 'status-confirmed' : isPending ? 'status-pending' : isRescheduled ? 'status-rescheduled' : 'status-none';
+      const color = isConfirmed ? 'var(--success)' : isPending ? 'var(--warning)' : isRescheduled ? 'var(--purple)' : 'var(--text3)';
+      const iconBg = isConfirmed ? '#dcfce7' : isPending ? '#fef9c3' : isRescheduled ? 'var(--purple-bg)' : 'var(--surface2)';
+      const icon = isConfirmed
+        ? `<svg width="20" height="20" fill="none" stroke="#16a34a" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke-width="2.5" stroke-linecap="round"/></svg>`
+        : isPending
+          ? `<svg width="20" height="20" fill="none" stroke="#ca8a04" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
+          : isRescheduled
+            ? `<svg width="20" height="20" fill="none" stroke="var(--purple)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
+            : `<svg width="20" height="20" fill="none" stroke="#a1a1aa" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`;
+      const statusText = isConfirmed ? 'Confirmed — Final Defense' : isPending ? 'Pending — Awaiting Approval' : isRescheduled ? 'Rescheduled — Final Defense' : a.status.charAt(0).toUpperCase() + a.status.slice(1);
+      const cancelBtn = (a.status === 'pending' || a.status === 'confirmed' || a.status === 'rescheduled')
+        ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">
         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke-width="2"/></svg>
         Cancel appointment
        </button>` : '';
-  banner.className = `status-banner ${bgClass}`;
-  banner.innerHTML = `
+      banner.className = `status-banner ${bgClass}`;
+      banner.innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;">
       <div class="status-icon" style="background:${iconBg};">${icon}</div>
       <div>
@@ -714,138 +1549,138 @@ function renderStatusBanner() {
       </div>
     </div>
     ${cancelBtn}`;
-}
-
-// ── Overview details ──────────────────────────────────────────────
-function renderOverviewDetails() {
-  const a = _appointment;
-  if (!a) {
-    document.getElementById('d-date').textContent  = 'Not booked';
-    document.getElementById('d-day').textContent   = '—';
-    document.getElementById('d-time').textContent  = '—';
-    document.getElementById('d-venue').textContent = '—';
-    document.getElementById('adviser-dot').textContent  = '—';
-    document.getElementById('adviser-name').textContent = '—';
-    document.getElementById('defense-tag').textContent  = 'No appointment';
-    document.getElementById('defense-tag').className    = 'tag';
-    return;
-  }
-  document.getElementById('d-title').textContent = a.thesis_title || '—';
-  document.getElementById('d-date').textContent  = a.date || '—';
-  document.getElementById('d-day').textContent   = a.date ? new Date(a.date+'T00:00:00').toLocaleDateString('en-PH',{weekday:'long'}) : '—';
-  document.getElementById('d-time').textContent  = a.time_slot || '—';
-  document.getElementById('d-venue').textContent = a.venue_name || '—';
-  const advInitials = (a.adviser_name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('adviser-dot').textContent  = advInitials;
-  document.getElementById('adviser-name').textContent = a.adviser_name || '—';
-  document.getElementById('defense-tag').textContent  = a.status.charAt(0).toUpperCase()+a.status.slice(1);
-  document.getElementById('defense-tag').className    = `tag tag-${a.status}`;
-
-  // Panelists
-  const pl = document.getElementById('panelist-list');
-  const colors = ['linear-gradient(135deg,#7c3aed,#6d28d9)','linear-gradient(135deg,#ea580c,#d97706)','linear-gradient(135deg,#0369a1,#0d9488)','linear-gradient(135deg,#16a34a,#0d9488)'];
-  if (a.panelists && a.panelists.length > 0) {
-    pl.innerHTML = a.panelists.map((p,i) => `
-      <div class="panelist-chip">
-        <div class="panelist-dot" style="background:${colors[i%colors.length]};">${p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
-        <div><div class="panelist-name">${p.name}</div><div class="panelist-role">Panelist ${i+1}</div></div>
-      </div>`).join('');
-  } else {
-    pl.innerHTML = '<div style="font-size:12px;color:var(--text3);">Panelists will be assigned by the Research Coordinator.</div>';
-  }
-}
-
-// ── Checklist ─────────────────────────────────────────────────────
-function renderChecklist() {
-  const a = _appointment;
-  const hasAppt = !!a;
-  const hasManuscript = a?.manuscript_uploaded;
-  const isConfirmed = a?.status === 'confirmed';
-  const isCompleted = a?.status === 'completed';
-
-  function setStep(n, state, desc) {
-    const circle = document.getElementById(`step${n}-circle`);
-    const name   = document.getElementById(`step${n}-name`);
-    if (!circle) return;
-    circle.className = `step-circle ${state}`;
-    circle.textContent = state === 'done' ? '✓' : state === 'active' ? '→' : String(n);
-    name.className = `step-name ${state}-text`;
-    if (desc && document.getElementById(`step${n}-desc`)) document.getElementById(`step${n}-desc`).textContent = desc;
-  }
-
-  if (!hasAppt) {
-    setStep(1,'active'); setStep(2,'todo'); setStep(3,'todo'); setStep(4,'todo');
-  } else if (!hasManuscript) {
-    setStep(1,'done','Appointment submitted'); setStep(2,'active','Upload your manuscript to confirm slot'); setStep(3,'todo'); setStep(4,'todo');
-  } else if (!isConfirmed && !isCompleted) {
-    setStep(1,'done','Done'); setStep(2,'done','Manuscript uploaded'); setStep(3,'active','Awaiting coordinator approval'); setStep(4,'todo');
-  } else if (isConfirmed) {
-    setStep(1,'done','Done'); setStep(2,'done','Done'); setStep(3,'done',`Confirmed: ${a.date}`); setStep(4,'active',`Defense day: ${a.date}`);
-  } else {
-    setStep(1,'done','Done'); setStep(2,'done','Done'); setStep(3,'done','Done'); setStep(4,'done','Defense completed!');
-  }
-}
-
-// ── Schedule board ────────────────────────────────────────────────
-async function loadScheduleBoard() {
-  const el = document.getElementById('board-content');
-  el.innerHTML = '<div class="empty-state"><div class="empty-title">Loading...</div></div>';
-  try {
-    const r = await fetch('/api/appointments');
-    if (!r.ok) throw new Error();
-    const { appointments } = await r.json();
-    const active = appointments.filter(a => a.status !== 'cancelled');
-    if (!active.length) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-title">No defenses scheduled yet.</div></div>';
-      return;
     }
-    const tagMap = { confirmed:'tag-final', pending:'tag-pending', completed:'tag-completed', cancelled:'tag-cancelled', rescheduled:'tag-rescheduled' };
-    el.innerHTML = `<table class="sched-table">
+
+    // ── Overview details ──────────────────────────────────────────────
+    function renderOverviewDetails() {
+      const a = _appointment;
+      if (!a) {
+        document.getElementById('d-date').textContent = 'Not booked';
+        document.getElementById('d-day').textContent = '—';
+        document.getElementById('d-time').textContent = '—';
+        document.getElementById('d-venue').textContent = '—';
+        document.getElementById('adviser-dot').textContent = '—';
+        document.getElementById('adviser-name').textContent = '—';
+        document.getElementById('defense-tag').textContent = 'No appointment';
+        document.getElementById('defense-tag').className = 'tag';
+        return;
+      }
+      document.getElementById('d-title').textContent = a.thesis_title || '—';
+      document.getElementById('d-date').textContent = a.date || '—';
+      document.getElementById('d-day').textContent = a.date ? new Date(a.date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'long' }) : '—';
+      document.getElementById('d-time').textContent = a.time_slot || '—';
+      document.getElementById('d-venue').textContent = a.venue_name || '—';
+      const advInitials = (a.adviser_name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('adviser-dot').textContent = advInitials;
+      document.getElementById('adviser-name').textContent = a.adviser_name || '—';
+      document.getElementById('defense-tag').textContent = a.status.charAt(0).toUpperCase() + a.status.slice(1);
+      document.getElementById('defense-tag').className = `tag tag-${a.status}`;
+
+      // Panelists
+      const pl = document.getElementById('panelist-list');
+      const colors = ['linear-gradient(135deg,#7c3aed,#6d28d9)', 'linear-gradient(135deg,#ea580c,#d97706)', 'linear-gradient(135deg,#0369a1,#0d9488)', 'linear-gradient(135deg,#16a34a,#0d9488)'];
+      if (a.panelists && a.panelists.length > 0) {
+        pl.innerHTML = a.panelists.map((p, i) => `
+      <div class="panelist-chip">
+        <div class="panelist-dot" style="background:${colors[i % colors.length]};">${p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}</div>
+        <div><div class="panelist-name">${p.name}</div><div class="panelist-role">Panelist ${i + 1}</div></div>
+      </div>`).join('');
+      } else {
+        pl.innerHTML = '<div style="font-size:12px;color:var(--text3);">Panelists will be assigned by the Research Coordinator.</div>';
+      }
+    }
+
+    // ── Checklist ─────────────────────────────────────────────────────
+    function renderChecklist() {
+      const a = _appointment;
+      const hasAppt = !!a;
+      const hasManuscript = a?.manuscript_uploaded;
+      const isConfirmed = a?.status === 'confirmed';
+      const isCompleted = a?.status === 'completed';
+
+      function setStep(n, state, desc) {
+        const circle = document.getElementById(`step${n}-circle`);
+        const name = document.getElementById(`step${n}-name`);
+        if (!circle) return;
+        circle.className = `step-circle ${state}`;
+        circle.textContent = state === 'done' ? '✓' : state === 'active' ? '→' : String(n);
+        name.className = `step-name ${state}-text`;
+        if (desc && document.getElementById(`step${n}-desc`)) document.getElementById(`step${n}-desc`).textContent = desc;
+      }
+
+      if (!hasAppt) {
+        setStep(1, 'active'); setStep(2, 'todo'); setStep(3, 'todo'); setStep(4, 'todo');
+      } else if (!hasManuscript) {
+        setStep(1, 'done', 'Appointment submitted'); setStep(2, 'active', 'Upload your manuscript to confirm slot'); setStep(3, 'todo'); setStep(4, 'todo');
+      } else if (!isConfirmed && !isCompleted) {
+        setStep(1, 'done', 'Done'); setStep(2, 'done', 'Manuscript uploaded'); setStep(3, 'active', 'Awaiting coordinator approval'); setStep(4, 'todo');
+      } else if (isConfirmed) {
+        setStep(1, 'done', 'Done'); setStep(2, 'done', 'Done'); setStep(3, 'done', `Confirmed: ${a.date}`); setStep(4, 'active', `Defense day: ${a.date}`);
+      } else {
+        setStep(1, 'done', 'Done'); setStep(2, 'done', 'Done'); setStep(3, 'done', 'Done'); setStep(4, 'done', 'Defense completed!');
+      }
+    }
+
+    // ── Schedule board ────────────────────────────────────────────────
+    async function loadScheduleBoard() {
+      const el = document.getElementById('board-content');
+      el.innerHTML = '<div class="empty-state"><div class="empty-title">Loading...</div></div>';
+      try {
+        const r = await fetch('/api/appointments');
+        if (!r.ok) throw new Error();
+        const { appointments } = await r.json();
+        const active = appointments.filter(a => a.status !== 'cancelled');
+        if (!active.length) {
+          el.innerHTML = '<div class="empty-state"><div class="empty-title">No defenses scheduled yet.</div></div>';
+          return;
+        }
+        const tagMap = { confirmed: 'tag-final', pending: 'tag-pending', completed: 'tag-completed', cancelled: 'tag-cancelled', rescheduled: 'tag-rescheduled' };
+        el.innerHTML = `<table class="sched-table">
       <thead><tr><th>Time</th><th>Group</th><th>Venue</th><th>Adviser</th><th>Status</th></tr></thead>
       <tbody>${active.map(a => `
         <tr class="${_user && a.student_id === _user.id ? 'mine-row' : ''}">
-          <td style="font-family:var(--mono);font-size:11px;">${a.time_slot||'—'}</td>
-          <td style="font-weight:600;">${a.group_name}${_user && a.student_id===_user.id?' <span style="font-size:10px;color:var(--accent);">(You)</span>':''}</td>
-          <td>${a.venue_name||'—'}</td>
-          <td>${a.adviser_name||'—'}</td>
-          <td><span class="tag ${tagMap[a.status]||''}">${a.status}</span></td>
+          <td style="font-family:var(--mono);font-size:11px;">${a.time_slot || '—'}</td>
+          <td style="font-weight:600;">${a.group_name}${_user && a.student_id === _user.id ? ' <span style="font-size:10px;color:var(--accent);">(You)</span>' : ''}</td>
+          <td>${a.venue_name || '—'}</td>
+          <td>${a.adviser_name || '—'}</td>
+          <td><span class="tag ${tagMap[a.status] || ''}">${a.status}</span></td>
         </tr>`).join('')}
       </tbody>
     </table>`;
-  } catch { el.innerHTML = '<div class="empty-state"><div class="empty-title">Failed to load schedule.</div></div>'; }
-}
+      } catch { el.innerHTML = '<div class="empty-state"><div class="empty-title">Failed to load schedule.</div></div>'; }
+    }
 
-// ── My schedule ───────────────────────────────────────────────────
-function renderMySchedule() {
-  const el = document.getElementById('my-schedule-content');
-  const a  = _appointment;
-  if (!a) {
-    el.innerHTML = `<div class="card"><div class="empty-state">
+    // ── My schedule ───────────────────────────────────────────────────
+    function renderMySchedule() {
+      const el = document.getElementById('my-schedule-content');
+      const a = _appointment;
+      if (!a) {
+        el.innerHTML = `<div class="card"><div class="empty-state">
       <svg fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5"/></svg>
       <div class="empty-title">No defense scheduled yet</div>
       <div class="empty-sub">Use <strong>Book a defense</strong> in the sidebar to request a slot.</div>
     </div></div>`;
-    return;
-  }
-  const panelists = (a.panelists && a.panelists.length > 0)
-    ? a.panelists.map(p=>`<div style="font-size:13px;color:var(--text2);">• ${p.name}</div>`).join('')
-    : '<div style="font-size:13px;color:var(--text3);">To be assigned by Research Coordinator</div>';
-  const cancelBtn = (a.status==='pending'||a.status==='confirmed'||a.status==='rescheduled')
-    ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">Cancel Appointment</button>` : '';
-  el.innerHTML = `
+        return;
+      }
+      const panelists = (a.panelists && a.panelists.length > 0)
+        ? a.panelists.map(p => `<div style="font-size:13px;color:var(--text2);">• ${p.name}</div>`).join('')
+        : '<div style="font-size:13px;color:var(--text3);">To be assigned by Research Coordinator</div>';
+      const cancelBtn = (a.status === 'pending' || a.status === 'confirmed' || a.status === 'rescheduled')
+        ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">Cancel Appointment</button>` : '';
+      el.innerHTML = `
     <div class="grid-2">
       <div class="card">
         <div class="card-header"><span class="card-title">Appointment Details</span><span class="tag tag-${a.status}">${a.status}</span></div>
         <div class="defense-detail" style="margin-bottom:16px;">
-          <div class="detail-item"><div class="detail-label">Thesis Title</div><div class="detail-value">${a.thesis_title||'—'}</div></div>
-          <div class="detail-item"><div class="detail-label">Date</div><div class="detail-value">${a.date||'—'}</div></div>
-          <div class="detail-item"><div class="detail-label">Time</div><div class="detail-value" style="font-family:var(--mono);">${a.time_slot||'—'}</div></div>
-          <div class="detail-item"><div class="detail-label">Venue</div><div class="detail-value">${a.venue_name||'—'}</div></div>
-          <div class="detail-item"><div class="detail-label">Group</div><div class="detail-value">${a.group_name||'—'}</div></div>
+          <div class="detail-item"><div class="detail-label">Thesis Title</div><div class="detail-value">${a.thesis_title || '—'}</div></div>
+          <div class="detail-item"><div class="detail-label">Date</div><div class="detail-value">${a.date || '—'}</div></div>
+          <div class="detail-item"><div class="detail-label">Time</div><div class="detail-value" style="font-family:var(--mono);">${a.time_slot || '—'}</div></div>
+          <div class="detail-item"><div class="detail-label">Venue</div><div class="detail-value">${a.venue_name || '—'}</div></div>
+          <div class="detail-item"><div class="detail-label">Group</div><div class="detail-value">${a.group_name || '—'}</div></div>
           ${a.meeting_link ? `<div class="detail-item" style="grid-column:1/-1"><div class="detail-label">Meeting Link</div><div class="detail-value"><a href="${a.meeting_link}" target="_blank" style="color:var(--accent)">${a.meeting_link}</a></div></div>` : ''}
         </div>
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">Adviser</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">${a.adviser_name||'—'}</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">${a.adviser_name || '—'}</div>
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">Panelists</div>
         <div style="margin-bottom:16px;">${panelists}</div>
         ${cancelBtn}
@@ -853,7 +1688,7 @@ function renderMySchedule() {
       <div class="card">
         <div class="card-header"><span class="card-title">Manuscript status</span></div>
         <div style="margin-bottom:12px;">
-          <div style="font-size:13px;color:${a.manuscript_uploaded?'var(--success)':'var(--warning)'};font-weight:600;">
+          <div style="font-size:13px;color:${a.manuscript_uploaded ? 'var(--success)' : 'var(--warning)'};font-weight:600;">
             ${a.manuscript_uploaded ? '✓ Manuscript uploaded' : '⚠ Manuscript not yet uploaded'}
           </div>
           ${!a.manuscript_uploaded ? '<div style="font-size:12px;color:var(--text3);margin-top:4px;">Upload your manuscript to confirm your defense slot.</div>' : ''}
@@ -862,172 +1697,172 @@ function renderMySchedule() {
         ${a.notes ? `<div style="margin-top:14px;font-size:12px;color:var(--text2);"><strong>Notes:</strong> ${a.notes}</div>` : ''}
       </div>
     </div>`;
-}
-
-// ── Booking dropdowns ─────────────────────────────────────────────
-let _venues = [];
-async function loadBookingDropdowns() {
-  try {
-    const [fRes, vRes] = await Promise.all([fetch('/api/faculty'), fetch('/api/venues')]);
-    const { faculty } = await fRes.json();
-    const { venues }  = await vRes.json();
-    _venues = venues;
-    document.getElementById('bk-adviser').innerHTML = '<option value="">Choose adviser</option>' + faculty.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
-    document.getElementById('bk-venue').innerHTML   = '<option value="">Choose venue</option>'   + venues.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
-  } catch (e) { console.error('Dropdown load error', e); }
-}
-
-// Show/hide meeting link field based on venue type
-document.getElementById('bk-venue')?.addEventListener('change', function() {
-  const venueId = parseInt(this.value);
-  const venue = _venues.find(v => v.id === venueId);
-  const wrap = document.getElementById('bk-meeting-link-wrap');
-  if (wrap) {
-    wrap.style.display = venue && venue.type === 'virtual' ? '' : 'none';
-    if (venue && venue.type !== 'virtual') {
-      document.getElementById('bk-meeting-link').value = '';
     }
-  }
-});
 
-// ── Update booking panel state ────────────────────────────────────
-function updateBookingPanel() {
-  const dateInput = document.getElementById('bk-date');
-  // Set minimum date to today to prevent booking past dates
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
-  dateInput.min = `${yyyy}-${mm}-${dd}`;
-  dateInput.value = ''; // Clear previous selection
-  
-  // Refresh appointment data and update booking notice
-  if (_appointment && ['pending','confirmed','rescheduled'].includes(_appointment.status)) {
-    document.getElementById('book-existing-notice').style.display = '';
-  } else {
-    document.getElementById('book-existing-notice').style.display = 'none';
-  }
-}
+    // ── Booking dropdowns ─────────────────────────────────────────────
+    let _venues = [];
+    async function loadBookingDropdowns() {
+      try {
+        const [fRes, vRes] = await Promise.all([fetch('/api/faculty'), fetch('/api/venues')]);
+        const { faculty } = await fRes.json();
+        const { venues } = await vRes.json();
+        _venues = venues;
+        document.getElementById('bk-adviser').innerHTML = '<option value="">Choose adviser</option>' + faculty.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+        document.getElementById('bk-venue').innerHTML = '<option value="">Choose venue</option>' + venues.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+      } catch (e) { console.error('Dropdown load error', e); }
+    }
 
-// ── Check availability ────────────────────────────────────────────
-async function checkConflict() {
-  const date      = document.getElementById('bk-date').value;
-  const timeRaw   = document.getElementById('bk-time').value;
-  const adviser   = document.getElementById('bk-adviser').value;
-  const venue     = document.getElementById('bk-venue').value;
-  const resultEl  = document.getElementById('conflict-check-result');
-  if (!date || !timeRaw || !adviser || !venue) {
-    showToast('Fill in date, time, adviser, and venue first.', 'warning');
-    return;
-  }
-  const hour      = parseInt(timeRaw.split(':')[0]);
-  const time_slot = `${String(hour).padStart(2,'0')}:00-${String(hour+1).padStart(2,'0')}:00`;
-  resultEl.style.display = 'block';
-  resultEl.innerHTML = '<div style="font-size:13px;color:var(--text3);">Checking...</div>';
-  try {
-    const r = await fetch(`/api/appointments/check-conflict?date=${date}&time_slot=${encodeURIComponent(time_slot)}&adviser_id=${adviser}&venue_id=${venue}&panelist_ids=`);
-    const d = await r.json();
-    const items = [
-      { label: 'Date & Time',    ok: d.pastTime?.ok, msg: d.pastTime?.message },
-      { label: 'Schedule rules', ok: d.rules?.ok,    msg: d.rules?.message    },
-      { label: 'Adviser',        ok: d.adviser?.ok,  msg: d.adviser?.message  },
-      { label: 'Venue',          ok: d.venue?.ok,    msg: d.venue?.message    },
-    ];
-    resultEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;padding:12px;background:${d.all_clear?'var(--success-bg)':'var(--danger-bg)'};border:1px solid ${d.all_clear?'#bbf7d0':'#fecaca'};border-radius:8px;">
-      ${items.map(i=>`<div style="font-size:12px;color:${i.ok?'var(--success)':'var(--danger)'};">
-        ${i.ok?'✓':'✗'} <strong>${i.label}:</strong> ${i.msg||''}
+    // Show/hide meeting link field based on venue type
+    document.getElementById('bk-venue')?.addEventListener('change', function () {
+      const venueId = parseInt(this.value);
+      const venue = _venues.find(v => v.id === venueId);
+      const wrap = document.getElementById('bk-meeting-link-wrap');
+      if (wrap) {
+        wrap.style.display = venue && venue.type === 'virtual' ? '' : 'none';
+        if (venue && venue.type !== 'virtual') {
+          document.getElementById('bk-meeting-link').value = '';
+        }
+      }
+    });
+
+    // ── Update booking panel state ────────────────────────────────────
+    function updateBookingPanel() {
+      const dateInput = document.getElementById('bk-date');
+      // Set minimum date to today to prevent booking past dates
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      dateInput.min = `${yyyy}-${mm}-${dd}`;
+      dateInput.value = ''; // Clear previous selection
+
+      // Refresh appointment data and update booking notice
+      if (_appointment && ['pending', 'confirmed', 'rescheduled'].includes(_appointment.status)) {
+        document.getElementById('book-existing-notice').style.display = '';
+      } else {
+        document.getElementById('book-existing-notice').style.display = 'none';
+      }
+    }
+
+    // ── Check availability ────────────────────────────────────────────
+    async function checkConflict() {
+      const date = document.getElementById('bk-date').value;
+      const timeRaw = document.getElementById('bk-time').value;
+      const adviser = document.getElementById('bk-adviser').value;
+      const venue = document.getElementById('bk-venue').value;
+      const resultEl = document.getElementById('conflict-check-result');
+      if (!date || !timeRaw || !adviser || !venue) {
+        showToast('Fill in date, time, adviser, and venue first.', 'warning');
+        return;
+      }
+      const hour = parseInt(timeRaw.split(':')[0]);
+      const time_slot = `${String(hour).padStart(2, '0')}:00-${String(hour + 1).padStart(2, '0')}:00`;
+      resultEl.style.display = 'block';
+      resultEl.innerHTML = '<div style="font-size:13px;color:var(--text3);">Checking...</div>';
+      try {
+        const r = await fetch(`/api/appointments/check-conflict?date=${date}&time_slot=${encodeURIComponent(time_slot)}&adviser_id=${adviser}&venue_id=${venue}&panelist_ids=`);
+        const d = await r.json();
+        const items = [
+          { label: 'Date & Time', ok: d.pastTime?.ok, msg: d.pastTime?.message },
+          { label: 'Schedule rules', ok: d.rules?.ok, msg: d.rules?.message },
+          { label: 'Adviser', ok: d.adviser?.ok, msg: d.adviser?.message },
+          { label: 'Venue', ok: d.venue?.ok, msg: d.venue?.message },
+        ];
+        resultEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;padding:12px;background:${d.all_clear ? 'var(--success-bg)' : 'var(--danger-bg)'};border:1px solid ${d.all_clear ? '#bbf7d0' : '#fecaca'};border-radius:8px;">
+      ${items.map(i => `<div style="font-size:12px;color:${i.ok ? 'var(--success)' : 'var(--danger)'};">
+        ${i.ok ? '✓' : '✗'} <strong>${i.label}:</strong> ${i.msg || ''}
       </div>`).join('')}
-      <div style="font-size:12px;font-weight:700;color:${d.all_clear?'var(--success)':'var(--danger)'};margin-top:4px;">
+      <div style="font-size:12px;font-weight:700;color:${d.all_clear ? 'var(--success)' : 'var(--danger)'};margin-top:4px;">
         ${d.all_clear ? '✅ All clear — you can proceed with booking.' : '❌ Conflicts detected — please choose a different slot.'}
       </div>
     </div>`;
-  } catch { resultEl.innerHTML = '<div style="font-size:13px;color:var(--danger);">Check failed. Try again.</div>'; }
-}
-
-// ── Submit booking ────────────────────────────────────────────────
-async function submitBooking() {
-  if (_appointment && ['pending','confirmed','rescheduled'].includes(_appointment.status)) {
-    showToast('You already have an active appointment.', 'error');
-    document.getElementById('book-existing-notice').style.display = '';
-    return;
-  }
-  const thesis_title = document.getElementById('bk-title').value.trim();
-  const group_name   = document.getElementById('bk-group').value.trim();
-  const adviser_id   = parseInt(document.getElementById('bk-adviser').value);
-  const date         = document.getElementById('bk-date').value;
-  const timeRaw      = document.getElementById('bk-time').value;
-  const venue_id     = parseInt(document.getElementById('bk-venue').value);
-  const meeting_link = document.getElementById('bk-meeting-link').value.trim() || null;
-  if (!thesis_title || !group_name || !adviser_id || !date || !timeRaw || !venue_id) {
-    showToast('Please fill in all fields.', 'error');
-    return;
-  }
-  const hour      = parseInt(timeRaw.split(':')[0]);
-  const time_slot = `${String(hour).padStart(2,'0')}:00-${String(hour+1).padStart(2,'0')}:00`;
-
-  const btn = document.getElementById('bk-submit');
-  btn.disabled = true; btn.textContent = 'Booking...';
-  try {
-    const r = await fetch('/api/appointments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ group_name, adviser_id, panelist_ids: [], date, time_slot, venue_id, thesis_title, meeting_link })
-    });
-    const d = await r.json();
-    if (r.ok) {
-      showToast('Appointment booked! Upload your manuscript next.', 'success');
-      await loadAppointment();
-      switchPanel('my-schedule', document.querySelector('[data-panel=my-schedule]'));
-    } else {
-      showToast(d.error || 'Booking failed.', 'error');
+      } catch { resultEl.innerHTML = '<div style="font-size:13px;color:var(--danger);">Check failed. Try again.</div>'; }
     }
-  } catch { showToast('Server error. Try again.', 'error'); }
-  finally { btn.disabled = false; btn.textContent = 'Confirm Booking'; }
-}
 
-// ── Cancel appointment ────────────────────────────────────────────
-async function cancelAppointment(id) {
-  if (!confirm('Are you sure you want to cancel your appointment?')) return;
-  try {
-    const r = await fetch(`/api/appointments/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'cancelled' })
-    });
-    if (r.ok) {
-      showToast('Appointment cancelled.', 'info');
-      _appointment = null;
-      await loadAppointment();
-      renderMySchedule();
-    } else {
-      const d = await r.json();
-      showToast(d.error || 'Cancel failed.', 'error');
+    // ── Submit booking ────────────────────────────────────────────────
+    async function submitBooking() {
+      if (_appointment && ['pending', 'confirmed', 'rescheduled'].includes(_appointment.status)) {
+        showToast('You already have an active appointment.', 'error');
+        document.getElementById('book-existing-notice').style.display = '';
+        return;
+      }
+      const thesis_title = document.getElementById('bk-title').value.trim();
+      const group_name = document.getElementById('bk-group').value.trim();
+      const adviser_id = parseInt(document.getElementById('bk-adviser').value);
+      const date = document.getElementById('bk-date').value;
+      const timeRaw = document.getElementById('bk-time').value;
+      const venue_id = parseInt(document.getElementById('bk-venue').value);
+      const meeting_link = document.getElementById('bk-meeting-link').value.trim() || null;
+      if (!thesis_title || !group_name || !adviser_id || !date || !timeRaw || !venue_id) {
+        showToast('Please fill in all fields.', 'error');
+        return;
+      }
+      const hour = parseInt(timeRaw.split(':')[0]);
+      const time_slot = `${String(hour).padStart(2, '0')}:00-${String(hour + 1).padStart(2, '0')}:00`;
+
+      const btn = document.getElementById('bk-submit');
+      btn.disabled = true; btn.textContent = 'Booking...';
+      try {
+        const r = await fetch('/api/appointments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ group_name, adviser_id, panelist_ids: [], date, time_slot, venue_id, thesis_title, meeting_link })
+        });
+        const d = await r.json();
+        if (r.ok) {
+          showToast('Appointment booked! Upload your manuscript next.', 'success');
+          await loadAppointment();
+          switchPanel('my-schedule', document.querySelector('[data-panel=my-schedule]'));
+        } else {
+          showToast(d.error || 'Booking failed.', 'error');
+        }
+      } catch { showToast('Server error. Try again.', 'error'); }
+      finally { btn.disabled = false; btn.textContent = 'Confirm Booking'; }
     }
-  } catch { showToast('Server error.', 'error'); }
-}
 
-// ── Manuscript ────────────────────────────────────────────────────
-async function loadManuscript() {
-  const a = _appointment;
-  if (!a) {
-    document.getElementById('upload-gate').style.display = '';
-    document.getElementById('upload-area').style.display = 'none';
-    document.getElementById('manuscript-history').innerHTML = '<div style="font-size:13px;color:var(--text3);">No submissions yet.</div>';
-    return;
-  }
-  document.getElementById('upload-gate').style.display = 'none';
-  document.getElementById('upload-area').style.display = '';
+    // ── Cancel appointment ────────────────────────────────────────────
+    async function cancelAppointment(id) {
+      if (!confirm('Are you sure you want to cancel your appointment?')) return;
+      try {
+        const r = await fetch(`/api/appointments/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'cancelled' })
+        });
+        if (r.ok) {
+          showToast('Appointment cancelled.', 'info');
+          _appointment = null;
+          await loadAppointment();
+          renderMySchedule();
+        } else {
+          const d = await r.json();
+          showToast(d.error || 'Cancel failed.', 'error');
+        }
+      } catch { showToast('Server error.', 'error'); }
+    }
 
-  // Load existing manuscript
-  try {
-    const r = await fetch(`/api/manuscripts/${a.id}`);
-    if (r.ok) {
-      const { manuscript: m } = await r.json();
-      const kb = Math.round(m.file_size / 1024);
-      const deleteBtn = a.status === 'pending' 
-        ? `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteManuscript(${m.id}, '${m.original_name.replace(/'/g, "\\'")}')">Delete</button>`
-        : `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px;opacity:0.5;cursor:not-allowed;" disabled title="Cannot delete after confirmation">Delete</button>`;
-      document.getElementById('manuscript-history').innerHTML = `
+    // ── Manuscript ────────────────────────────────────────────────────
+    async function loadManuscript() {
+      const a = _appointment;
+      if (!a) {
+        document.getElementById('upload-gate').style.display = '';
+        document.getElementById('upload-area').style.display = 'none';
+        document.getElementById('manuscript-history').innerHTML = '<div style="font-size:13px;color:var(--text3);">No submissions yet.</div>';
+        return;
+      }
+      document.getElementById('upload-gate').style.display = 'none';
+      document.getElementById('upload-area').style.display = '';
+
+      // Load existing manuscript
+      try {
+        const r = await fetch(`/api/manuscripts/${a.id}`);
+        if (r.ok) {
+          const { manuscript: m } = await r.json();
+          const kb = Math.round(m.file_size / 1024);
+          const deleteBtn = a.status === 'pending'
+            ? `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteManuscript(${m.id}, '${m.original_name.replace(/'/g, "\\'")}')">Delete</button>`
+            : `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px;opacity:0.5;cursor:not-allowed;" disabled title="Cannot delete after confirmation">Delete</button>`;
+          document.getElementById('manuscript-history').innerHTML = `
         <div class="version-item">
           <span class="ver-badge current">Latest</span>
           <div style="flex:1;">
@@ -1039,135 +1874,136 @@ async function loadManuscript() {
             ${deleteBtn}
           </div>
         </div>`;
-    } else {
-      document.getElementById('manuscript-history').innerHTML = '<div style="font-size:13px;color:var(--text3);">No manuscript uploaded yet.</div>';
+        } else {
+          document.getElementById('manuscript-history').innerHTML = '<div style="font-size:13px;color:var(--text3);">No manuscript uploaded yet.</div>';
+        }
+      } catch { }
+
+      // Drag-and-drop
+      const zone = document.getElementById('upload-zone');
+      zone.ondragover = e => { e.preventDefault(); zone.classList.add('dragover'); };
+      zone.ondragleave = () => zone.classList.remove('dragover');
+      zone.ondrop = e => { e.preventDefault(); zone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) processUpload(f); };
     }
-  } catch {}
 
-  // Drag-and-drop
-  const zone = document.getElementById('upload-zone');
-  zone.ondragover  = e => { e.preventDefault(); zone.classList.add('dragover'); };
-  zone.ondragleave = () => zone.classList.remove('dragover');
-  zone.ondrop      = e => { e.preventDefault(); zone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) processUpload(f); };
-}
-
-function uploadManuscript(input) {
-  if (input.files[0]) processUpload(input.files[0]);
-}
-
-async function processUpload(file) {
-  const allowed = ['.pdf','.docx','.doc'];
-  const ext = '.' + file.name.split('.').pop().toLowerCase();
-  if (!allowed.includes(ext)) { showToast('Only PDF or DOCX files allowed.', 'error'); return; }
-  if (file.size > 10*1024*1024) { showToast('File too large. Max 10MB.', 'error'); return; }
-  const prog = document.getElementById('upload-progress');
-  prog.style.display = ''; prog.textContent = `Uploading ${file.name}...`;
-  const fd = new FormData();
-  fd.append('manuscript', file);
-  try {
-    const r = await fetch(`/api/manuscripts/upload/${_appointment.id}`, { method: 'POST', body: fd });
-    const d = await r.json();
-    if (r.ok) {
-      showToast('Manuscript uploaded! Your slot is now confirmed.', 'success');
-      prog.style.display = 'none';
-      await loadAppointment();
-      loadManuscript();
-    } else {
-      prog.style.display = 'none';
-      showToast(d.error || 'Upload failed.', 'error');
+    function uploadManuscript(input) {
+      if (input.files[0]) processUpload(input.files[0]);
     }
-  } catch { prog.style.display = 'none'; showToast('Upload error. Try again.', 'error'); }
-}
 
-async function deleteManuscript(manuscriptId, fileName) {
-  if (!confirm(`Delete "${fileName}"? This cannot be undone.`)) return;
-  try {
-    const r = await fetch(`/api/manuscripts/${manuscriptId}`, { method: 'DELETE' });
-    const d = await r.json();
-    if (r.ok) {
-      showToast('Manuscript deleted.', 'success');
-      loadManuscript();
-    } else {
-      showToast(d.error || 'Delete failed.', 'error');
+    async function processUpload(file) {
+      const allowed = ['.pdf', '.docx', '.doc'];
+      const ext = '.' + file.name.split('.').pop().toLowerCase();
+      if (!allowed.includes(ext)) { showToast('Only PDF or DOCX files allowed.', 'error'); return; }
+      if (file.size > 10 * 1024 * 1024) { showToast('File too large. Max 10MB.', 'error'); return; }
+      const prog = document.getElementById('upload-progress');
+      prog.style.display = ''; prog.textContent = `Uploading ${file.name}...`;
+      const fd = new FormData();
+      fd.append('manuscript', file);
+      try {
+        const r = await fetch(`/api/manuscripts/upload/${_appointment.id}`, { method: 'POST', body: fd });
+        const d = await r.json();
+        if (r.ok) {
+          showToast('Manuscript uploaded! Your slot is now confirmed.', 'success');
+          prog.style.display = 'none';
+          await loadAppointment();
+          loadManuscript();
+        } else {
+          prog.style.display = 'none';
+          showToast(d.error || 'Upload failed.', 'error');
+        }
+      } catch { prog.style.display = 'none'; showToast('Upload error. Try again.', 'error'); }
     }
-  } catch { showToast('Delete error. Try again.', 'error'); }
-}
 
-// ── Notifications ─────────────────────────────────────────────────
-async function loadNotifications() {
-  const el = document.getElementById('notif-list');
-  try {
-    const r = await fetch('/api/notifications');
-    if (!r.ok) throw new Error();
-    const { notifications } = await r.json();
-    if (!notifications.length) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-title">No notifications</div><div class="empty-sub">You\'re all caught up!</div></div>';
-      return;
+    async function deleteManuscript(manuscriptId, fileName) {
+      if (!confirm(`Delete "${fileName}"? This cannot be undone.`)) return;
+      try {
+        const r = await fetch(`/api/manuscripts/${manuscriptId}`, { method: 'DELETE' });
+        const d = await r.json();
+        if (r.ok) {
+          showToast('Manuscript deleted.', 'success');
+          loadManuscript();
+        } else {
+          showToast(d.error || 'Delete failed.', 'error');
+        }
+      } catch { showToast('Delete error. Try again.', 'error'); }
     }
-    const dotColors = { info:'var(--info)', success:'var(--success)', warning:'var(--warning)', error:'var(--danger)' };
-    el.innerHTML = notifications.map(n => `
-      <div class="notif-item" style="${!n.is_read?'background:var(--accent-light);border-radius:8px;padding:8px 10px;':''}" onclick="markRead(${n.id}, this)">
-        <div class="notif-dot" style="background:${dotColors[n.type]||'var(--text3)'}; ${!n.is_read?'width:9px;height:9px;':'opacity:.4;'}"></div>
+
+    // ── Notifications ─────────────────────────────────────────────────
+    async function loadNotifications() {
+      const el = document.getElementById('notif-list');
+      try {
+        const r = await fetch('/api/notifications');
+        if (!r.ok) throw new Error();
+        const { notifications } = await r.json();
+        if (!notifications.length) {
+          el.innerHTML = '<div class="empty-state"><div class="empty-title">No notifications</div><div class="empty-sub">You\'re all caught up!</div></div>';
+          return;
+        }
+        const dotColors = { info: 'var(--info)', success: 'var(--success)', warning: 'var(--warning)', error: 'var(--danger)' };
+        el.innerHTML = notifications.map(n => `
+      <div class="notif-item" style="${!n.is_read ? 'background:var(--accent-light);border-radius:8px;padding:8px 10px;' : ''}" onclick="markRead(${n.id}, this)">
+        <div class="notif-dot" style="background:${dotColors[n.type] || 'var(--text3)'}; ${!n.is_read ? 'width:9px;height:9px;' : 'opacity:.4;'}"></div>
         <div>
           <div class="notif-text">${n.message}</div>
-          <div class="notif-time">${new Date(n.created_at).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+          <div class="notif-time">${new Date(n.created_at).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
         </div>
       </div>`).join('');
-    const unread = notifications.filter(n=>!n.is_read).length;
-    document.getElementById('notif-badge').textContent = unread;
-    document.getElementById('notif-badge').style.display = unread ? '' : 'none';
-  } catch { el.innerHTML = '<div class="empty-state"><div class="empty-title">Failed to load notifications.</div></div>'; }
-}
+        const unread = notifications.filter(n => !n.is_read).length;
+        document.getElementById('notif-badge').textContent = unread;
+        document.getElementById('notif-badge').style.display = unread ? '' : 'none';
+      } catch { el.innerHTML = '<div class="empty-state"><div class="empty-title">Failed to load notifications.</div></div>'; }
+    }
 
-async function markRead(id, el) {
-  await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
-  el.style.background = '';
-  loadNotifBadge();
-}
+    async function markRead(id, el) {
+      await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+      el.style.background = '';
+      loadNotifBadge();
+    }
 
-async function markAllRead() {
-  await fetch('/api/notifications/read-all', { method: 'PUT' });
-  showToast('All notifications marked as read.', 'success');
-  loadNotifications();
-}
+    async function markAllRead() {
+      await fetch('/api/notifications/read-all', { method: 'PUT' });
+      showToast('All notifications marked as read.', 'success');
+      loadNotifications();
+    }
 
-async function loadNotifBadge() {
-  try {
-    const r = await fetch('/api/notifications');
-    if (!r.ok) return;
-    const { notifications } = await r.json();
-    const unread = notifications.filter(n=>!n.is_read).length;
-    const badge = document.getElementById('notif-badge');
-    badge.textContent     = unread;
-    badge.style.display   = unread ? '' : 'none';
-  } catch {}
-}
+    async function loadNotifBadge() {
+      try {
+        const r = await fetch('/api/notifications');
+        if (!r.ok) return;
+        const { notifications } = await r.json();
+        const unread = notifications.filter(n => !n.is_read).length;
+        const badge = document.getElementById('notif-badge');
+        badge.textContent = unread;
+        badge.style.display = unread ? '' : 'none';
+      } catch { }
+    }
 
-// ── Toast ─────────────────────────────────────────────────────────
-function showToast(msg, type = 'info') {
-  const c = document.getElementById('toast-container');
-  const colors = { success:'#16a34a', error:'#dc2626', warning:'#ca8a04', info:'#0369a1' };
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.style.background = colors[type] || colors.info;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => t.remove(), 4000);
-}
+    // ── Toast ─────────────────────────────────────────────────────────
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      const colors = { success: '#16a34a', error: '#dc2626', warning: '#ca8a04', info: '#0369a1' };
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.style.background = colors[type] || colors.info;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
 
-// ── Book panel: show existing notice if needed ────────────────────
-document.querySelector('[data-panel=book]').addEventListener('click', () => {
-  const notice = document.getElementById('book-existing-notice');
-  if (_appointment && ['pending','confirmed'].includes(_appointment.status)) {
-    notice.style.display = '';
-    document.getElementById('book-form').style.opacity = '.5';
-    document.getElementById('book-form').style.pointerEvents = 'none';
-  } else {
-    notice.style.display = 'none';
-    document.getElementById('book-form').style.opacity = '';
-    document.getElementById('book-form').style.pointerEvents = '';
-  }
-});
-</script>
+    // ── Book panel: show existing notice if needed ────────────────────
+    document.querySelector('[data-panel=book]').addEventListener('click', () => {
+      const notice = document.getElementById('book-existing-notice');
+      if (_appointment && ['pending', 'confirmed'].includes(_appointment.status)) {
+        notice.style.display = '';
+        document.getElementById('book-form').style.opacity = '.5';
+        document.getElementById('book-form').style.pointerEvents = 'none';
+      } else {
+        notice.style.display = 'none';
+        document.getElementById('book-form').style.opacity = '';
+        document.getElementById('book-form').style.pointerEvents = '';
+      }
+    });
+  </script>
 </body>
+
 </html>
