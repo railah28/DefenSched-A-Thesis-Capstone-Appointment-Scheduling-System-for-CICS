@@ -149,10 +149,26 @@ router.get('/check-conflict', requireAuth, requireActive, (req, res) => {
 
 // ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, requireActive, (req, res) => {
+
   const { userId, role } = req.session;
   const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes, thesis_title, meeting_link } = req.body;
   if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
     return res.status(400).json({ error: 'All fields are required.' });
+
+  const checkActiveBookingSql = `
+    SELECT * FROM appointments 
+    WHERE student_id = ? AND status != 'cancelled'
+  `;
+
+  db.query(checkActiveBookingSql, [userId], (err, results) => {
+    if (err) {
+      console.error("Database error during booking check:", err);
+      return res.status(500).json({ error: 'Internal server error.' });
+    }
+
+    if (results.length > 0) {
+      return res.status(400).json({ error: 'You already have an active appointment scheduling request.' });
+    }
 
   // Prevent student double-booking
   if (role === 'student') {
