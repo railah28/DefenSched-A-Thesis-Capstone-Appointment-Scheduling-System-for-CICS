@@ -27,7 +27,7 @@
     .form-container{position:absolute;top:0;height:100%;transition:all 0.6s ease-in-out;}
     .sign-in{left:0;width:50%;z-index:2;}
     .container.active .sign-in{transform:translateX(100%);}
-    .sign-up{left:0;width:50%;opacity:0;z-index:1;}
+    .sign-up{left:0;width:50%;opacity:0;z-index:1;overflow-y:auto;}
     .container.active .sign-up{transform:translateX(100%);opacity:1;z-index:5;animation:move 0.6s;}
     @keyframes move{0%,49.99%{opacity:0;z-index:1;}50%,100%{opacity:1;z-index:5;}}
     .form-container form{
@@ -103,7 +103,7 @@
 <div class="container" id="container">
 
   <div class="form-container sign-up">
-    <form>
+    <form id="register-form" style="overflow-y:auto;justify-content:flex-start;padding-top:1.2rem;padding-bottom:1.2rem;">
       <div class="logo-wrap">
         <img src="data:image/jpeg;base64,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" alt="CICS Logo"/>
         <span>CICS</span>
@@ -116,10 +116,44 @@
         <a href="#"><i class="fa-brands fa-instagram"></i></a>
       </div>
       <div class="divider"><div class="divider-line"></div><span>or use your email</span><div class="divider-line"></div></div>
-      <input type="text" placeholder="Full Name"/>
-      <input type="email" placeholder="Email Address"/>
-      <input type="password" placeholder="Password"/>
-      <button class="submit-btn" type="button">Sign Up</button>
+
+      <!-- Role selector -->
+      <select id="reg-role" onchange="regRoleChange()" style="width:100%;padding:9px 12px;margin-bottom:10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;background:#f3f4f8;color:#333;outline:none;cursor:pointer;">
+        <option value="student">&#127891; Thesis Student</option>
+        <option value="faculty">&#128218; Faculty (Adviser / Panelist)</option>
+      </select>
+
+      <input type="text" id="reg-name" placeholder="Full Name / Group Name"/>
+      <input type="email" id="reg-email" placeholder="Email Address"/>
+      <input type="password" id="reg-password" placeholder="Password"/>
+
+      <!-- Solo / Group — students only -->
+      <div id="reg-group-section">
+        <p style="font-size:11px;color:#888;margin:2px 0 6px;">Participation Type</p>
+        <div style="display:flex;background:#f3f4f8;border:0.5px solid #ddd;border-radius:8px;overflow:hidden;margin-bottom:10px;">
+          <button type="button" id="btn-solo" onclick="setGroupMode(false)"
+            style="flex:1;padding:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;background:#2b1369;color:#fff;transition:all 0.2s;">
+            Solo
+          </button>
+          <button type="button" id="btn-grp" onclick="setGroupMode(true)"
+            style="flex:1;padding:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;background:transparent;color:#999;transition:all 0.2s;">
+            Group
+          </button>
+        </div>
+        <div id="reg-group-fields" style="display:none;">
+          <select id="reg-group-size" onchange="buildMemberFields()" style="width:100%;padding:9px 12px;margin-bottom:10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;background:#f3f4f8;color:#333;outline:none;">
+            <option value="2">2 members</option>
+            <option value="3">3 members</option>
+            <option value="4">4 members</option>
+            <option value="5">5 members</option>
+            <option value="6">6 members</option>
+          </select>
+          <input type="text" id="reg-leader" placeholder="Team Leader Full Name" style="margin-bottom:6px;"/>
+          <div id="reg-members-container"></div>
+        </div>
+      </div>
+
+      <button class="submit-btn" type="button" onclick="handleRegister()">Sign Up</button>
     </form>
   </div>
 
@@ -164,9 +198,88 @@
 
 </div>
 <script>
+  // Slide toggle
   const c = document.getElementById('container');
   document.getElementById('register').addEventListener('click', () => c.classList.add('active'));
   document.getElementById('login').addEventListener('click', () => c.classList.remove('active'));
+
+  // Show/hide Solo-Group section based on role
+  function regRoleChange() {
+    const role = document.getElementById('reg-role').value;
+    const section = document.getElementById('reg-group-section');
+    section.style.display = (role === 'student') ? '' : 'none';
+    if (role !== 'student') setGroupMode(false);
+  }
+
+  // Solo / Group mode toggle
+  let isGroupMode = false;
+  function setGroupMode(isGroup) {
+    isGroupMode = isGroup;
+    const fields = document.getElementById('reg-group-fields');
+    const btnSolo = document.getElementById('btn-solo');
+    const btnGrp  = document.getElementById('btn-grp');
+    fields.style.display = isGroup ? '' : 'none';
+    btnSolo.style.background = isGroup ? 'transparent' : '#2b1369';
+    btnSolo.style.color       = isGroup ? '#999' : '#fff';
+    btnGrp.style.background  = isGroup ? '#2b1369' : 'transparent';
+    btnGrp.style.color        = isGroup ? '#fff' : '#999';
+    if (isGroup) buildMemberFields();
+  }
+
+  // Dynamically build member name inputs
+  function buildMemberFields() {
+    const size = parseInt(document.getElementById('reg-group-size').value) || 2;
+    const container = document.getElementById('reg-members-container');
+    container.innerHTML = '';
+    for (let i = 2; i <= size; i++) {
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.id = `reg-member-${i}`;
+      inp.placeholder = `Member ${i} Full Name`;
+      inp.style.marginBottom = '6px';
+      container.appendChild(inp);
+    }
+  }
+
+  // Handle register button
+  function handleRegister() {
+    const role     = document.getElementById('reg-role').value;
+    const name     = document.getElementById('reg-name').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+
+    if (!name || !email || !password) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    const payload = { role, name, email, password };
+
+    if (role === 'student') {
+      payload.participationType = isGroupMode ? 'group' : 'solo';
+      if (isGroupMode) {
+        const size    = parseInt(document.getElementById('reg-group-size').value);
+        const leader  = document.getElementById('reg-leader').value.trim();
+        const members = [leader];
+        for (let i = 2; i <= size; i++) {
+          const m = document.getElementById(`reg-member-${i}`);
+          if (m) members.push(m.value.trim());
+        }
+        payload.groupSize = size;
+        payload.leader    = leader;
+        payload.members   = members;
+      }
+    }
+
+    console.log('Register payload:', payload);
+    // TODO: replace with your actual API call, e.g.:
+    // fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+    alert(`Account created!\nRole: ${role}\nName: ${name}`);
+    c.classList.remove('active'); // go back to sign-in
+  }
+
+  // Init: student is default — show group section
+  regRoleChange();
 </script>
 </body>
 </html>
