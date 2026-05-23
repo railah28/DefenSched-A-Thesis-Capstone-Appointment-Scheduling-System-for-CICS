@@ -33,6 +33,7 @@ app.use('/api/faculty',       require('./routes/faculty'));
 app.use('/api/manuscripts',   require('./routes/manuscripts'));
 app.use('/api/honoraria',     require('./routes/honoraria'));
 app.use('/api/users',         require('./routes/users'));
+app.use('/api/admin/users',   require('./routes/admin-users'));
 app.use('/api/notifications', require('./routes/notifications'));
 
 // ── Venues endpoint (admin) ───────────────────────────────────────

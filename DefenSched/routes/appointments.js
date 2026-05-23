@@ -197,17 +197,13 @@ router.post('/', requireAuth, (req, res) => {
   // Notify adviser, panelists, and submitting student
   notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
   for (const pid of pIdsArr) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
-  const pIds = Array.isArray(panelist_ids) ? panelist_ids.filter(Boolean) : [];
-  const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
-  for (const pid of pIds) insPan.run(apptId, pid);
-
-  // Notify adviser, panelists, and submitting student
-  notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
-  for (const pid of pIds) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
   notify(userId, 'Appointment submitted. Upload your manuscript to confirm.', 'success');
 
   // Notify all admin users about the new booking
   const admins = db.prepare("SELECT id FROM users WHERE role = 'admin' AND is_active = 1").all();
+  for (const admin of admins) {
+    notify(admin.id, `New appointment request from ${group_name} on ${date} at ${time_slot}.`, 'info');
+  }
   for (const admin of admins) {
     notify(admin.id, `New appointment request from ${group_name} on ${date} at ${time_slot}.`, 'info');
   }

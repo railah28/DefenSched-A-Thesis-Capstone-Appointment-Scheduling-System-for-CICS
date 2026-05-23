@@ -104,4 +104,10 @@ router.get('/venues/all', requireAuth, (req, res) => {
   res.json({ venues });
 });
 
+// GET /api/users/venues/all — venue list
+router.get('/venues/all', requireAuth, (req, res) => {
+  const venues = db.prepare('SELECT * FROM venues WHERE is_active = 1 ORDER BY name').all();
+  res.json({ venues });
+});
+
 module.exports = router;
