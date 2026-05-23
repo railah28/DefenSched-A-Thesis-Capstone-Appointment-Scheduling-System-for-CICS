@@ -109,4 +109,31 @@ router.get('/download/:id', requireAuth, (req, res) => {
   res.download(filePath, ms.original_name);
 });
 
+// DELETE /api/manuscripts/:id — delete manuscript
+router.delete('/:id', requireAuth, (req, res) => {
+  const ms = db.prepare('SELECT m.*, a.student_id, a.status FROM manuscripts m JOIN appointments a ON m.appointment_id = a.id WHERE m.id = ?').get(req.params.id);
+  if (!ms) return res.status(404).json({ error: 'Manuscript not found.' });
+  
+  // Only the student who uploaded it can delete it
+  if (ms.student_id !== req.session.userId) {
+    return res.status(403).json({ error: 'You can only delete your own manuscripts.' });
+  }
+  
+  // Only allow deletion if appointment is still pending
+  if (ms.status !== 'pending') {
+    return res.status(403).json({ error: 'Cannot delete manuscript once appointment is confirmed. Contact your adviser if you need to re-upload.' });
+  }
+  
+  // Delete physical file
+  const filePath = path.join(UPLOADS_DIR, ms.filename);
+  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  
+  // Delete database record
+  db.prepare('DELETE FROM manuscripts WHERE id = ?').run(req.params.id);
+  db.prepare('UPDATE appointments SET manuscript_uploaded = 0 WHERE id = ?').run(ms.appointment_id);
+  
+  res.json({ success: true, message: 'Manuscript deleted.' });
+});
+
+
 module.exports = router;
