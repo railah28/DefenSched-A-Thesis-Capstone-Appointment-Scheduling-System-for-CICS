@@ -45,6 +45,12 @@ router.post('/upload/:appointmentId', requireAuth, requireActive, upload.single(
     return res.status(403).json({ error: 'You can only upload for your own appointment.' });
   if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
 
+  if (appt.status === 'cancelled' || appt.status === 'canceled') {
+    return res.status(400).json({ 
+      error: 'Cannot upload a manuscript to a cancelled appointment. Please book a new defense.' 
+    });
+  }
+
   // Remove old manuscript file if exists
   const existing = db.prepare('SELECT * FROM manuscripts WHERE appointment_id = ?').get(appointmentId);
   if (existing) {
