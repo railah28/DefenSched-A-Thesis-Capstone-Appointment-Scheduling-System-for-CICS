@@ -1003,6 +1003,91 @@
       background: linear-gradient(135deg, #0d9488, #0ea5e9);
       color: #fff;
     }
+
+    /* ── Panel Schedule Cards ─────────────────────────────────── */
+    .panel-card {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); cursor: pointer;
+      transition: all 0.15s; margin-bottom: 10px;
+    }
+    .panel-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 12px rgba(37,99,235,0.08);
+      transform: translateX(4px);
+    }
+    .panel-card-date {
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 56px; padding: 8px 12px;
+      background: var(--surface2); border-radius: var(--radius);
+    }
+    .panel-card-day {
+      font-size: 22px; font-weight: 700; color: var(--text);
+      font-family: var(--mono); line-height: 1;
+    }
+    .panel-card-month {
+      font-size: 11px; color: var(--text3); font-weight: 600;
+      text-transform: uppercase; margin-top: 2px;
+    }
+    .panel-card-body { flex: 1; min-width: 0; }
+    .panel-card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .panel-card-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+    .panel-card-footer { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .panel-card-arrow {
+      font-size: 20px; color: var(--text3);
+      transition: all 0.15s;
+    }
+    .panel-card:hover .panel-card-arrow {
+      color: var(--accent); transform: translateX(2px);
+    }
+
+    /* ── Panel Detail Modal ───────────────────────────────────── */
+    .panel-detail-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 9999; display: flex; align-items: center;
+      justify-content: center; animation: fadeIn .15s ease;
+    }
+    .panel-detail-modal {
+      background: var(--surface); border-radius: var(--radius-lg);
+      width: 520px; max-width: 94vw; max-height: 90vh;
+      overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 24px;
+    }
+    .panel-detail-header {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 20px;
+    }
+    .panel-detail-title { font-size: 16px; font-weight: 600; }
+    .panel-detail-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 22px; color: var(--text3); padding: 4px;
+    }
+    .panel-detail-field { margin-bottom: 14px; }
+    .panel-detail-label {
+      font-size: 10px; font-weight: 600; color: var(--text3);
+      text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px;
+    }
+    .panel-detail-value {
+      font-size: 13px; color: var(--text); padding: 8px 10px;
+      background: var(--surface2); border-radius: var(--radius);
+    }
+    .panel-detail-value a { color: var(--accent); word-break: break-all; }
+    .panel-detail-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .panel-detail-full { grid-column: 1 / -1; }
+    .panel-detail-actions {
+      display: flex; gap: 8px; justify-content: flex-end;
+      margin-top: 16px; padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .panel-members-list {
+      display: flex; flex-direction: column; gap: 4px;
+      font-size: 13px; color: var(--text2);
+    }
+    .panel-members-list .leader { font-weight: 600; color: var(--text); }
   </style>
 </head>
 
@@ -1242,32 +1327,20 @@
       <div class="page-header">
         <div>
           <div class="page-title">My Panel Schedule</div>
-          <div class="page-sub">Appointments where you serve as panelist</div>
+          <div class="page-sub">Defense groups assigned to you as panelist</div>
         </div>
+        <select id="panel-filter" class="form-select" style="width:140px" onchange="loadPanel()">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Approved</option>
+          <option value="completed">Completed</option>
+          <option value="rescheduled">Rescheduled</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Venue</th>
-                <th>Adviser</th>
-                <th>Status</th>
-                <th>Manuscript</th>
-              </tr>
-            </thead>
-            <tbody id="panel-tbody">
-              <tr>
-                <td colspan="7">
-                  <div class="skeleton"></div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div id="panel-cards-container">
+        <div class="skeleton" style="height:60px;margin-bottom:10px"></div>
+        <div class="skeleton" style="height:60px;margin-bottom:10px"></div>
       </div>
     </section>
 
@@ -1552,13 +1625,185 @@
 
     // ── Load Panel Schedule ──────────────────────────────────────────────────
     function loadPanel() {
-      const panel = _appointments.filter(a => a.panelists?.some(p => p.id === _user.id)).sort((a, b) => a.date < b.date ? -1 : 1);
-      document.getElementById('panel-tbody').innerHTML = panel.length
+      const filter = document.getElementById('panel-filter').value;
+      const panel = _appointments
+        .filter(a => a.panelists?.some(p => p.id === _user.id))
+        .filter(a => !filter || a.status === filter)
+        .sort((a, b) => a.date < b.date ? -1 : 1);
+
+      const container = document.getElementById('panel-cards-container');
+      container.innerHTML = panel.length
         ? panel.map(a => {
-          const hasMs = _manuscripts.some(m => m.appointment_id === a.id);
-          return `<tr><td>${a.group_name}</td><td style="font-family:var(--mono);font-size:12px">${fmtDate(a.date)}</td><td style="font-family:var(--mono);font-size:12px">${a.time_slot || '—'}</td><td>${a.venue_name || '—'}</td><td>${a.adviser_name || '—'}</td><td>${fmtStatus(a.status)}</td><td>${hasMs ? `<a href="/api/manuscripts/download/${_manuscripts.find(m => m.appointment_id === a.id).id}" target="_blank" class="btn btn-outline btn-sm">Download</a>` : '<span style="color:var(--text3);font-size:12px">—</span>'}</td></tr>`;
-        }).join('')
-        : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No panel assignments</td></tr>';
+            const d = new Date(a.date + 'T00:00:00');
+            const day = d.getDate();
+            const month = d.toLocaleDateString('en-PH', { month: 'short' });
+            const statusDisplay = a.status === 'confirmed' ? 'Approved' : a.status.charAt(0).toUpperCase() + a.status.slice(1);
+            const statusClass = a.status === 'confirmed' ? 'tag-confirmed' : `tag-${a.status}`;
+            return `<div class="panel-card" onclick="openPanelDetail(${a.id})">
+              <div class="panel-card-date">
+                <span class="panel-card-day">${String(day).padStart(2, '0')}</span>
+                <span class="panel-card-month">${month}</span>
+              </div>
+              <div class="panel-card-body">
+                <div class="panel-card-title">${a.group_name}</div>
+                <div class="panel-card-meta">${a.time_slot || '—'} · ${a.venue_name || '—'}</div>
+                <div class="panel-card-footer"><span class="tag ${statusClass}">${statusDisplay}</span></div>
+              </div>
+              <div class="panel-card-arrow">›</div>
+            </div>`;
+          }).join('')
+        : '<div class="card"><div class="db-empty">No panel assignments</div></div>';
+    }
+
+    // ── Panel Detail Modal ───────────────────────────────────────────────────
+    function openPanelDetail(apptId) {
+      const a = _appointments.find(x => x.id === apptId);
+      if (!a) return;
+
+      // Parse group members from student_members JSON
+      let membersHtml = '<span style="color:var(--text3)">—</span>';
+      if (a.student_members) {
+        try {
+          const m = JSON.parse(a.student_members);
+          const list = [];
+          if (m.leader) list.push(`<span class="leader">👑 ${m.leader} (Leader)</span>`);
+          if (m.members && m.members.length) {
+            m.members.forEach((name, i) => list.push(`<span>${i + 1}. ${name}</span>`));
+          }
+          if (list.length) membersHtml = `<div class="panel-members-list">${list.join('')}</div>`;
+        } catch (_) {}
+      }
+
+      const panelistNames = (a.panelists || []).map(p => p.name).join(', ') || '—';
+      const manuscript = _manuscripts.find(m => m.appointment_id === a.id);
+      const statusDisplay = a.status === 'confirmed' ? 'Approved' : a.status.charAt(0).toUpperCase() + a.status.slice(1);
+      const statusClass = a.status === 'confirmed' ? 'tag-confirmed' : `tag-${a.status}`;
+      const isVirtual = a.venue_name && a.venue_name.toLowerCase().includes('virtual');
+      const meetingLink = a.meeting_link || '';
+
+      // Determine venue display
+      let venueDisplay = a.venue_name || '—';
+      if (isVirtual && meetingLink) {
+        venueDisplay += ` · <a href="${meetingLink}" target="_blank">Join Meeting</a>`;
+      }
+
+      const modal = document.createElement('div');
+      modal.className = 'panel-detail-overlay';
+      modal.onclick = function(e) { if (e.target === this) this.remove(); };
+      modal.innerHTML = `
+        <div class="panel-detail-modal">
+          <div class="panel-detail-header">
+            <span class="panel-detail-title">${a.group_name}</span>
+            <button class="panel-detail-close" onclick="this.closest('.panel-detail-overlay').remove()">×</button>
+          </div>
+
+          <div class="panel-detail-grid">
+            <div class="panel-detail-full">
+              <div class="panel-detail-label">Thesis / Capstone Title</div>
+              <div class="panel-detail-value">${a.thesis_title || '—'}</div>
+            </div>
+            <div class="panel-detail-full">
+              <div class="panel-detail-label">Group Members</div>
+              <div class="panel-detail-value">${membersHtml}</div>
+            </div>
+            <div>
+              <div class="panel-detail-label">Adviser</div>
+              <div class="panel-detail-value">${a.adviser_name || '—'}</div>
+            </div>
+            <div>
+              <div class="panel-detail-label">Panel Members</div>
+              <div class="panel-detail-value">${panelistNames}</div>
+            </div>
+            <div>
+              <div class="panel-detail-label">Date</div>
+              <div class="panel-detail-value" style="font-family:var(--mono)">${fmtDate(a.date)}</div>
+            </div>
+            <div>
+              <div class="panel-detail-label">Time</div>
+              <div class="panel-detail-value" style="font-family:var(--mono)">${a.time_slot || '—'}</div>
+            </div>
+            <div class="${meetingLink ? 'panel-detail-full' : ''}">
+              <div class="panel-detail-label">Venue</div>
+              <div class="panel-detail-value">${venueDisplay}</div>
+            </div>
+            ${meetingLink ? `
+            <div>
+              <div class="panel-detail-label">Meeting Link</div>
+              <div class="panel-detail-value" id="panel-ml-display">
+                <a href="${meetingLink}" target="_blank">${meetingLink}</a>
+                <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="editMeetingLink(${a.id})">Edit</button>
+              </div>
+              <div id="panel-ml-edit" style="display:none">
+                <div style="display:flex;gap:6px">
+                  <input type="url" id="panel-ml-input" class="form-input" value="${meetingLink}" placeholder="https://meet.google.com/..." style="flex:1">
+                  <button class="btn btn-primary btn-sm" onclick="saveMeetingLink(${a.id})">Save</button>
+                  <button class="btn btn-ghost btn-sm" onclick="cancelEditMeetingLink()">Cancel</button>
+                </div>
+              </div>
+            </div>` : `
+            <div>
+              <div class="panel-detail-label">Meeting Link</div>
+              <div class="panel-detail-value" id="panel-ml-display">
+                <span style="color:var(--text3)">Not set</span>
+                <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="editMeetingLink(${a.id})">Add</button>
+              </div>
+              <div id="panel-ml-edit" style="display:none">
+                <div style="display:flex;gap:6px">
+                  <input type="url" id="panel-ml-input" class="form-input" value="" placeholder="https://meet.google.com/..." style="flex:1">
+                  <button class="btn btn-primary btn-sm" onclick="saveMeetingLink(${a.id})">Save</button>
+                  <button class="btn btn-ghost btn-sm" onclick="cancelEditMeetingLink()">Cancel</button>
+                </div>
+              </div>
+            </div>`}
+            <div>
+              <div class="panel-detail-label">Status</div>
+              <div class="panel-detail-value"><span class="tag ${statusClass}">${statusDisplay}</span></div>
+            </div>
+          </div>
+
+          <div class="panel-detail-actions">
+            ${manuscript ? `<a href="/api/manuscripts/download/${manuscript.id}" target="_blank" class="btn btn-primary">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round"/></svg>
+              Download Paper
+            </a>` : '<span style="font-size:12px;color:var(--text3)">No manuscript uploaded</span>'}
+            <button class="btn btn-ghost" onclick="this.closest('.panel-detail-overlay').remove()">Close</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function editMeetingLink() {
+      document.getElementById('panel-ml-display').style.display = 'none';
+      document.getElementById('panel-ml-edit').style.display = '';
+    }
+
+    function cancelEditMeetingLink() {
+      document.getElementById('panel-ml-display').style.display = '';
+      document.getElementById('panel-ml-edit').style.display = 'none';
+    }
+
+    async function saveMeetingLink(apptId) {
+      const input = document.getElementById('panel-ml-input');
+      const link = input.value.trim() || null;
+      try {
+        const res = await fetch(`/api/appointments/${apptId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ meeting_link: link })
+        });
+        if (res.ok) {
+          showToast('Meeting link saved', 'success');
+          cancelEditMeetingLink();
+          // Refresh data
+          await fetchAll();
+          loadPanel();
+        } else {
+          showToast('Failed to save meeting link', 'error');
+        }
+      } catch {
+        showToast('Server error', 'error');
+      }
     }
 
     function changeWeek(delta) {
