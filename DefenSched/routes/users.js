@@ -4,10 +4,10 @@ const express = require('express');
 const router  = express.Router();
 const bcrypt  = require('bcryptjs');
 const db      = require('../database');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireActive, requireRole } = require('../middleware/auth');
 
 // GET /api/users — admin: all users; faculty/student: self only
-router.get('/', requireAuth, (req, res) => {
+router.get('/', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   if (role === 'admin') {
     const users = db.prepare(
@@ -22,7 +22,7 @@ router.get('/', requireAuth, (req, res) => {
 });
 
 // GET /api/users/:id
-router.get('/:id', requireAuth, (req, res) => {
+router.get('/:id', requireAuth, requireActive, (req, res) => {
   const user = db.prepare(
     'SELECT id, name, email, role, group_name, is_group, members, is_active, created_at FROM users WHERE id = ?'
   ).get(req.params.id);
@@ -99,13 +99,7 @@ router.delete('/:id', requireRole('admin'), (req, res) => {
 });
 
 // GET /api/users/venues/all — venue list
-router.get('/venues/all', requireAuth, (req, res) => {
-  const venues = db.prepare('SELECT * FROM venues WHERE is_active = 1 ORDER BY name').all();
-  res.json({ venues });
-});
-
-// GET /api/users/venues/all — venue list
-router.get('/venues/all', requireAuth, (req, res) => {
+router.get('/venues/all', requireAuth, requireActive, (req, res) => {
   const venues = db.prepare('SELECT * FROM venues WHERE is_active = 1 ORDER BY name').all();
   res.json({ venues });
 });

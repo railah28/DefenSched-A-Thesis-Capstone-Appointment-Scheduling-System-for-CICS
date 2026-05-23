@@ -3,10 +3,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireActive, requireRole } = require('../middleware/auth');
 
 // GET /api/honoraria/rates
-router.get('/rates', requireAuth, (req, res) => {
+router.get('/rates', requireAuth, requireActive, (req, res) => {
   const rates = db.prepare('SELECT * FROM honoraria_rates').all();
   res.json({ rates });
 });
@@ -26,7 +26,7 @@ router.post('/rates', requireRole('admin'), (req, res) => {
 });
 
 // GET /api/honoraria/report — full computation per faculty
-router.get('/report', requireAuth, (req, res) => {
+router.get('/report', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
 
   const rates = {};
@@ -74,7 +74,7 @@ router.get('/report', requireAuth, (req, res) => {
 });
 
 // GET /api/honoraria/settings — defense window settings
-router.get('/settings', requireAuth, (req, res) => {
+router.get('/settings', requireAuth, requireActive, (req, res) => {
   const settings = {};
   db.prepare('SELECT setting_key, setting_value FROM defense_settings').all()
     .forEach(s => { settings[s.setting_key] = s.setting_value; });
@@ -82,7 +82,7 @@ router.get('/settings', requireAuth, (req, res) => {
 });
 
 // PUT /api/honoraria/settings — update defense window
-router.put('/settings', requireRole('admin'), (req, res) => {
+router.put('/settings', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   const { defense_start_time, defense_end_time, defense_days } = req.body;
   const upd = db.prepare(`UPDATE defense_settings SET setting_value = ?, updated_at = ? WHERE setting_key = ?`);
   if (defense_start_time) upd.run(defense_start_time, new Date().toISOString(), 'defense_start_time');

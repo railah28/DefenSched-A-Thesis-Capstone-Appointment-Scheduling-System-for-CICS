@@ -3,11 +3,11 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
-const { requireRole } = require('../middleware/auth');
+const { requireAuth, requireActive, requireRole } = require('../middleware/auth');
 
 // GET /api/admin/users/pending
 // Fetch all users with pending approval status.
-router.get('/pending', requireRole('admin'), (req, res) => {
+router.get('/pending', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   try {
     const pendingUsers = db.prepare(`
       SELECT id, name, email, role, group_name, is_group, members, created_at
@@ -24,7 +24,7 @@ router.get('/pending', requireRole('admin'), (req, res) => {
 
 // POST /api/admin/users/:id/approve
 // Approve a pending user and set status to active.
-router.post('/:id/approve', requireRole('admin'), (req, res) => {
+router.post('/:id/approve', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   try {
     const uid = parseInt(req.params.id, 10);
     const user = db.prepare('SELECT id, email, name, status FROM users WHERE id = ?').get(uid);
@@ -45,7 +45,7 @@ router.post('/:id/approve', requireRole('admin'), (req, res) => {
 
 // POST /api/admin/users/:id/reject
 // Reject a pending user and set status to rejected.
-router.post('/:id/reject', requireRole('admin'), (req, res) => {
+router.post('/:id/reject', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   try {
     const uid = parseInt(req.params.id, 10);
     const { reason } = req.body;

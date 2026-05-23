@@ -6,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const db = require('../database');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireActive } = require('../middleware/auth');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -35,7 +35,7 @@ function notify(userId, message, type = 'info') {
 }
 
 // POST /api/manuscripts/upload/:appointmentId
-router.post('/upload/:appointmentId', requireAuth, upload.single('manuscript'), (req, res) => {
+router.post('/upload/:appointmentId', requireAuth, requireActive, upload.single('manuscript'), (req, res) => {
   const { appointmentId } = req.params;
   const { userId } = req.session;
 
@@ -75,7 +75,7 @@ router.post('/upload/:appointmentId', requireAuth, upload.single('manuscript'), 
 });
 
 // GET /api/manuscripts/list-by-faculty — all manuscripts for logged-in faculty
-router.get('/list-by-faculty', requireAuth, (req, res) => {
+router.get('/list-by-faculty', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   if (role !== 'faculty') return res.status(403).json({ error: 'Faculty only.' });
 
@@ -94,14 +94,14 @@ router.get('/list-by-faculty', requireAuth, (req, res) => {
 });
 
 // GET /api/manuscripts/:appointmentId — get manuscript info
-router.get('/:appointmentId', requireAuth, (req, res) => {
+router.get('/:appointmentId', requireAuth, requireActive, (req, res) => {
   const ms = db.prepare('SELECT * FROM manuscripts WHERE appointment_id = ?').get(req.params.appointmentId);
   if (!ms) return res.status(404).json({ error: 'No manuscript found.' });
   res.json({ manuscript: ms });
 });
 
 // GET /api/manuscripts/download/:id — download file
-router.get('/download/:id', requireAuth, (req, res) => {
+router.get('/download/:id', requireAuth, requireActive, (req, res) => {
   const ms = db.prepare('SELECT * FROM manuscripts WHERE id = ?').get(req.params.id);
   if (!ms) return res.status(404).json({ error: 'File not found.' });
   const filePath = path.join(UPLOADS_DIR, ms.filename);

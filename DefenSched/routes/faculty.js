@@ -3,10 +3,10 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../database');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireActive, requireRole } = require('../middleware/auth');
 
 // GET /api/faculty — list all faculty (for dropdowns)
-router.get('/', requireAuth, (req, res) => {
+router.get('/', requireAuth, requireActive, (req, res) => {
   const faculty = db.prepare(
     `SELECT id, name, email FROM users WHERE role = 'faculty' AND is_active = 1 ORDER BY name`
   ).all();
@@ -14,7 +14,7 @@ router.get('/', requireAuth, (req, res) => {
 });
 
 // GET /api/faculty/:id/availability
-router.get('/:id/availability', requireAuth, (req, res) => {
+router.get('/:id/availability', requireAuth, requireActive, (req, res) => {
   const { date, type } = req.query;
   let query = 'SELECT * FROM faculty_availability WHERE faculty_id = ?';
   const params = [req.params.id];
@@ -25,7 +25,7 @@ router.get('/:id/availability', requireAuth, (req, res) => {
 });
 
 // POST /api/faculty/:id/availability — add a slot
-router.post('/:id/availability', requireAuth, (req, res) => {
+router.post('/:id/availability', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   // Faculty can only set their own; admin can set any
   if (role === 'faculty' && parseInt(req.params.id) !== userId)
@@ -47,7 +47,7 @@ router.post('/:id/availability', requireAuth, (req, res) => {
 });
 
 // DELETE /api/faculty/:id/availability/:slotId
-router.delete('/:id/availability/:slotId', requireAuth, (req, res) => {
+router.delete('/:id/availability/:slotId', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   if (role === 'faculty' && parseInt(req.params.id) !== userId)
     return res.status(403).json({ error: 'Cannot modify another faculty\'s availability.' });
