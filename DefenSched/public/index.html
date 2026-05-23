@@ -230,6 +230,11 @@
 
       <!-- Solo / Group — students only -->
       <div id="reg-group-section">
+        <p style="font-size:11px;color:#888;margin:2px 0 6px;">Assigned Adviser</p>
+        <select id="reg-adviser" style="width:100%;padding:9px 12px;margin-bottom:10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;background:#f3f4f8;color:#333;outline:none;cursor:pointer;">
+          <option value="">Loading faculty...</option>
+        </select>
+        
         <p style="font-size:11px;color:#888;margin:2px 0 6px;">Participation Type</p>
         <div style="display:flex;background:#f3f4f8;border:0.5px solid #ddd;border-radius:8px;overflow:hidden;margin-bottom:10px;">
           <button type="button" id="btn-solo" onclick="setGroupMode(false)"
@@ -409,8 +414,14 @@
     let leader_name = null;
     let member_names = [];
 
+    const adviser_id = document.getElementById('reg-adviser')?.value || null;
+
     if (role === 'student') {
       group_name = name;
+      if (!adviser_id) {
+        alert('Please select an adviser.');
+        return;
+      }
       if (isGroupMode) {
         is_group = true;
         const size = parseInt(document.getElementById('reg-group-size').value) || 2;
@@ -433,7 +444,7 @@
       const res  = await fetch('/api/auth/register', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ name, email, password, role, is_group, group_name, leader_name, member_names })
+        body:    JSON.stringify({ name, email, password, role, is_group, group_name, leader_name, member_names, adviser_id })
       });
       const data = await res.json();
 
@@ -456,6 +467,22 @@
 
   // Init: student is default — show group section
   regRoleChange();
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('/api/faculty');
+      const data = await res.json();
+      const select = document.getElementById('reg-adviser');
+      if (select) {
+        select.innerHTML = '<option value="">Select an adviser...</option>';
+        data.faculty.forEach(f => {
+          select.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+        });
+      }
+    } catch (e) {
+      console.error('Error fetching faculty', e);
+    }
+  });
 </script>
 </body>
 </html>
