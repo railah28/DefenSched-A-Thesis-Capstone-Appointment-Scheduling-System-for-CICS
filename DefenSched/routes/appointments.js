@@ -33,7 +33,7 @@ router.get('/', requireAuth, (req, res) => {
   let rows;
   if (role === 'admin') {
     rows = db.prepare(`
-      SELECT a.*, u.name student_name, f.name adviser_name, v.name venue_name
+      SELECT a.*, u.name student_name, u.members student_members, u.is_group student_is_group, f.name adviser_name, v.name venue_name
       FROM appointments a
       JOIN users u ON a.student_id = u.id
       JOIN users f ON a.adviser_id = f.id
@@ -42,7 +42,7 @@ router.get('/', requireAuth, (req, res) => {
     `).all();
   } else if (role === 'faculty') {
     rows = db.prepare(`
-      SELECT DISTINCT a.*, u.name student_name, f.name adviser_name, v.name venue_name
+      SELECT DISTINCT a.*, u.name student_name, u.members student_members, u.is_group student_is_group, f.name adviser_name, v.name venue_name
       FROM appointments a
       JOIN users u ON a.student_id = u.id
       JOIN users f ON a.adviser_id = f.id
@@ -150,7 +150,7 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 // ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, (req, res) => {
   const { userId, role } = req.session;
-  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes } = req.body;
+  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes, thesis_title, meeting_link } = req.body;
   if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
     return res.status(400).json({ error: 'All fields are required.' });
 
@@ -186,9 +186,9 @@ router.post('/', requireAuth, (req, res) => {
     return res.status(409).json({ error: 'Conflict: Venue is already booked.' });
 
   const { lastInsertRowid: apptId } = db.prepare(`
-    INSERT INTO appointments (group_name, student_id, adviser_id, date, time_slot, venue_id, notes, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
-  `).run(group_name, userId, adviser_id, date, time_slot, venue_id, notes || null);
+    INSERT INTO appointments (group_name, student_id, adviser_id, date, time_slot, venue_id, notes, status, thesis_title, meeting_link)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+  `).run(group_name, userId, adviser_id, date, time_slot, venue_id, notes || null, thesis_title || null, meeting_link || null);
 
   const pIdsArr = panelist_ids || [];
   const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
@@ -223,7 +223,7 @@ router.put('/:id', requireAuth, (req, res) => {
   if (role === 'student' && appt.student_id !== userId)
     return res.status(403).json({ error: 'Cannot modify another group\'s appointment.' });
 
-  const fields = ['status','date','time_slot','venue_id','notes'];
+  const fields = ['status','date','time_slot','venue_id','notes','meeting_link'];
   const updates = {};
   fields.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
   updates.updated_at = new Date().toISOString();
@@ -231,8 +231,16 @@ router.put('/:id', requireAuth, (req, res) => {
   const set = Object.keys(updates).map(k => `${k} = ?`).join(', ');
   db.prepare(`UPDATE appointments SET ${set} WHERE id = ?`).run(...Object.values(updates), req.params.id);
 
-  if (role !== 'student' && (req.body.date || req.body.time_slot))
+  if (role !== 'student' && (req.body.date || req.body.time_slot)) {
     notify(appt.student_id, `Your defense has been rescheduled to ${req.body.date || appt.date} at ${req.body.time_slot || appt.time_slot}.`, 'warning');
+    // Also notify panelists
+    const panRes = db.prepare('SELECT panelist_id FROM appointment_panelists WHERE appointment_id = ?').all(req.params.id);
+    for (const p of panRes) {
+      if (p.panelist_id !== appt.student_id) {
+        notify(p.panelist_id, `The defense for ${appt.group_name} has been rescheduled to ${req.body.date || appt.date} at ${req.body.time_slot || appt.time_slot}.`, 'warning');
+      }
+    }
+  }
 
   res.json({ success: true });
 });

@@ -1969,6 +1969,10 @@
             <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Thesis / Capstone Title</label>
+              <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text);font-weight:500">${appt.thesis_title || '—'}</div>
+            </div>
             <div class="form-group">
               <label class="form-label">Group Name</label>
               <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text);font-weight:500">${appt.group_name}</div>
@@ -1989,6 +1993,12 @@
               <label class="form-label">Panelists</label>
               <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text)">
                 ${(appt.panelists || []).map(p => p.name).join(', ') || '—'}
+              </div>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Meeting Link</label>
+              <div style="padding:9px 12px;background:var(--surface2);border-radius:var(--radius);font-size:13px;color:var(--text)">
+                ${appt.meeting_link ? `<a href="${appt.meeting_link}" target="_blank" style="color:var(--accent)">${appt.meeting_link}</a>` : '<span style="color:var(--text3)">Not set</span>'}
               </div>
             </div>
             <div class="form-group" style="grid-column:1/-1">

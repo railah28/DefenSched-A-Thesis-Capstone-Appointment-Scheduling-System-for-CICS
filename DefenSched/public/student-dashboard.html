@@ -306,6 +306,10 @@
       <div class="card" id="defense-detail-card">
         <div class="card-header"><span class="card-title">My defense details</span><span class="tag tag-pending" id="defense-tag">—</span></div>
         <div class="defense-detail" style="margin-bottom:14px;">
+          <div class="detail-item" style="grid-column:1/-1">
+            <div class="detail-label">Thesis Title</div>
+            <div class="detail-value" id="d-title">—</div>
+          </div>
           <div class="detail-item">
             <div class="detail-label">Date</div>
             <div class="detail-value" id="d-date">—</div>
@@ -419,6 +423,10 @@
 
       <div style="display:flex;flex-direction:column;gap:14px;" id="book-form">
         <div class="form-field">
+          <label>Capstone/Thesis Title *</label>
+          <input class="input" id="bk-title" type="text" placeholder="e.g. AI-Powered Scheduling System" required>
+        </div>
+        <div class="form-field">
           <label>Group Name</label>
           <input class="input" id="bk-group" type="text" placeholder="e.g. Group Alpha">
         </div>
@@ -443,6 +451,10 @@
           <select class="input" id="bk-venue">
             <option value="">Loading venues...</option>
           </select>
+        </div>
+        <div class="form-field" id="bk-meeting-link-wrap" style="display:none">
+          <label>Meeting Link (for online defense)</label>
+          <input class="input" id="bk-meeting-link" type="url" placeholder="https://meet.google.com/...">
         </div>
         <div class="form-note">
           ℹ️ <strong>Note on panelists:</strong> Panelists will be assigned by the Research Coordinator after your appointment is reviewed. You don't need to choose them.
@@ -718,6 +730,7 @@ function renderOverviewDetails() {
     document.getElementById('defense-tag').className    = 'tag';
     return;
   }
+  document.getElementById('d-title').textContent = a.thesis_title || '—';
   document.getElementById('d-date').textContent  = a.date || '—';
   document.getElementById('d-day').textContent   = a.date ? new Date(a.date+'T00:00:00').toLocaleDateString('en-PH',{weekday:'long'}) : '—';
   document.getElementById('d-time').textContent  = a.time_slot || '—';
@@ -824,10 +837,12 @@ function renderMySchedule() {
       <div class="card">
         <div class="card-header"><span class="card-title">Appointment Details</span><span class="tag tag-${a.status}">${a.status}</span></div>
         <div class="defense-detail" style="margin-bottom:16px;">
+          <div class="detail-item"><div class="detail-label">Thesis Title</div><div class="detail-value">${a.thesis_title||'—'}</div></div>
           <div class="detail-item"><div class="detail-label">Date</div><div class="detail-value">${a.date||'—'}</div></div>
           <div class="detail-item"><div class="detail-label">Time</div><div class="detail-value" style="font-family:var(--mono);">${a.time_slot||'—'}</div></div>
           <div class="detail-item"><div class="detail-label">Venue</div><div class="detail-value">${a.venue_name||'—'}</div></div>
           <div class="detail-item"><div class="detail-label">Group</div><div class="detail-value">${a.group_name||'—'}</div></div>
+          ${a.meeting_link ? `<div class="detail-item" style="grid-column:1/-1"><div class="detail-label">Meeting Link</div><div class="detail-value"><a href="${a.meeting_link}" target="_blank" style="color:var(--accent)">${a.meeting_link}</a></div></div>` : ''}
         </div>
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">Adviser</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">${a.adviser_name||'—'}</div>
@@ -850,15 +865,30 @@ function renderMySchedule() {
 }
 
 // ── Booking dropdowns ─────────────────────────────────────────────
+let _venues = [];
 async function loadBookingDropdowns() {
   try {
     const [fRes, vRes] = await Promise.all([fetch('/api/faculty'), fetch('/api/venues')]);
     const { faculty } = await fRes.json();
     const { venues }  = await vRes.json();
+    _venues = venues;
     document.getElementById('bk-adviser').innerHTML = '<option value="">Choose adviser</option>' + faculty.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
     document.getElementById('bk-venue').innerHTML   = '<option value="">Choose venue</option>'   + venues.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
   } catch (e) { console.error('Dropdown load error', e); }
 }
+
+// Show/hide meeting link field based on venue type
+document.getElementById('bk-venue')?.addEventListener('change', function() {
+  const venueId = parseInt(this.value);
+  const venue = _venues.find(v => v.id === venueId);
+  const wrap = document.getElementById('bk-meeting-link-wrap');
+  if (wrap) {
+    wrap.style.display = venue && venue.type === 'virtual' ? '' : 'none';
+    if (venue && venue.type !== 'virtual') {
+      document.getElementById('bk-meeting-link').value = '';
+    }
+  }
+});
 
 // ── Update booking panel state ────────────────────────────────────
 function updateBookingPanel() {
@@ -921,12 +951,14 @@ async function submitBooking() {
     document.getElementById('book-existing-notice').style.display = '';
     return;
   }
-  const group_name = document.getElementById('bk-group').value.trim();
-  const adviser_id = parseInt(document.getElementById('bk-adviser').value);
-  const date       = document.getElementById('bk-date').value;
-  const timeRaw    = document.getElementById('bk-time').value;
-  const venue_id   = parseInt(document.getElementById('bk-venue').value);
-  if (!group_name || !adviser_id || !date || !timeRaw || !venue_id) {
+  const thesis_title = document.getElementById('bk-title').value.trim();
+  const group_name   = document.getElementById('bk-group').value.trim();
+  const adviser_id   = parseInt(document.getElementById('bk-adviser').value);
+  const date         = document.getElementById('bk-date').value;
+  const timeRaw      = document.getElementById('bk-time').value;
+  const venue_id     = parseInt(document.getElementById('bk-venue').value);
+  const meeting_link = document.getElementById('bk-meeting-link').value.trim() || null;
+  if (!thesis_title || !group_name || !adviser_id || !date || !timeRaw || !venue_id) {
     showToast('Please fill in all fields.', 'error');
     return;
   }
@@ -939,7 +971,7 @@ async function submitBooking() {
     const r = await fetch('/api/appointments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ group_name, adviser_id, panelist_ids: [], date, time_slot, venue_id })
+      body: JSON.stringify({ group_name, adviser_id, panelist_ids: [], date, time_slot, venue_id, thesis_title, meeting_link })
     });
     const d = await r.json();
     if (r.ok) {
