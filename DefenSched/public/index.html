@@ -55,6 +55,13 @@
       font-size:13px;outline:none;margin-bottom:10px;transition:border-color 0.2s;
     }
     .form-container input:focus{border-color:#2b1369;background:#fff;}
+    .form-container select{
+      background:#f3f4f8;border:1.5px solid transparent;
+      border-radius:10px;width:100%;padding:11px 14px;
+      font-size:13px;outline:none;margin-bottom:10px;transition:border-color 0.2s;
+      color:#333;cursor:pointer;
+    }
+    .form-container select:focus{border-color:#2b1369;background:#fff;}
     .row{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:8px;}
     .row label{font-size:12px;color:#666;display:flex;align-items:center;gap:5px;cursor:pointer;}
     .row a{font-size:12px;color:#2b1369;text-decoration:none;}
@@ -219,7 +226,7 @@
       <div class="divider"><div class="divider-line"></div><span>or use your email</span><div class="divider-line"></div></div>
 
       <!-- Role selector -->
-      <select id="reg-role" onchange="regRoleChange()" style="width:100%;padding:9px 12px;margin-bottom:10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;background:#f3f4f8;color:#333;outline:none;cursor:pointer;">
+      <select id="reg-role" onchange="regRoleChange()">
         <option value="student">&#127891; Thesis Student</option>
         <option value="faculty">&#128218; Faculty (Adviser / Panelist)</option>
       </select>
@@ -231,7 +238,7 @@
       <!-- Solo / Group — students only -->
       <div id="reg-group-section">
         <p style="font-size:11px;color:#888;margin:2px 0 6px;">Assigned Adviser</p>
-        <select id="reg-adviser" style="width:100%;padding:9px 12px;margin-bottom:10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;background:#f3f4f8;color:#333;outline:none;cursor:pointer;">
+        <select id="reg-adviser">
           <option value="">Loading faculty...</option>
         </select>
         
@@ -247,7 +254,7 @@
           </button>
         </div>
         <div id="reg-group-fields" style="display:none;">
-          <select id="reg-group-size" onchange="buildMemberFields()" style="width:100%;padding:9px 12px;margin-bottom:10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;background:#f3f4f8;color:#333;outline:none;">
+          <select id="reg-group-size" onchange="buildMemberFields()">
             <option value="2">2 members</option>
             <option value="3">3 members</option>
             <option value="4">4 members</option>
