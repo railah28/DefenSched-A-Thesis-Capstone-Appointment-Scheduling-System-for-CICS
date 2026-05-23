@@ -148,7 +148,69 @@ router.get('/check-conflict', requireAuth, requireActive, (req, res) => {
 });
 
 // ── POST /api/appointments ────────────────────────────────────────
+
+// ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, requireActive, (req, res) => {
+
+  const { userId, role } = req.session;
+  const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes, thesis_title, meeting_link } = req.body;
+  
+  if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
+    return res.status(400).json({ error: 'All fields are required.' });
+
+  if (role === 'student') {
+    
+    const existing = db.prepare(`
+      SELECT id FROM appointments
+      WHERE student_id = ? 
+        AND LOWER(status) NOT IN ('cancelled', 'none', 'rejected')
+    `).get(userId);
+    
+    if (existing) {
+      return res.status(400).json({ error: 'You already have an active appointment.' });
+    }
+  }
+
+  const now = new Date();
+  const bookingDate = new Date(date + 'T' + time_slot.split('-')[0] + ':00:00');
+  if (bookingDate <= now)
+    return res.status(409).json({ error: 'Cannot book past dates or times.' });
+
+  const advAvail = db.prepare(`
+    SELECT id FROM faculty_availability
+    WHERE faculty_id = ? AND date = ? AND time_slot = ? AND availability_type = 'adviser'
+  `).get(adviser_id, date, time_slot);
+  if (!advAvail)
+    return res.status(409).json({ error: 'Adviser has not marked this time as available.' });
+
+  if (db.prepare(`SELECT id FROM appointments WHERE adviser_id=? AND date=? AND time_slot=? AND LOWER(status)!='cancelled'`).get(adviser_id, date, time_slot))
+    return res.status(409).json({ error: 'Conflict: Adviser has a conflict at that time.' });
+
+  if (db.prepare(`SELECT id FROM appointments WHERE venue_id=? AND date=? AND time_slot=? AND LOWER(status)!='cancelled'`).get(venue_id, date, time_slot))
+    return res.status(409).json({ error: 'Conflict: Venue is already booked.' });
+
+  const { lastInsertRowid: apptId } = db.prepare(`
+    INSERT INTO appointments (group_name, student_id, adviser_id, date, time_slot, venue_id, notes, status, thesis_title, meeting_link)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+  `).run(group_name, userId, adviser_id, date, time_slot, venue_id, notes || null, thesis_title || null, meeting_link || null);
+
+  const pIds = Array.isArray(panelist_ids) ? panelist_ids.filter(Boolean) : [];
+  const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
+  for (const pid of pIds) insPan.run(apptId, pid);
+
+  notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
+  for (const pid of pIds) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
+  notify(userId, 'Appointment submitted. Upload your manuscript to confirm.', 'success');
+
+  const admins = db.prepare("SELECT id FROM users WHERE role = 'admin' AND is_active = 1").all();
+  for (const admin of admins) {
+    notify(admin.id, `New appointment request from ${group_name} on ${date} at ${time_slot}.`, 'info');
+  }
+
+  res.status(201).json({ success: true, appointment_id: apptId });
+});
+
+/*router.post('/', requireAuth, requireActive, (req, res) => {
 
   const { userId, role } = req.session;
   const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes, thesis_title, meeting_link } = req.body;
@@ -159,16 +221,6 @@ router.post('/', requireAuth, requireActive, (req, res) => {
     SELECT * FROM appointments 
     WHERE student_id = ? AND status != 'cancelled'
   `;
-
-  db.query(checkActiveBookingSql, [userId], (err, results) => {
-    if (err) {
-      console.error("Database error during booking check:", err);
-      return res.status(500).json({ error: 'Internal server error.' });
-    }
-
-    if (results.length > 0) {
-      return res.status(400).json({ error: 'You already have an active appointment scheduling request.' });
-    }
 
   // Prevent student double-booking
   if (role === 'student') {
@@ -221,7 +273,7 @@ router.post('/', requireAuth, requireActive, (req, res) => {
   }
 
   res.status(201).json({ success: true, appointment_id: apptId });
-});
+});*/
 
 // ── PUT /api/appointments/:id ─────────────────────────────────────
 router.put('/:id', requireAuth, requireActive, (req, res) => {
