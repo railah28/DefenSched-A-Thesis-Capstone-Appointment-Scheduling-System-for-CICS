@@ -33,16 +33,17 @@ app.use('/api/faculty',       require('./routes/faculty'));
 app.use('/api/manuscripts',   require('./routes/manuscripts'));
 app.use('/api/honoraria',     require('./routes/honoraria'));
 app.use('/api/users',         require('./routes/users'));
+app.use('/api/admin/users',   require('./routes/admin-users'));
 app.use('/api/notifications', require('./routes/notifications'));
 
 // ── Venues endpoint (admin) ───────────────────────────────────────
 const db = require('./database');
-const { requireAuth, requireRole } = require('./middleware/auth');
+const { requireAuth, requireRole, requireActive } = require('./middleware/auth');
 
-app.get('/api/venues', requireAuth, (req, res) => {
+app.get('/api/venues', requireAuth, requireActive, (req, res) => {
   res.json({ venues: db.prepare('SELECT * FROM venues WHERE is_active = 1 ORDER BY name').all() });
 });
-app.post('/api/venues', requireRole('admin'), (req, res) => {
+app.post('/api/venues', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   const { name, type, capacity } = req.body;
   if (!name || !type) return res.status(400).json({ error: 'name and type are required.' });
   const { lastInsertRowid: id } = db.prepare(
@@ -50,7 +51,7 @@ app.post('/api/venues', requireRole('admin'), (req, res) => {
   ).run(name, type, capacity || 10);
   res.status(201).json({ success: true, venue_id: id });
 });
-app.put('/api/venues/:id', requireRole('admin'), (req, res) => {
+app.put('/api/venues/:id', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   const { name, type, capacity, is_active } = req.body;
   const updates = {};
   if (name      !== undefined) updates.name      = name;
@@ -61,7 +62,7 @@ app.put('/api/venues/:id', requireRole('admin'), (req, res) => {
   db.prepare(`UPDATE venues SET ${set} WHERE id = ?`).run(...Object.values(updates), req.params.id);
   res.json({ success: true });
 });
-app.delete('/api/venues/:id', requireRole('admin'), (req, res) => {
+app.delete('/api/venues/:id', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   const venue = db.prepare('SELECT id FROM venues WHERE id = ?').get(req.params.id);
   if (!venue) return res.status(404).json({ error: 'Venue not found.' });
   // Soft-delete: mark inactive (keeps FK integrity with existing appointments)
@@ -70,16 +71,13 @@ app.delete('/api/venues/:id', requireRole('admin'), (req, res) => {
 });
 
 // ── Dashboard pages (role-protected) ─────────────────────────────
-app.get('/admin-dashboard', (req, res) => {
-  if (!req.session?.userId || req.session.role !== 'admin') return res.redirect('/');
+app.get('/admin-dashboard', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-dashboard.html'));
 });
-app.get('/faculty-dashboard', (req, res) => {
-  if (!req.session?.userId || req.session.role !== 'faculty') return res.redirect('/');
+app.get('/faculty-dashboard', requireAuth, requireActive, requireRole('faculty'), (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'faculty-dashboard.html'));
 });
-app.get('/student-dashboard', (req, res) => {
-  if (!req.session?.userId || req.session.role !== 'student') return res.redirect('/');
+app.get('/student-dashboard', requireAuth, requireActive, requireRole('student'), (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'student-dashboard.html'));
 });
 

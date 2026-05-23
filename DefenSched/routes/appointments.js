@@ -3,7 +3,7 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../database');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireActive, requireRole } = require('../middleware/auth');
 
 // ── Helpers ──────────────────────────────────────────────────────
 function getDayName(dateStr) {
@@ -28,7 +28,7 @@ function attachPanelists(appts) {
 }
 
 // ── GET /api/appointments ─────────────────────────────────────────
-router.get('/', requireAuth, (req, res) => {
+router.get('/', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   let rows;
   if (role === 'admin') {
@@ -65,7 +65,7 @@ router.get('/', requireAuth, (req, res) => {
 });
 
 // ── GET /api/appointments/check-conflict ─────────────────────────
-router.get('/check-conflict', requireAuth, (req, res) => {
+router.get('/check-conflict', requireAuth, requireActive, (req, res) => {
   const { date, time_slot, adviser_id, panelist_ids, venue_id, exclude_id } = req.query;
   if (!date || !time_slot || !adviser_id || !venue_id)
     return res.status(400).json({ error: 'Missing required fields.' });
@@ -148,7 +148,7 @@ router.get('/check-conflict', requireAuth, (req, res) => {
 });
 
 // ── POST /api/appointments ────────────────────────────────────────
-router.post('/', requireAuth, (req, res) => {
+router.post('/', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   const { group_name, adviser_id, panelist_ids, date, time_slot, venue_id, notes, thesis_title, meeting_link } = req.body;
   if (!group_name || !adviser_id || !date || !time_slot || !venue_id)
@@ -194,7 +194,6 @@ router.post('/', requireAuth, (req, res) => {
   const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
   for (const pid of pIds) insPan.run(apptId, pid);
 
-  // Notify adviser, panelists, and submitting student
   notify(parseInt(adviser_id), `New defense scheduled: ${group_name} on ${date} at ${time_slot}.`, 'info');
   for (const pid of pIds) notify(pid, `You are assigned as panelist for ${group_name} on ${date}.`, 'info');
   notify(userId, 'Appointment submitted. Upload your manuscript to confirm.', 'success');
@@ -209,7 +208,7 @@ router.post('/', requireAuth, (req, res) => {
 });
 
 // ── PUT /api/appointments/:id ─────────────────────────────────────
-router.put('/:id', requireAuth, (req, res) => {
+router.put('/:id', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   const appt = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
   if (!appt) return res.status(404).json({ error: 'Appointment not found.' });
@@ -239,7 +238,7 @@ router.put('/:id', requireAuth, (req, res) => {
 });
 
 // ── DELETE /api/appointments/:id — hard delete ────────────────────
-router.delete('/:id', requireRole('admin'), (req, res) => {
+router.delete('/:id', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   const appt = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
   if (!appt) return res.status(404).json({ error: 'Appointment not found.' });
 
