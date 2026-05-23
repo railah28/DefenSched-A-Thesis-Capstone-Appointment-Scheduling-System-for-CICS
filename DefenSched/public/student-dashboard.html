@@ -1024,6 +1024,9 @@ async function loadManuscript() {
     if (r.ok) {
       const { manuscript: m } = await r.json();
       const kb = Math.round(m.file_size / 1024);
+      const deleteBtn = a.status === 'pending' 
+        ? `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteManuscript(${m.id}, '${m.original_name.replace(/'/g, "\\'")}')">Delete</button>`
+        : `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px;opacity:0.5;cursor:not-allowed;" disabled title="Cannot delete after confirmation">Delete</button>`;
       document.getElementById('manuscript-history').innerHTML = `
         <div class="version-item">
           <span class="ver-badge current">Latest</span>
@@ -1033,7 +1036,7 @@ async function loadManuscript() {
           </div>
           <div style="display:flex;gap:6px;">
             <a href="/api/manuscripts/download/${m.id}" class="btn btn-outline" style="padding:5px 10px;font-size:11px;">Download</a>
-            <button class="btn btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteManuscript(${m.id}, '${m.original_name.replace(/'/g, "\\'")}')">Delete</button>
+            ${deleteBtn}
           </div>
         </div>`;
     } else {
