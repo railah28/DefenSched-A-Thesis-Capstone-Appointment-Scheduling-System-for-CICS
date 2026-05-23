@@ -1031,7 +1031,10 @@ async function loadManuscript() {
             <div style="font-size:12px;font-weight:500;">${m.original_name}</div>
             <div style="font-size:11px;color:var(--text3);font-family:var(--mono);">${new Date(m.uploaded_at).toLocaleDateString()} · ${kb}KB</div>
           </div>
-          <a href="/api/manuscripts/download/${m.id}" class="btn btn-outline" style="padding:5px 10px;font-size:11px;">Download</a>
+          <div style="display:flex;gap:6px;">
+            <a href="/api/manuscripts/download/${m.id}" class="btn btn-outline" style="padding:5px 10px;font-size:11px;">Download</a>
+            <button class="btn btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteManuscript(${m.id}, '${m.original_name.replace(/'/g, "\\'")}')">Delete</button>
+          </div>
         </div>`;
     } else {
       document.getElementById('manuscript-history').innerHTML = '<div style="font-size:13px;color:var(--text3);">No manuscript uploaded yet.</div>';
@@ -1071,6 +1074,20 @@ async function processUpload(file) {
       showToast(d.error || 'Upload failed.', 'error');
     }
   } catch { prog.style.display = 'none'; showToast('Upload error. Try again.', 'error'); }
+}
+
+async function deleteManuscript(manuscriptId, fileName) {
+  if (!confirm(`Delete "${fileName}"? This cannot be undone.`)) return;
+  try {
+    const r = await fetch(`/api/manuscripts/${manuscriptId}`, { method: 'DELETE' });
+    const d = await r.json();
+    if (r.ok) {
+      showToast('Manuscript deleted.', 'success');
+      loadManuscript();
+    } else {
+      showToast(d.error || 'Delete failed.', 'error');
+    }
+  } catch { showToast('Delete error. Try again.', 'error'); }
 }
 
 // ── Notifications ─────────────────────────────────────────────────
