@@ -27,7 +27,7 @@ router.post('/register', (req, res) => {
     const { lastInsertRowid: id } = db.prepare(`
       INSERT INTO users (name, email, password_hash, role, group_name, is_group, members, status, adviser_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(name, email.toLowerCase().trim(), hashed, role, group_name || null, isGroup, membersJson, 'pending', adviser_id || null);
+    `).run(name, email.toLowerCase().trim(), hashed, role, group_name || null, isGroup, membersJson, 'pending', (role === 'student' && !adviser_id) ? 2 : adviser_id || null);
 
     // Notify all admins in the system about the new signup
     const admins = db.prepare("SELECT id FROM users WHERE role = 'admin' AND is_active = 1").all();
