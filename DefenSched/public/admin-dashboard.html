@@ -1019,6 +1019,84 @@
     .adm-month-event:hover {
       opacity: .8;
     }
+
+    /* ── Panelist Checkbox List ─────────────────────────────────── */
+    .panelist-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .panelist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+
+    .panelist-item:hover {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .panelist-item.selected {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .panelist-item input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .panelist-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .panelist-email {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: var(--mono);
+    }
+
+    .btn-purple {
+      background: rgba(167, 139, 250, .15);
+      color: var(--purple);
+      border: 1px solid rgba(167, 139, 250, .25);
+    }
+
+    .btn-purple:hover {
+      background: rgba(167, 139, 250, .25);
+    }
+
+    .panelist-conflict-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: rgba(245, 166, 35, .15);
+      color: var(--warning);
+      border: 1px solid rgba(245, 166, 35, .25);
+      letter-spacing: .02em;
+    }
   </style>
 </head>
 
@@ -1719,6 +1797,31 @@
     </div>
   </div>
 
+  <!-- MODAL: Assign Panelists -->
+  <div class="modal-overlay" id="panelist-modal">
+    <div class="modal" style="width:520px">
+      <div class="modal-header">
+        <span class="modal-title">Assign Panelists</span>
+        <button class="modal-close" onclick="closeModal('panelist-modal')">×</button>
+      </div>
+      <div class="form-group" style="margin-bottom:8px">
+        <div id="panelist-appt-info" style="font-size:13px;color:var(--text2);padding:10px;background:var(--surface2);border-radius:var(--radius);margin-bottom:4px"></div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Select faculty members to assign as panelists for this defense.</div>
+        <input type="text" id="panelist-search" class="form-input" placeholder="Search faculty…" style="margin-bottom:10px" oninput="filterPanelistList()">
+        <div class="panelist-list" id="panelist-list">
+          <div class="db-empty">Loading faculty…</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+        <span id="panelist-selected-count" style="font-size:12px;color:var(--text3)">0 selected</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="closeModal('panelist-modal')">Cancel</button>
+          <button class="btn btn-primary" onclick="submitPanelistAssignment()" id="save-panelist-btn">Save Panelists</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let _user = null, _appointments = [], _allUsers = [], _venues = [], _honoraria = { report: [], grand_total: 0, rates: {} }, _statusApptId = null;
 
@@ -1833,7 +1936,7 @@
       document.getElementById('board-filter').onchange = loadScheduleBoard;
       const f = document.getElementById('board-filter').value;
       const rows = _appointments.filter(a => !f || a.status === f).sort((a, b) => a.date < b.date ? -1 : 1);
-      document.getElementById('board-tbody').innerHTML = rows.length ? rows.map(a => `<tr><td><div style="font-weight:600">${a.group_name}</div></td><td>${a.adviser_name || '—'}</td><td style="font-size:12px">${(a.panelists || []).map(p => p.name).join(', ') || '—'}</td><td style="font-family:var(--mono);font-size:12px">${fmtDate(a.date)}<br>${a.time_slot || '—'}</td><td>${a.venue_name || '—'}</td><td>${fmtStatus(a.status)}</td><td><button class="btn btn-ghost btn-sm" onclick="openStatusModal(${a.id},'${a.group_name.replace(/'/g, "\\'")}','${a.status}')">Update</button></td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No appointments found</td></tr>';
+      document.getElementById('board-tbody').innerHTML = rows.length ? rows.map(a => `<tr><td><div style="font-weight:600">${a.group_name}</div></td><td>${a.adviser_name || '—'}</td><td style="font-size:12px">${(a.panelists || []).map(p => p.name).join(', ') || '<span style="color:var(--text3)">None assigned</span>'}</td><td style="font-family:var(--mono);font-size:12px">${fmtDate(a.date)}<br>${a.time_slot || '—'}</td><td>${a.venue_name || '—'}</td><td>${fmtStatus(a.status)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="openStatusModal(${a.id},'${a.group_name.replace(/'/g, "\\'")}','${a.status}')">Update</button><button class="btn btn-purple btn-sm" onclick="openPanelistModal(${a.id},'${a.group_name.replace(/'/g, "\\'")}')">Assign Panelists</button></div></td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:30px">No appointments found</td></tr>';
     }
 
     function switchScheduleBoardView(view, el) {
@@ -2062,6 +2165,7 @@
           </div>
           <div style="display:flex;gap:8px;justify-content:flex-end">
             <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">Close</button>
+            <button class="btn btn-purple" onclick="openPanelistModal(${appt.id},'${appt.group_name.replace(/'/g, "\\'")}')">Assign Panelists</button>
             <button class="btn btn-primary" onclick="openStatusModal(${appt.id},'${appt.group_name.replace(/'/g, "\\'")}','${appt.status}'); this.closest('.modal-overlay').remove()">Update Status</button>
           </div>
         </div>
@@ -2256,6 +2360,94 @@
       const status = document.getElementById('status-select').value;
       const res = await fetch(`/api/appointments/${_statusApptId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
       if (res.ok) { closeModal('status-modal'); showToast('Status updated', 'success'); await refresh() } else showToast('Failed', 'error');
+    }
+
+    // ── PANELIST ASSIGNMENT MODAL ────────────────────────────────────
+    let _panelistApptId = null;
+
+    function openPanelistModal(apptId, apptName) {
+      _panelistApptId = apptId;
+      document.getElementById('panelist-appt-info').textContent = apptName;
+      document.getElementById('panelist-search').value = '';
+
+      const appt = _appointments.find(a => a.id === apptId);
+      const currentPanelists = (appt?.panelists || []).map(p => p.id);
+      const adviserId = appt?.adviser_id || null;
+
+      // Get all active faculty members
+      const faculty = _allUsers.filter(u => u.role === 'faculty' && u.is_active !== 0);
+
+      renderPanelistList(faculty, currentPanelists, adviserId);
+      updatePanelistCount();
+      openModal('panelist-modal');
+    }
+
+    function renderPanelistList(faculty, selectedIds, adviserId) {
+      const list = document.getElementById('panelist-list');
+      if (!faculty.length) {
+        list.innerHTML = '<div class="db-empty">No active faculty members found.</div>';
+        return;
+      }
+      list.innerHTML = faculty.map(f => {
+        const isAdviser = f.id === adviserId;
+        const isChecked = !isAdviser && selectedIds.includes(f.id);
+        const disabledAttr = isAdviser ? 'disabled' : '';
+        const itemStyle = isAdviser ? 'opacity:.5;cursor:not-allowed;' : '';
+        const adviserBadge = isAdviser
+          ? `<span class="panelist-conflict-badge">⚠ Current Adviser</span>`
+          : '';
+        return `
+          <label class="panelist-item${isChecked ? ' selected' : ''}" for="pan-${f.id}" style="${itemStyle}">
+            <input type="checkbox" id="pan-${f.id}" value="${f.id}" ${isChecked ? 'checked' : ''} ${disabledAttr}
+              onchange="togglePanelistItem(this)">
+            <div style="flex:1">
+              <div class="panelist-name" style="display:flex;align-items:center;gap:8px">${f.name}${adviserBadge}</div>
+              <div class="panelist-email">${f.email}</div>
+            </div>
+          </label>`;
+      }).join('');
+    }
+
+    function togglePanelistItem(cb) {
+      const item = cb.closest('.panelist-item');
+      item.classList.toggle('selected', cb.checked);
+      updatePanelistCount();
+    }
+
+    function updatePanelistCount() {
+      const count = document.querySelectorAll('#panelist-list input[type="checkbox"]:checked').length;
+      document.getElementById('panelist-selected-count').textContent = `${count} selected`;
+    }
+
+    function filterPanelistList() {
+      const q = document.getElementById('panelist-search').value.toLowerCase();
+      document.querySelectorAll('#panelist-list .panelist-item').forEach(item => {
+        const name = item.querySelector('.panelist-name').textContent.toLowerCase();
+        const email = item.querySelector('.panelist-email').textContent.toLowerCase();
+        item.style.display = (!q || name.includes(q) || email.includes(q)) ? '' : 'none';
+      });
+    }
+
+    async function submitPanelistAssignment() {
+      const panelist_ids = [...document.querySelectorAll('#panelist-list input[type="checkbox"]:checked')].map(cb => parseInt(cb.value));
+      const btn = document.getElementById('save-panelist-btn');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      try {
+        const res = await fetch(`/api/appointments/${_panelistApptId}/panelists`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ panelist_ids })
+        });
+        if (res.ok) {
+          closeModal('panelist-modal');
+          showToast('Panelists assigned successfully!', 'success');
+          await refresh();
+        } else {
+          const d = await res.json();
+          showToast(d.error || 'Failed to assign panelists', 'error');
+        }
+      } catch { showToast('Server error', 'error'); }
+      finally { btn.disabled = false; btn.textContent = 'Save Panelists'; }
     }
 
     // ── USER EDIT MODAL (unified for students & faculty) ─────────────

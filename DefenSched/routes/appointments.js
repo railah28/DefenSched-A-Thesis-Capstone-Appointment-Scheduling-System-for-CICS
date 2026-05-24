@@ -353,6 +353,42 @@ router.put('/:id', requireAuth, requireActive, (req, res) => {
   res.json({ success: true });
 });*/
 
+// ── PUT /api/appointments/:id/panelists — admin assign panelists ──
+router.put('/:id/panelists', requireAuth, requireActive, requireRole('admin'), (req, res) => {
+  const appt = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
+  if (!appt) return res.status(404).json({ error: 'Appointment not found.' });
+
+  const { panelist_ids } = req.body;
+  const pIds = Array.isArray(panelist_ids) ? panelist_ids.map(Number).filter(Boolean) : [];
+
+  // ←— Conflict guard: adviser cannot also be a panelist for the same group
+  if (pIds.includes(appt.adviser_id)) {
+    const adviser = db.prepare('SELECT name FROM users WHERE id = ?').get(appt.adviser_id);
+    return res.status(409).json({
+      error: `${adviser?.name || 'The adviser'} is already assigned as the adviser for this group and cannot also serve as a panelist.`
+    });
+  }
+
+  // Get previous panelists for notification comparison
+  const prevPanelists = db.prepare('SELECT panelist_id FROM appointment_panelists WHERE appointment_id = ?').all(req.params.id).map(r => r.panelist_id);
+
+  // Replace panelists
+  db.prepare('DELETE FROM appointment_panelists WHERE appointment_id = ?').run(req.params.id);
+  const insPan = db.prepare('INSERT INTO appointment_panelists (appointment_id, panelist_id) VALUES (?, ?)');
+  for (const pid of pIds) insPan.run(req.params.id, pid);
+
+  // Notify newly added panelists
+  const newPanelists = pIds.filter(pid => !prevPanelists.includes(pid));
+  for (const pid of newPanelists) {
+    notify(pid, `You have been assigned as a panelist for ${appt.group_name}'s defense on ${appt.date} at ${appt.time_slot}.`, 'info');
+  }
+
+  // Notify student of panelist update
+  notify(appt.student_id, `Panelists have been assigned to your defense on ${appt.date}.`, 'info');
+
+  res.json({ success: true });
+});
+
 // ── DELETE /api/appointments/:id — hard delete ────────────────────
 router.delete('/:id', requireAuth, requireActive, requireRole('admin'), (req, res) => {
   const appt = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
