@@ -6,7 +6,7 @@ const db      = require('../database');
 const { requireAuth, requireActive, requireRole } = require('../middleware/auth');
 
 // GET /api/faculty — list all faculty (for dropdowns)
-router.get('/', (req, res) => {
+router.get('/', requireAuth, requireActive, (req, res) => {
   const faculty = db.prepare(
     `SELECT id, name, email FROM users WHERE role = 'faculty' AND is_active = 1 ORDER BY name`
   ).all();
