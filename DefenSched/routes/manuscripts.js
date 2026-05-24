@@ -121,7 +121,7 @@ router.delete('/:id', requireAuth, (req, res) => {
   
   // Only allow deletion if appointment is still pending
   if (ms.status !== 'pending') {
-    return res.status(400).json({ error: 'Cannot delete manuscript once appointment is confirmed. Contact your adviser if you need to re-upload.' });
+    return res.status(403).json({ error: 'Cannot delete manuscript once appointment is confirmed. Contact your adviser if you need to re-upload.' });
   }
   
   // Delete physical file
