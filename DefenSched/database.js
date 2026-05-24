@@ -109,7 +109,6 @@ try { db.exec(`ALTER TABLE users ADD COLUMN is_group INTEGER NOT NULL DEFAULT 0`
 try { db.exec(`ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'`); } catch (_) { /* column already exists */ }
 try { db.exec(`ALTER TABLE appointments ADD COLUMN thesis_title TEXT`); } catch (_) { /* column already exists */ }
 try { db.exec(`ALTER TABLE appointments ADD COLUMN meeting_link TEXT`); } catch (_) { /* column already exists */ }
-try { db.exec(`ALTER TABLE users ADD COLUMN adviser_id INTEGER`); } catch (_) { /* column already exists */ }
 
 // ── Seed ────────────────────────────────────────────────────────
 function seed() {
@@ -120,15 +119,15 @@ function seed() {
   const h = p => bcrypt.hashSync(p, 10);
 
   const ins = db.prepare(`
-    INSERT INTO users (name, email, password_hash, role, group_name, adviser_id)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO users (name, email, password_hash, role, group_name)
+    VALUES (?, ?, ?, ?, ?)
   `);
-  ins.run('Research Coordinator', 'admin@cics.edu.ph', h('admin123'), 'admin', null, null);
-  ins.run('Dr. Jose Reyes', 'jose.reyes@cics.edu.ph', h('faculty123'), 'faculty', null, null);
-  ins.run('Prof. Maria Santos', 'maria.santos@cics.edu.ph', h('faculty123'), 'faculty', null, null);
-  ins.run('Dr. Ana Lim', 'ana.lim@cics.edu.ph', h('faculty123'), 'faculty', null, null);
-  ins.run('Group Alpha', 'group.alpha@cics.edu.ph', h('student123'), 'student', 'Group Alpha', 2);
-  ins.run('Group Beta', 'group.beta@cics.edu.ph', h('student123'), 'student', 'Group Beta', 3);
+  ins.run('Research Coordinator', 'admin@cics.edu.ph', h('admin123'), 'admin', null);
+  ins.run('Dr. Jose Reyes', 'jose.reyes@cics.edu.ph', h('faculty123'), 'faculty', null);
+  ins.run('Prof. Maria Santos', 'maria.santos@cics.edu.ph', h('faculty123'), 'faculty', null);
+  ins.run('Dr. Ana Lim', 'ana.lim@cics.edu.ph', h('faculty123'), 'faculty', null);
+  ins.run('Group Alpha', 'group.alpha@cics.edu.ph', h('student123'), 'student', 'Group Alpha');
+  ins.run('Group Beta', 'group.beta@cics.edu.ph', h('student123'), 'student', 'Group Beta');
 
   const insV = db.prepare('INSERT INTO venues (name, type, capacity) VALUES (?, ?, ?)');
   insV.run('Room 301 - CICS Lab', 'physical', 15);

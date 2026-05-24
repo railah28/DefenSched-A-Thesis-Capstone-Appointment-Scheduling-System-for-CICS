@@ -97,7 +97,20 @@ router.get('/check-conflict', requireAuth, requireActive, (req, res) => {
     rules = { ok: true, message: 'Within approved schedule window.' };
   }
 
-  const adviser = { ok: true,  message: 'Adviser availability checking disabled.' };
+  // Check if adviser has marked this slot as available
+  const advAvail = db.prepare(`
+    SELECT id FROM faculty_availability
+    WHERE faculty_id = ? AND date = ? AND time_slot = ? AND availability_type = 'adviser'
+  `).get(adviser_id, date, time_slot);
+  const advHasConflict = db.prepare(`
+    SELECT id FROM appointments
+    WHERE adviser_id = ? AND date = ? AND time_slot = ? AND status != 'cancelled' ${ex}
+  `).get(adviser_id, date, time_slot);
+  const adviser = advHasConflict
+    ? { ok: false, message: 'Adviser has a conflict at this time.' }
+    : !advAvail
+    ? { ok: false, message: 'Adviser has not marked this time as available.' }
+    : { ok: true,  message: 'Adviser is available.' };
 
   const pIds = panelist_ids ? panelist_ids.split(',').map(Number).filter(Boolean) : [];
   let panelists = { ok: true, message: 'No panelists selected.', details: [] };
@@ -224,7 +237,16 @@ router.post('/', requireAuth, requireActive, (req, res) => {
   if (bookingDate <= now)
     return res.status(409).json({ error: 'Cannot book past dates or times.' });
 
-  // Adviser availability checking has been removed
+  // Check if adviser has marked this slot as available
+  const advAvail = db.prepare(`
+    SELECT id FROM faculty_availability
+    WHERE faculty_id = ? AND date = ? AND time_slot = ? AND availability_type = 'adviser'
+  `).get(adviser_id, date, time_slot);
+  if (!advAvail)
+    return res.status(409).json({ error: 'Adviser has not marked this time as available.' });
+
+  if (db.prepare(`SELECT id FROM appointments WHERE adviser_id=? AND date=? AND time_slot=? AND status!='cancelled'`).get(adviser_id, date, time_slot))
+    return res.status(409).json({ error: 'Conflict: Adviser has a conflict at that time.' });
 
   if (db.prepare(`SELECT id FROM appointments WHERE venue_id=? AND date=? AND time_slot=? AND status!='cancelled'`).get(venue_id, date, time_slot))
     return res.status(409).json({ error: 'Conflict: Venue is already booked.' });
