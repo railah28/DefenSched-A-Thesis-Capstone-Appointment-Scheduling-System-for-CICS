@@ -1574,7 +1574,11 @@
             ? `<svg width="20" height="20" fill="none" stroke="var(--purple)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`
             : `<svg width="20" height="20" fill="none" stroke="#a1a1aa" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke-width="2" stroke-linecap="round"/></svg>`;
       const statusText = isConfirmed ? 'Confirmed — Final Defense' : isPending ? 'Pending — Awaiting Approval' : isRescheduled ? 'Rescheduled — Final Defense' : a.status.charAt(0).toUpperCase() + a.status.slice(1);
-      const cancelBtn = '';
+      const cancelBtn = (a.status.toLowerCase() === 'pending')
+        ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke-width="2"/></svg>
+        Cancel appointment
+       </button>` : '';;
       banner.className = `status-banner ${bgClass}`;
       banner.innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;">
@@ -1591,6 +1595,7 @@
     // ── Overview details ──────────────────────────────────────────────
     function renderOverviewDetails() {
       const a = _appointment;
+      
       if (!a) {
         document.getElementById('d-date').textContent = 'Not booked';
         document.getElementById('d-day').textContent = '—';
@@ -1848,9 +1853,13 @@
       const panelists = (a.panelists && a.panelists.length > 0)
         ? a.panelists.map(p => `<div style="font-size:13px;color:var(--text2);">• ${p.name}</div>`).join('')
         : '<div style="font-size:13px;color:var(--text3);">To be assigned by Research Coordinator</div>';
-      /*const cancelBtn = (a.status === 'pending' || a.status === 'confirmed' || a.status === 'rescheduled')
-        ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">Cancel Appointment</button>` : '';*/
-      el.innerHTML = `
+
+      /*const cancelBtn = (a.status.toLowerCase() === 'pending')
+        ? `<button class="btn btn-danger" onclick="cancelAppointment(${a.id})">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke-width="2"/></svg>
+        Cancel appointment
+       </button>` : '';*/
+        el.innerHTML = `
     <div class="grid-2">
       <div class="card">
         <div class="card-header"><span class="card-title">Appointment Details</span><span class="tag tag-${a.status}">${a.status}</span></div>
@@ -2076,7 +2085,7 @@
     }*/
 
     // ── Cancel appointment ────────────────────────────────────────────
-    /*async function cancelAppointment(id) {
+    async function cancelAppointment(id) {
       if (!confirm('Are you sure you want to cancel your appointment?')) return;
       try {
         const r = await fetch(`/api/appointments/${id}`, {
@@ -2094,7 +2103,7 @@
           showToast(d.error || 'Cancel failed.', 'error');
         }
       } catch { showToast('Server error.', 'error'); }
-    } */
+    } 
 
     // ── Manuscript ────────────────────────────────────────────────────
     async function loadManuscript() {
