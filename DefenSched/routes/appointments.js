@@ -148,8 +148,6 @@ router.get('/check-conflict', requireAuth, requireActive, (req, res) => {
 });
 
 // ── POST /api/appointments ────────────────────────────────────────
-
-// ── POST /api/appointments ────────────────────────────────────────
 router.post('/', requireAuth, requireActive, (req, res) => {
 
   const { userId, role } = req.session;
@@ -276,8 +274,6 @@ router.post('/', requireAuth, requireActive, (req, res) => {
 });*/
 
 // ── PUT /api/appointments/:id ─────────────────────────────────────
-
-// ── PUT /api/appointments/:id ─────────────────────────────────────
 router.put('/:id', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
   const appt = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
@@ -289,7 +285,9 @@ router.put('/:id', requireAuth, requireActive, (req, res) => {
   
   if (req.body.status && req.body.status.toLowerCase() === 'cancelled') {
     if (role === 'student') {
-      return res.status(403).json({ error: 'Unauthorized: Students are not permitted to cancel appointments.' });
+      if (appt.status.toLowerCase() !== 'pending') {
+      return res.status(403).json({ error: 'Unauthorized: Students can only cancel pending appointments.' });
+      }
     }
   }
 
