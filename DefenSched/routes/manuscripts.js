@@ -45,6 +45,12 @@ router.post('/upload/:appointmentId', requireAuth, requireActive, upload.single(
     return res.status(403).json({ error: 'You can only upload for your own appointment.' });
   if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
 
+  if (appt.status === 'cancelled' || appt.status === 'canceled') {
+    return res.status(400).json({ 
+      error: 'Cannot upload a manuscript to a cancelled appointment. Please book a new defense.' 
+    });
+  }
+
   // Remove old manuscript file if exists
   const existing = db.prepare('SELECT * FROM manuscripts WHERE appointment_id = ?').get(appointmentId);
   if (existing) {
@@ -58,17 +64,17 @@ router.post('/upload/:appointmentId', requireAuth, requireActive, upload.single(
     VALUES (?, ?, ?, ?)
   `).run(appointmentId, req.file.filename, req.file.originalname, req.file.size);
 
-  // Confirm the appointment and notify stakeholders
-  db.prepare(`UPDATE appointments SET manuscript_uploaded = 1, status = 'confirmed', updated_at = ? WHERE id = ?`)
+  db.prepare(`UPDATE appointments SET manuscript_uploaded = 1, updated_at = ? WHERE id = ?`)
     .run(new Date().toISOString(), appointmentId);
 
-  notify(appt.adviser_id, `Manuscript uploaded by ${appt.group_name}. Defense confirmed for ${appt.date}.`, 'success');
+  notify(appt.adviser_id, `Manuscript uploaded by ${appt.group_name} for the defense on ${appt.date}.`, 'success');
+  
   const panelists = db.prepare('SELECT panelist_id FROM appointment_panelists WHERE appointment_id = ?').all(appointmentId);
   panelists.forEach(p => notify(p.panelist_id, `Manuscript available for ${appt.group_name}'s defense on ${appt.date}.`, 'info'));
 
   res.status(201).json({
     success: true,
-    message: 'Manuscript uploaded. Appointment is now CONFIRMED.',
+    message: 'Manuscript uploaded successfully. Awaiting final confirmation.',
     filename: req.file.originalname,
     size: req.file.size
   });
