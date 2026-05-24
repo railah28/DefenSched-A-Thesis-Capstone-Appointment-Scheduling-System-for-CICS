@@ -937,10 +937,278 @@
     .version-item:last-child {
       border-bottom: none;
     }
+
+    /* =====================================================
+       MOBILE RESPONSIVE - Student Dashboard
+       ===================================================== */
+
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 300;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-menu-btn svg {
+      width: 22px;
+      height: 22px;
+      color: var(--text);
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 199;
+    }
+
+    .sidebar-backdrop.open {
+      display: block;
+    }
+
+    .bottom-nav {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+        z-index: 200;
+        width: 260px;
+        box-shadow: 6px 0 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0 !important;
+        padding: 16px 14px 80px !important;
+      }
+
+      .page-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+        padding-top: 52px;
+      }
+
+      .page-header .btn,
+      .page-header button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Stats: 2 cols */
+      .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
+      }
+
+      .stat-card {
+        padding: 14px !important;
+        gap: 10px !important;
+        border-radius: 12px !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+      }
+
+      /* Cards */
+      .card {
+        border-radius: 12px;
+        padding: 16px !important;
+      }
+
+      /* Tables: horizontal scroll */
+      .card>div {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        min-width: 480px;
+      }
+
+      /* Single-column grids */
+      [style*="grid-template-columns: 1fr 1fr"],
+      [style*="grid-template-columns:1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Panelist chips */
+      .panelist-list {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* Forms */
+      .form-row {
+        flex-direction: column !important;
+      }
+
+      /* Upload zone */
+      .upload-zone {
+        padding: 20px 14px !important;
+      }
+
+      /* Schedule board cards tighter */
+      .sched-card {
+        padding: 12px !important;
+      }
+
+      /* Notif items readable on small screens */
+      .notif-item {
+        padding: 12px 8px !important;
+      }
+
+      /* Bottom navigation */
+      .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        z-index: 150;
+        height: 62px;
+        box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.07);
+      }
+
+      .bottom-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        cursor: pointer;
+        color: var(--text3);
+        font-size: 10px;
+        font-weight: 600;
+        padding: 6px 2px;
+        transition: color 0.15s;
+        position: relative;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .bottom-nav-item.active {
+        color: var(--accent);
+      }
+
+      .bottom-nav-item svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .bnav-badge {
+        position: absolute;
+        top: 5px;
+        right: calc(50% - 20px);
+        background: var(--danger);
+        color: #fff;
+        font-size: 9px;
+        min-width: 15px;
+        height: 15px;
+        border-radius: 99px;
+        padding: 0 3px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--surface);
+      }
+    }
+
+    @media (max-width: 400px) {
+      .stats-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .bottom-nav-item span {
+        display: none;
+      }
+
+      .bottom-nav {
+        height: 54px;
+      }
+
+      .main {
+        padding-bottom: 68px !important;
+      }
+    }
   </style>
 </head>
 
 <body>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+  <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="openSidebar()" aria-label="Open menu">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" />
+    </svg>
+  </button>
+
+  <nav class="bottom-nav" id="bottom-nav">
+    <div class="bottom-nav-item active" data-bnav="overview" onclick="switchPanelMobile('overview',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.8" />
+        <rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.8" />
+        <rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.8" />
+        <rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.8" />
+      </svg>
+      <span>Home</span>
+    </div>
+    <div class="bottom-nav-item" data-bnav="book" onclick="switchPanelMobile('book',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.8" />
+        <path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
+      <span>Book</span>
+    </div>
+    <div class="bottom-nav-item" data-bnav="my-schedule" onclick="switchPanelMobile('my-schedule',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.8" />
+        <path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.8" />
+        <path d="M9 16l2 2 4-4" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
+      <span>Schedule</span>
+    </div>
+    <div class="bottom-nav-item" data-bnav="manuscript" onclick="switchPanelMobile('manuscript',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-width="1.8"
+          stroke-linecap="round" />
+      </svg>
+      <span>Upload</span>
+    </div>
+    <div class="bottom-nav-item" data-bnav="notifications" onclick="switchPanelMobile('notifications',this)">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke-width="1.8"
+          stroke-linecap="round" />
+      </svg>
+      <span>Alerts</span>
+      <span class="bnav-badge" id="bnav-notif-badge"></span>
+    </div>
+  </nav>
+
 
   <!-- ── Sidebar ─────────────────────────────────────────────── -->
   <aside class="sidebar">
@@ -1941,13 +2209,34 @@
         }
         const dotColors = { info: 'var(--info)', success: 'var(--success)', warning: 'var(--warning)', error: 'var(--danger)' };
         el.innerHTML = notifications.map(n => `
-      <div class="notif-item" style="${!n.is_read ? 'background:var(--accent-light);border-radius:8px;padding:8px 10px;' : ''}" onclick="markRead(${n.id}, this)">
-        <div class="notif-dot" style="background:${dotColors[n.type] || 'var(--text3)'}; ${!n.is_read ? 'width:9px;height:9px;' : 'opacity:.4;'}"></div>
-        <div>
+      <div class="notif-item"
+           data-notif-id="${n.id}"
+           data-notif-link="${n.link || ''}"
+           style="display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);${!n.is_read ? 'background:var(--accent-light);border-radius:8px;padding:8px 10px;' : ''}${n.link ? 'cursor:pointer;' : ''}"
+      >
+        <div class="notif-dot" style="margin-top:5px;flex-shrink:0;background:${dotColors[n.type] || 'var(--text3)'}; ${!n.is_read ? 'width:9px;height:9px;' : 'opacity:.4;'}"></div>
+        <div style="flex:1;min-width:0">
           <div class="notif-text">${n.message}</div>
-          <div class="notif-time">${new Date(n.created_at).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+          <div class="notif-time">${new Date(n.created_at).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}${n.link ? ' <span style="font-size:10px;color:var(--primary);margin-left:4px;">→ View</span>' : ''}</div>
         </div>
+        <button data-del-id="${n.id}" style="flex-shrink:0;background:none;border:none;color:var(--danger);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;opacity:0.7" title="Delete">&#10005;</button>
       </div>`).join('');
+        // Wire up click-to-navigate
+        el.querySelectorAll('.notif-item[data-notif-id]').forEach(item => {
+          item.addEventListener('click', e => {
+            if (e.target.closest('[data-del-id]')) return;
+            handleNotifClick(item.dataset.notifId, item.dataset.notifLink, item);
+          });
+        });
+        // Wire up delete buttons
+        el.querySelectorAll('[data-del-id]').forEach(btn => {
+          btn.addEventListener('click', async e => {
+            e.stopPropagation();
+            await fetch(`/api/notifications/${btn.dataset.delId}`, { method: 'DELETE' });
+            btn.closest('.notif-item').remove();
+            loadNotifBadge();
+          });
+        });
         const unread = notifications.filter(n => !n.is_read).length;
         document.getElementById('notif-badge').textContent = unread;
         document.getElementById('notif-badge').style.display = unread ? '' : 'none';
@@ -1958,6 +2247,17 @@
       await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
       el.style.background = '';
       loadNotifBadge();
+    }
+
+    async function handleNotifClick(id, link, el) {
+      await fetch(`/api/notifications/${id}/read`, { method: 'PUT' });
+      el.style.background = '';
+      el.style.opacity = '0.6';
+      loadNotifBadge();
+      if (link) {
+        const navEl = document.querySelector(`.nav-item[data-panel="${link}"]`);
+        switchPanel(link, navEl || null);
+      }
     }
 
     async function markAllRead() {
@@ -2003,6 +2303,51 @@
         document.getElementById('book-form').style.pointerEvents = '';
       }
     });
+
+    // ── Mobile sidebar & navigation ────────────────────────────────
+    function openSidebar() {
+      document.querySelector('.sidebar').classList.add('mobile-open');
+      document.getElementById('sidebar-backdrop').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('mobile-open');
+      document.getElementById('sidebar-backdrop').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function switchPanelMobile(name, bnavEl) {
+      const sideNavEl = document.querySelector('.nav-item[data-panel="' + name + '"]');
+      switchPanel(name, sideNavEl);
+      document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+      if (bnavEl) bnavEl.classList.add('active');
+      closeSidebar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Keep sidebar nav + bottom nav in sync
+    document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
+      item.addEventListener('click', function () {
+        const panel = this.dataset.panel;
+        document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+        const bnavItem = document.querySelector('.bottom-nav-item[data-bnav="' + panel + '"]');
+        if (bnavItem) bnavItem.classList.add('active');
+        if (window.innerWidth <= 768) closeSidebar();
+      });
+    });
+
+    // Sync notif count to bottom nav badge
+    function syncBnavBadge() {
+      const mainBadge = document.getElementById('notif-badge');
+      const bnavBadge = document.getElementById('bnav-notif-badge');
+      if (!bnavBadge) return;
+      const count = parseInt(mainBadge ? mainBadge.textContent : '0') || 0;
+      bnavBadge.textContent = count;
+      bnavBadge.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    // Poll badge sync every 2s
+    setInterval(syncBnavBadge, 2000);
   </script>
 </body>
 
