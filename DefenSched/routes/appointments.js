@@ -161,7 +161,7 @@ router.post('/', requireAuth, requireActive, (req, res) => {
     const existing = db.prepare(`
       SELECT id FROM appointments
       WHERE student_id = ? 
-        AND LOWER(status) NOT IN ('cancelled', 'none', 'rejected')
+        AND LOWER(status) NOT IN ('cancelled', 'completed', 'none', 'rejected')
     `).get(userId);
     
     if (existing) {
