@@ -25,6 +25,17 @@ router.get('/', requireAuth, requireActive, (req, res) => {
   ).get(userId);
   res.json({ users: [user] });
 });
+router.get('/faculty', requireAuth, requireActive, (req, res) => {
+  const faculty = db.prepare('SELECT id, name, email FROM users WHERE role = "faculty" AND is_active = 1 ORDER BY name').all();
+  res.json({ faculty });
+});
+
+// GET /api/users/advisers — list of adviser (faculty) accounts
+router.get('/advisers', requireAuth, requireActive, (req, res) => {
+  const advisers = db.prepare('SELECT id, name, email FROM users WHERE role = "faculty" AND is_active = 1 ORDER BY name').all();
+  res.json({ advisers });
+});
+
 
 // GET /api/users/:id
 router.get('/:id', requireAuth, requireActive, (req, res) => {

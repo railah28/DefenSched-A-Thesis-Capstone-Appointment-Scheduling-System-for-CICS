@@ -55,6 +55,13 @@
       font-size:13px;outline:none;margin-bottom:10px;transition:border-color 0.2s;
     }
     .form-container input:focus{border-color:#2b1369;background:#fff;}
+    .form-container select{
+      background:#f3f4f8;border:1.5px solid transparent;
+      border-radius:10px;width:100%;padding:11px 14px;
+      font-size:13px;outline:none;margin-bottom:10px;transition:border-color 0.2s;
+      color:#333;cursor:pointer;
+    }
+    .form-container select:focus{border-color:#2b1369;background:#fff;}
     .row{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:8px;}
     .row label{font-size:12px;color:#666;display:flex;align-items:center;gap:5px;cursor:pointer;}
     .row a{font-size:12px;color:#2b1369;text-decoration:none;}
@@ -118,7 +125,7 @@
       <div class="divider"><div class="divider-line"></div><span>or use your email</span><div class="divider-line"></div></div>
 
       <!-- Role selector -->
-      <select id="reg-role" onchange="regRoleChange()" style="width:100%;padding:9px 12px;margin-bottom:10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;background:#f3f4f8;color:#333;outline:none;cursor:pointer;">
+      <select id="reg-role" onchange="regRoleChange()">
         <option value="student">&#127891; Thesis Student</option>
         <option value="faculty">&#128218; Faculty (Adviser / Panelist)</option>
       </select>
@@ -129,6 +136,11 @@
 
       <!-- Solo / Group — students only -->
       <div id="reg-group-section">
+        <p style="font-size:11px;color:#888;margin:2px 0 6px;">Assigned Adviser</p>
+        <select id="reg-adviser">
+          <option value="">Loading faculty...</option>
+        </select>
+        
         <p style="font-size:11px;color:#888;margin:2px 0 6px;">Participation Type</p>
         <div style="display:flex;background:#f3f4f8;border:0.5px solid #ddd;border-radius:8px;overflow:hidden;margin-bottom:10px;">
           <button type="button" id="btn-solo" onclick="setGroupMode(false)"
@@ -141,7 +153,7 @@
           </button>
         </div>
         <div id="reg-group-fields" style="display:none;">
-          <select id="reg-group-size" onchange="buildMemberFields()" style="width:100%;padding:9px 12px;margin-bottom:10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;background:#f3f4f8;color:#333;outline:none;">
+          <select id="reg-group-size" onchange="buildMemberFields()">
             <option value="2">2 members</option>
             <option value="3">3 members</option>
             <option value="4">4 members</option>
@@ -254,32 +266,70 @@
     }
 
     const payload = { role, name, email, password };
+    let is_group = false;
+    let group_name = '';
+    let leader_name = '';
+    let member_names = [];
+    const adviser_id = document.getElementById('reg-adviser')?.value || null;
 
     if (role === 'student') {
-      payload.participationType = isGroupMode ? 'group' : 'solo';
+      group_name = name;
+      if (!adviser_id) {
+        alert('Please select an adviser.');
+        return;
+      }
       if (isGroupMode) {
-        const size    = parseInt(document.getElementById('reg-group-size').value);
-        const leader  = document.getElementById('reg-leader').value.trim();
-        const members = [leader];
+        is_group = true;
+        const size = parseInt(document.getElementById('reg-group-size').value) || 2;
+        leader_name = (document.getElementById('reg-leader')?.value || '').trim();
+        if (!leader_name) {
+          alert('Please enter the team leader\'s name.');
+          return;
+        }
         for (let i = 2; i <= size; i++) {
           const m = document.getElementById(`reg-member-${i}`);
-          if (m) members.push(m.value.trim());
+          if (m && m.value.trim()) member_names.push(m.value.trim());
         }
-        payload.groupSize = size;
-        payload.leader    = leader;
-        payload.members   = members;
       }
     }
 
-    console.log('Register payload:', payload);
-    // TODO: replace with your actual API call, e.g.:
-    // fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
-    alert(`Account created!\nRole: ${role}\nName: ${name}`);
-    c.classList.remove('active'); // go back to sign-in
+    const registerBtn = document.querySelector('#register-form .submit-btn');
+    if (registerBtn) { registerBtn.disabled = true; registerBtn.textContent = 'Creating account...'; }
+
+    try {
+      const res  = await fetch('/api/auth/register', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ name, email, password, role, is_group, group_name, leader_name, member_names, adviser_id })
+      });
+      alert(`Account created!\nRole: ${role}\nName: ${name}`);
+      c.classList.remove('active'); // go back to sign-in
+    } catch (e) {
+      console.error(e);
+      alert('Registration failed.');
+    } finally {
+      if (registerBtn) { registerBtn.disabled = false; registerBtn.textContent = 'Sign Up'; }
+    }
   }
 
   // Init: student is default — show group section
   regRoleChange();
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('/api/faculty');
+      const data = await res.json();
+      const select = document.getElementById('reg-adviser');
+      if (select) {
+        select.innerHTML = '<option value="">Select an adviser...</option>';
+        data.faculty.forEach(f => {
+          select.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+        });
+      }
+    } catch (e) {
+      console.error('Error fetching faculty', e);
+    }
+  });
 </script>
 </body>
 </html>

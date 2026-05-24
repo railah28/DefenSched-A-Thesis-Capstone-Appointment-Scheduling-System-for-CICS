@@ -1510,12 +1510,6 @@
             <label>Group Name</label>
             <input class="input" id="bk-group" type="text" placeholder="e.g. Group Alpha">
           </div>
-          <div class="form-field">
-            <label>Adviser</label>
-            <select class="input" id="bk-adviser">
-              <option value="">Loading faculty...</option>
-            </select>
-          </div>
           <div class="form-row">
             <div class="form-field">
               <label>Preferred Date</label>
@@ -1971,11 +1965,9 @@
     let _venues = [];
     async function loadBookingDropdowns() {
       try {
-        const [fRes, vRes] = await Promise.all([fetch('/api/faculty'), fetch('/api/venues')]);
-        const { faculty } = await fRes.json();
+        const vRes = await fetch('/api/venues');
         const { venues } = await vRes.json();
         _venues = venues;
-        document.getElementById('bk-adviser').innerHTML = '<option value="">Choose adviser</option>' + faculty.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
         document.getElementById('bk-venue').innerHTML = '<option value="">Choose venue</option>' + venues.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
       } catch (e) { console.error('Dropdown load error', e); }
     }
@@ -2016,11 +2008,11 @@
     async function checkConflict() {
       const date = document.getElementById('bk-date').value;
       const timeRaw = document.getElementById('bk-time').value;
-      const adviser = document.getElementById('bk-adviser').value;
+      const adviser = _user?.adviser_id || '';
       const venue = document.getElementById('bk-venue').value;
       const resultEl = document.getElementById('conflict-check-result');
-      if (!date || !timeRaw || !adviser || !venue) {
-        showToast('Fill in date, time, adviser, and venue first.', 'warning');
+      if (!date || !timeRaw || !venue) {
+        showToast('Fill in date, time, and venue first.', 'warning');
         return;
       }
       const hour = parseInt(timeRaw.split(':')[0]);
@@ -2033,7 +2025,6 @@
         const items = [
           { label: 'Date & Time', ok: d.pastTime?.ok, msg: d.pastTime?.message },
           { label: 'Schedule rules', ok: d.rules?.ok, msg: d.rules?.message },
-          { label: 'Adviser', ok: d.adviser?.ok, msg: d.adviser?.message },
           { label: 'Venue', ok: d.venue?.ok, msg: d.venue?.message },
         ];
         resultEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;padding:12px;background:${d.all_clear ? 'var(--success-bg)' : 'var(--danger-bg)'};border:1px solid ${d.all_clear ? '#bbf7d0' : '#fecaca'};border-radius:8px;">
@@ -2056,13 +2047,13 @@
       }
       const thesis_title = document.getElementById('bk-title').value.trim();
       const group_name = document.getElementById('bk-group').value.trim();
-      const adviser_id = parseInt(document.getElementById('bk-adviser').value);
+      const adviser_id = _user?.adviser_id || null;
       const date = document.getElementById('bk-date').value;
       const timeRaw = document.getElementById('bk-time').value;
       const venue_id = parseInt(document.getElementById('bk-venue').value);
       const meeting_link = document.getElementById('bk-meeting-link').value.trim() || null;
       if (!thesis_title || !group_name || !adviser_id || !date || !timeRaw || !venue_id) {
-        showToast('Please fill in all fields.', 'error');
+        showToast('Please fill in all fields (Adviser must be assigned).', 'error');
         return;
       }
       const hour = parseInt(timeRaw.split(':')[0]);
