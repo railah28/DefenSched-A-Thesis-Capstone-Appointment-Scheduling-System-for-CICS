@@ -6,11 +6,6 @@ const bcrypt  = require('bcryptjs');
 const db      = require('../database');
 const { requireAuth, requireActive, requireRole } = require('../middleware/auth');
 
-// ── Email domain validator ──────────────────────────────────
-function isValidCicsEmail(email) {
-  return /^[^\s@]+@cics\.edu\.ph$/i.test(email.trim());
-}
-
 // GET /api/users — admin: all users; faculty/student: self only
 router.get('/', requireAuth, requireActive, (req, res) => {
   const { userId, role } = req.session;
@@ -41,9 +36,6 @@ router.post('/', requireRole('admin'), (req, res) => {
   if (!name || !email || !password || !role)
     return res.status(400).json({ error: 'name, email, password, and role are required.' });
 
-  if (!isValidCicsEmail(email))
-    return res.status(400).json({ error: 'Invalid email. Only @cics.edu.ph addresses are allowed.' });
-
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
   if (existing) return res.status(409).json({ error: 'Email already in use.' });
 
@@ -61,11 +53,7 @@ router.put('/:id', requireRole('admin'), (req, res) => {
   const { name, email, role, group_name, is_active, password } = req.body;
   const updates = {};
   if (name)       updates.name       = name;
-  if (email) {
-    if (!isValidCicsEmail(email))
-      return res.status(400).json({ error: 'Invalid email. Only @cics.edu.ph addresses are allowed.' });
-    updates.email = email.toLowerCase().trim();
-  }
+  if (email)      updates.email      = email.toLowerCase().trim();
   if (role)       updates.role       = role;
   if (group_name !== undefined) updates.group_name = group_name;
   if (is_active  !== undefined) updates.is_active  = is_active ? 1 : 0;

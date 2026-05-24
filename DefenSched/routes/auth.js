@@ -5,19 +5,11 @@ const router  = express.Router();
 const bcrypt  = require('bcryptjs');
 const db      = require('../database');
 
-// ── Email domain validator ──────────────────────────────────
-function isValidCicsEmail(email) {
-  return /^[^\s@]+@cics\.edu\.ph$/i.test(email.trim());
-}
-
 // POST /api/auth/register — Users start with 'pending' status; admin must approve (requireActive middleware blocks access until approved)
 router.post('/register', (req, res) => {
   const { name, email, password, role, is_group, group_name, leader_name, member_names } = req.body;
   if (!name || !email || !password || !role)
     return res.status(400).json({ error: 'All fields are required.' });
-
-  if (!isValidCicsEmail(email))
-    return res.status(400).json({ error: 'Invalid email. Only @cics.edu.ph addresses are allowed.' });
 
   // Build members JSON for group student accounts
   let membersJson = null;
