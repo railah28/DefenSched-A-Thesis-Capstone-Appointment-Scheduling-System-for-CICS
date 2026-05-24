@@ -403,6 +403,11 @@
       return;
     }
 
+    if (!/^[^\s@]+@cics\.edu\.ph$/i.test(email)) {
+      alert('Invalid email address. Only @cics.edu.ph institutional emails are allowed.');
+      return;
+    }
+
     // Build group payload for student accounts
     let is_group    = false;
     let group_name  = null;
